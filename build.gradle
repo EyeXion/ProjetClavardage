@@ -6,9 +6,12 @@ plugins {
 group 'app.insa.clav'
 version '1.0'
 
+sourceCompatibility = 11
+
 repositories {
     mavenCentral()
 }
+
 
 javafx {
     version = "11.0.2"
@@ -19,5 +22,6 @@ javafx {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
-
-mainClassName = 'app.insa.clav.Main'
+application {
+    mainClassName = 'app.insa.clav.Core.Test'
+}

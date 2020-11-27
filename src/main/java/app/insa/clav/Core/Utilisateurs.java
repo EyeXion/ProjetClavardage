@@ -6,7 +6,7 @@ import java.net.*;
 
 //Classe qui permet d'identifier un utilisateur
 
-public class Utilisateurs {
+public class Utilisateurs{
     private String pseudo;
     private InetAddress inetAddress;
     private int id;

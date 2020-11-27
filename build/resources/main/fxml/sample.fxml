@@ -1,8 +1,18 @@
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.GridPane?>
+<?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<GridPane
-        xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
-</GridPane>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="center" prefHeight="147.0" prefWidth="217.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.Core.Controller">
+   <children>
+      <TextField fx:id="pseudoInput" promptText="Entrer Pseudo" />
+      <Label fx:id="pseudoLabel" text="Entrer Pseudo au dessus" />
+      <Button fx:id="sendPseudoButton" mnemonicParsing="false" onAction="#buttonPseudoHandler" text="Envoyer Pseudo" />
+      <ListView fx:id="listUserDisplay" prefHeight="52.0" prefWidth="171.0">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+      </ListView>
+   </children>
+</VBox>

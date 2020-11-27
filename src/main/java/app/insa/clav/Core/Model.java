@@ -51,6 +51,7 @@ public class Model implements PropertyChangeListener{
      */
     private PropertyChangeSupport support;
 
+
     /**
      * Constructeur
      * @param id
@@ -205,5 +206,9 @@ ID 2 -> Listening on 6002, sending on 5002
             msgResponse = new MessagePseudo(2, this.user.getInetAddress(), this.user.getPort(),  msg.srcIP, msg.srcResponsePort,this.user.getPseudo(),this.user.getId());
         }
         this.UDPOut.sendMsg(msgResponse);
+    }
+
+    public ArrayList<Utilisateurs> getUserList(){
+        return userList;
     }
 }
