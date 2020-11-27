@@ -1,7 +1,9 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.9'}
+    id 'org.openjfx.javafxplugin' version '0.0.9'
+    id 'org.beryx.jlink' version '2.15.1'
+}
 
 group 'app.insa.clav'
 version '1.0'
@@ -15,13 +17,39 @@ repositories {
 
 javafx {
     version = "11.0.2"
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
+    modules = [ 'javafx.controls', 'javafx.fxml','javafx.graphics','javafx.base' ]
 }
 
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation group: 'com.jfoenix', name: 'jfoenix', version: '9.0.9'
 }
+
 application {
     mainClassName = 'app.insa.clav.Core.Test'
+}
+
+run {
+    jvmArgs = [
+        "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED",
+        "--add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED",
+        "--add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED",
+        "--add-exports=javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED",
+        "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED"
+]
+}
+
+
+jlink {
+    launcher {
+        name = 'hellofx'
+        jvmArgs = [
+                "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix",
+                "--add-exports=javafx.controls/com.sun.javafx.scene.control=com.jfoenix",
+                "--add-exports=javafx.base/com.sun.javafx.binding=com.jfoenix",
+                "--add-exports=javafx.graphics/com.sun.javafx.stage=com.jfoenix",
+                "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=com.jfoenix",
+        ]
+    }
 }

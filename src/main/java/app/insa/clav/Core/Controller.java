@@ -2,16 +2,14 @@ package app.insa.clav.Core;
 
 import app.insa.clav.Messages.Message;
 import app.insa.clav.UI.UserInterface;
+import com.jfoenix.controls.JFXSpinner;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
@@ -53,6 +51,12 @@ public class Controller implements PropertyChangeListener {
     @FXML
     private TextField pseudoInput;
 
+    /**
+     * Petit cercle de chargement pendant validation pseudo
+     */
+    @FXML
+    private ProgressIndicator spinnerPseudo;
+
     private ObservableList<String> listUsers;
 
     /**
@@ -69,6 +73,7 @@ public class Controller implements PropertyChangeListener {
     public void setupController(Model model){
         this.model = model;
         this.model.addPropertyChangeListener(this,"pseudoRefused");
+        this.model.addPropertyChangeListener(this,"pseudoValide");
     }
 
     /**
@@ -85,7 +90,11 @@ public class Controller implements PropertyChangeListener {
      * @param evt
      */
     public void buttonPseudoHandler(ActionEvent evt){
-        this.model.choosePseudo(this.pseudoInput.getText());
+        String newPseudo = this.pseudoInput.getText();
+        if (!newPseudo.equals(this.model.user.getPseudo())){
+            this.model.choosePseudo(newPseudo);
+            this.spinnerPseudo.setVisible(true);
+        }
     }
 
     /**
@@ -103,10 +112,20 @@ public class Controller implements PropertyChangeListener {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        pseudoLabel.setText("Pseudo refusé !");
-                        System.out.println("Pseudo refusé");
+                        pseudoLabel.setText("Pseudo refusé ! Réessayez svp.");
+                        spinnerPseudo.setVisible(false);
                     }
                 });
+                break;
+            case "pseudoValide" :
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        pseudoLabel.setText("Bienvenue, " + model.user.getPseudo() + " !");
+                        spinnerPseudo.setVisible(false);
+                    }
+                });
+                break;
         }
     }
 

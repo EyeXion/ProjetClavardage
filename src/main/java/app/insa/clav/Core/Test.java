@@ -24,7 +24,7 @@ public class Test extends Application{
         Controller mainCtrl = fxmlLoader.getController();
         mainCtrl.setupController(model);
         primaryStage.setTitle("Messenger, en mieux");
-        primaryStage.setScene(new Scene(root, 300, 275));
+        primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.show();
         model.openInputUDP();
     }

@@ -1,18 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXListView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<VBox alignment="center" prefHeight="147.0" prefWidth="217.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.Core.Controller">
-   <children>
-      <TextField fx:id="pseudoInput" promptText="Entrer Pseudo" />
-      <Label fx:id="pseudoLabel" text="Entrer Pseudo au dessus" />
-      <Button fx:id="sendPseudoButton" mnemonicParsing="false" onAction="#buttonPseudoHandler" text="Envoyer Pseudo" />
-      <ListView fx:id="listUserDisplay" prefHeight="52.0" prefWidth="171.0">
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-      </ListView>
-   </children>
-</VBox>
+<BorderPane minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.Core.Controller">
+   <center>
+      <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0">
+         <children>
+            <Text fill="#f84d94" layoutX="208.0" layoutY="34.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Messenger, mais en mieux !" textAlignment="CENTER" AnchorPane.bottomAnchor="363.0" AnchorPane.leftAnchor="208.0" AnchorPane.rightAnchor="208.07666015625" AnchorPane.topAnchor="21.0">
+               <font>
+                  <Font name="FontAwesome" size="13.0" />
+               </font>
+            </Text>
+            <HBox layoutX="181.0" layoutY="137.0" prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+               <children>
+                  <VBox prefHeight="400.0" prefWidth="554.0">
+                     <children>
+                        <AnchorPane>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <children>
+                              <Label fx:id="pseudoLabel" layoutX="79.0" layoutY="20.0" prefHeight="18.0" prefWidth="268.0" text="Bonjour, veuillez rentrer votre pseudo" textAlignment="CENTER" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="79.0" AnchorPane.topAnchor="20.0" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane>
+                           <VBox.margin>
+                              <Insets bottom="50.0" left="100.0" right="100.0" top="100.0" />
+                           </VBox.margin>
+                           <children>
+                              <TextField fx:id="pseudoInput" promptText="Entrez pseudo" AnchorPane.leftAnchor="0.0" />
+                              <ProgressIndicator fx:id="spinnerPseudo" layoutX="174.0" prefHeight="32.0" prefWidth="40.0" visible="false" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <JFXButton fx:id="sendPseudoButton" buttonType="RAISED" layoutX="159.0" layoutY="14.0" onAction="#buttonPseudoHandler" ripplerFill="#705d38" style="-fx-background-color: ffb856;" text="Valider" textFill="WHITE" />
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="400.0" prefWidth="326.0">
+                     <children>
+                        <JFXListView fx:id="listUserDisplay" prefHeight="349.0" prefWidth="186.0" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+   </center>
+</BorderPane>

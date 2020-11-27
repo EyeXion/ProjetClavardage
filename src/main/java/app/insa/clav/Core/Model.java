@@ -2,7 +2,6 @@ package app.insa.clav.Core;
 
 import app.insa.clav.Messages.Message;
 import app.insa.clav.Messages.MessagePseudo;
-import app.insa.clav.Utils.TimerTaskResponseWait;
 import app.insa.clav.reseau.UDPInput;
 import app.insa.clav.reseau.UDPOutput;
 
@@ -13,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.net.*;
 import java.util.Timer;
+import java.util.TimerTask;
 //Toutes les interactions avec l'utilisateur (pour tester)
 
 /**
@@ -40,7 +40,7 @@ public class Model implements PropertyChangeListener{
     /**
      * Infos sur notre utilisateur local
      */
-    private Utilisateurs user;
+    public Utilisateurs user;
     /**
      * Sert à stocker le pseudo de base quand on veut change de pseudo. Si la demande de pseudo est refusée, on revient à ce pseudo
      */
@@ -50,6 +50,12 @@ public class Model implements PropertyChangeListener{
      * Observable, pour envoyer des notifications aux controleurs
      */
     private PropertyChangeSupport support;
+
+
+    /**
+     * Vrai si pseudo ok, faux sinon
+     */
+    private boolean isPseudoOk = true;
 
 
     /**
@@ -143,7 +149,7 @@ ID 2 -> Listening on 6002, sending on 5002
         this.UDPIn.setFilterValue(2,true);
         this.UDPIn.setFilterValue(3,true);
         this.sendPseudoBroadcast();
-        this.tim.schedule(new TimerTaskResponseWait(this.UDPIn),1000);
+        this.tim.schedule(new TimerTaskResponseWait(),1000);
         return true;
     }
 
@@ -184,6 +190,7 @@ ID 2 -> Listening on 6002, sending on 5002
                 if (!this.userList.contains(newUser3)) {
                     this.userList.add(newUser3);
                 }
+                this.isPseudoOk = false;
                 this.support.firePropertyChange("pseudoRefused",this.user.getPseudo(),this.ancienPseudo);
                 this.user.setPseudo(this.ancienPseudo);
                 break;
@@ -210,5 +217,32 @@ ID 2 -> Listening on 6002, sending on 5002
 
     public ArrayList<Utilisateurs> getUserList(){
         return userList;
+    }
+
+
+    /**
+     * Classe interne au model pour au bout d'une seconde d'envoi de demande pseudo type 1,
+     * on desactive les filtes et on met à jour la vue.
+     */
+    class TimerTaskResponseWait extends TimerTask {
+
+
+        public TimerTaskResponseWait() {
+        }
+
+        /**
+         * Quand la seconde s'est écoulée, on met les filtres à faux pour ne plus prendre en compte les messages de type 2 et 3
+         */
+        public void run() {
+            UDPIn.setFilterValue(2, false);
+            UDPIn.setFilterValue(2, false);
+            if (isPseudoOk == true){
+                //envoi message de type 4 pour confirmer.
+                support.firePropertyChange("pseudoValide",ancienPseudo,user.getPseudo());
+            }
+            else{
+                isPseudoOk = true; //On reinitialise cet attribut.
+            }
+        }
     }
 }
