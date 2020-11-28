@@ -1,5 +1,6 @@
 package app.insa.clav.Core;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.net.*;
 
@@ -61,6 +62,7 @@ public class Utilisateurs{
         return port;
     }
 
+    @Override
     public String toString(){
         return Integer.toString(this.id) + "|" + this.pseudo + "|" + this.inetAddress.toString() + "|" + Integer.toString(this.port);
     }

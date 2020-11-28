@@ -1,6 +1,6 @@
 package app.insa.clav.Core;//main pour les tests
 
-import java.util.Scanner;
+import app.insa.clav.UIControllers.MainWindowController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -19,12 +19,14 @@ public class Test extends Application{
 
         Model model = new Model(id,inputPort, outPutPort);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/sample.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/mainWindow.fxml"));
         Parent root =fxmlLoader.load();
-        Controller mainCtrl = fxmlLoader.getController();
+        MainWindowController mainCtrl = fxmlLoader.getController();
         mainCtrl.setupController(model);
         primaryStage.setTitle("Messenger, en mieux");
         primaryStage.setScene(new Scene(root, 600, 400));
+        primaryStage.setMinHeight(400);
+        primaryStage.setMinWidth(600);
         primaryStage.show();
         model.openInputUDP();
     }

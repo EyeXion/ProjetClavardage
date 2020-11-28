@@ -182,6 +182,7 @@ ID 2 -> Listening on 6002, sending on 5002
                 Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id,msgP2.srcResponsePort);
                 if (!this.userList.contains(newUser2)) {
                     this.userList.add(newUser2);
+                    this.support.firePropertyChange("newUserConnected",true,false);
                 }
                 break;
             case 3 :
@@ -189,6 +190,7 @@ ID 2 -> Listening on 6002, sending on 5002
                 Utilisateurs newUser3 = new Utilisateurs(msgP3.pseudo,msgP3.srcIP,msgP3.id,msgP3.srcResponsePort);
                 if (!this.userList.contains(newUser3)) {
                     this.userList.add(newUser3);
+                    this.support.firePropertyChange("newUserConnected",true,false);
                 }
                 this.isPseudoOk = false;
                 this.support.firePropertyChange("pseudoRefused",this.user.getPseudo(),this.ancienPseudo);

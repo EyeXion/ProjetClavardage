@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="290.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.PseudoWindowController">
+   <children>
+      <Label layoutX="98.0" layoutY="23.0" style="-fx-font-weight: bold;" text="Choix du Pseudo" textFill="#ae1a1a">
+         <font>
+            <Font name="Ubuntu Light" size="17.0" />
+         </font>
+      </Label>
+      <TextField fx:id="pseudoInput" layoutX="84.0" layoutY="117.0" promptText="Enter Pseudo..." />
+      <JFXButton fx:id="buttonValidatePseudo" buttonType="RAISED" layoutX="128.0" layoutY="182.0" onAction="#clickButtonValidatePseudo" ripplerFill="#1aad7f" style="-fx-background-color: e36366;" text="Validate" />
+      <Label fx:id="errorLabel" alignment="CENTER" layoutX="63.0" layoutY="73.0" prefHeight="16.0" prefWidth="213.0" text="Pseudo already used, try again" textAlignment="CENTER" visible="false" />
+      <ProgressIndicator fx:id="spinnerPseudo" layoutX="276.0" layoutY="117.0" prefHeight="26.0" prefWidth="34.0" visible="false" />
+   </children>
+</AnchorPane>
