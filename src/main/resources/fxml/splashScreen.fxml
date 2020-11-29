@@ -5,6 +5,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
 <StackPane fx:id="rootSplash" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.SplashScreenController">
@@ -27,5 +28,20 @@
             <Image url="@../logos/jigglySpalsh.png" />
          </image>
       </ImageView>
+      <Circle fx:id="c1" fill="#20f5f500" radius="88.0" stroke="#39d0e4" strokeType="INSIDE" strokeWidth="15.0" style="-fx-stroke-dash-array: 55;">
+         <StackPane.margin>
+            <Insets bottom="215.0" />
+         </StackPane.margin>
+      </Circle>
+      <Circle fx:id="c2" fill="#20f5f500" radius="58.0" stroke="#39e33e" strokeType="INSIDE" strokeWidth="10.0" style="-fx-stroke-dash-array: 35;">
+         <StackPane.margin>
+            <Insets bottom="215.0" />
+         </StackPane.margin>
+      </Circle>
+      <Circle fx:id="c3" fill="#20f5f500" radius="34.0" stroke="#d0d651" strokeType="INSIDE" strokeWidth="5.0" style="-fx-stroke-dash-array: 35;">
+         <StackPane.margin>
+            <Insets bottom="215.0" />
+         </StackPane.margin>
+      </Circle>
    </children>
 </StackPane>
