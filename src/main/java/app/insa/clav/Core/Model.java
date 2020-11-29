@@ -51,6 +51,8 @@ public class Model implements PropertyChangeListener{
      */
     private PropertyChangeSupport support;
 
+    private static Model instance = null;
+
 
     /**
      * Vrai si pseudo ok, faux sinon
@@ -72,7 +74,7 @@ ID 1 -> Listening on 6000, sending on 5000
 ID 2 -> Listening on 6001, sending on 5001
 ID 2 -> Listening on 6002, sending on 5002
 */
-    public Model(int id, int inputPort, int outputPort){
+    private Model(int id, int inputPort, int outputPort){
         try {
             this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), id, inputPort);
             this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), outputPort);
@@ -85,6 +87,19 @@ ID 2 -> Listening on 6002, sending on 5002
             e.printStackTrace();
         }
         this.userList = new ArrayList<Utilisateurs>();
+    }
+
+    public static Model getInstance(int id, int inputPort, int outputPort){
+        synchronized(Model.class){
+            if (instance == null) {
+                instance = new Model(id, inputPort, outputPort);
+            }
+        }
+        return instance;
+    }
+
+    public static Model getInstance(){
+        return instance;
     }
 
     /**

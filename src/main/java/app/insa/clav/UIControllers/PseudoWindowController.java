@@ -35,15 +35,12 @@ public class PseudoWindowController implements PropertyChangeListener, Initializ
 
 
     public PseudoWindowController(){
+        this.model = Model.getInstance();
+        this.model.addPropertyChangeListener(this,"pseudoRefused");
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-    }
-
-    public void setupPseudoController(Model model){
-        this.model = model;
-        this.model.addPropertyChangeListener(this,"pseudoRefused");
     }
 
 

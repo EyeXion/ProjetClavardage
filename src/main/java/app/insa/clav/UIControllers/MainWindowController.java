@@ -57,34 +57,25 @@ public class MainWindowController implements PropertyChangeListener, Initializab
      * Contructeur. Il crée lui même l'UI (plus tard on mettra quel type de fenetre en argument)
      */
     public MainWindowController(){
+        this.model = Model.getInstance();
+        this.model.addPropertyChangeListener(this,"pseudoValide");
+        this.model.addPropertyChangeListener(this,"newUserConnected");
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.hamburgerClick1 = new HamburgerSlideCloseTransition(this.mainHamburger);
-        this.hamburgerClick1.setRate(-1);
-    }
-
-
-    /**
-     * Permet de setup le model.
-     * @param model
-     */
-    public void setupController(Model model){
-        this.model = model;
-        this.model.addPropertyChangeListener(this,"pseudoValide");
-        this.model.addPropertyChangeListener(this,"newUserConnected");
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/mainDrawerContent.fxml"));
             Parent drawerBox = fxmlLoader.load();
-            MainDrawerController mainCtrl = fxmlLoader.getController();
-            mainCtrl.setupController(model);
             this.mainDrawer.setSidePane(drawerBox);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         this.listUsers = FXCollections.observableArrayList(this.model.getUserList().stream().map(Utilisateurs::getPseudo).collect(Collectors.toList()));
         this.userListView.setItems(this.listUsers);
+        this.hamburgerClick1 = new HamburgerSlideCloseTransition(this.mainHamburger);
+        this.hamburgerClick1.setRate(-1);
     }
 
     /**

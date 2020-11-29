@@ -15,8 +15,6 @@ public class PseudoStage extends Stage {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/pseudoWindow.fxml"));
         try {
             Parent rootPseudo = fxmlLoader.load();
-            PseudoWindowController ctrlPseudo = fxmlLoader.getController();
-            ctrlPseudo.setupPseudoController(model);
             this.setTitle("Messenger, en mieux");
             this.setScene(new Scene(rootPseudo, 340, 290));
             this.setMinHeight(290);

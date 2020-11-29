@@ -24,12 +24,11 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
     private JFXButton buttonPseudo;
     private PseudoStage pseudoWindow;
 
-    public void setupController(Model model){
-        this.model = model;
+
+    public MainDrawerController(){
+        this.model = Model.getInstance();
         this.model.addPropertyChangeListener(this,"pseudoValide");
     }
-
-    public MainDrawerController(){}
 
 
     @Override

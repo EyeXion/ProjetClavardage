@@ -18,12 +18,10 @@ public class Main extends Application{
         int inputPort = Integer.parseInt(args[1]);
         int outPutPort = Integer.parseInt(args[2]);
 
-        Model model = new Model(id,inputPort, outPutPort);
+        Model model = Model.getInstance(id,inputPort, outPutPort);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/mainWindow.fxml"));
         Parent root =fxmlLoader.load();
-        MainWindowController mainCtrl = fxmlLoader.getController();
-        mainCtrl.setupController(model);
         primaryStage.setTitle("Messenger, en mieux");
         primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.setMinHeight(400);
