@@ -20,16 +20,18 @@ Notre conception est pour le moment pas très bonne car nous avions mal compris 
 - Migration projet Gradle
 - UI commecencée avec mainWindow, petite animation menu et PseudoWindow
 - Ajout table des users connetés (pas hyper cool, quand on change de pseudo 2 fois on se duplique dans la ListView)
+- Message de type 4 (confirmation envoi pseudo)
+- Splash screen
 
 ###A faire
 
 - Quand on reçoit un messagPseudo de type 1, on vérifie toute la table des utilisateurs connectés. (maybe?)
 - Envoyer à intervalle régulier des messages qui disent qu'on est bien connecté
-- MEssage de type 4 (confirmation envoi pseudo)
-- Page d'acceuil pour premier pseudo + splash screen.
+- Page d'acceuil pour premier pseudo.
 - Client TCP (reprendre les TD).
 - Design fenêtre de clavardage
 - Rendre l'UI jolie.
+- Fix le bug quand on ouvre 2 fenêtres de changement de pseudo (mettre un flag pour pouvoir en ouvrir qu'une seule)
 
 ###Technos
 
