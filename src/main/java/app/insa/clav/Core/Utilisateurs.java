@@ -67,4 +67,15 @@ public class Utilisateurs{
         return Integer.toString(this.id) + "|" + this.pseudo + "|" + this.inetAddress.toString() + "|" + Integer.toString(this.port);
     }
 
+
+    @Override
+    public boolean equals(Object obj) {
+        Utilisateurs aux = (Utilisateurs) obj;
+        if (this.id == aux.id){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }

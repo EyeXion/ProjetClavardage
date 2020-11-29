@@ -10,7 +10,7 @@
 <?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="400.0" maxWidth="600.0" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.MainWindowController">
+<AnchorPane fx:id="rootPane" maxHeight="400.0" maxWidth="600.0" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.MainWindowController">
    <children>
       <JFXHamburger fx:id="mainHamburger" layoutX="14.0" layoutY="21.0" onMouseClicked="#clickMainHamburgerHandler">
          <effect>

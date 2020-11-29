@@ -20,7 +20,7 @@ public class Main extends Application{
 
         Model model = Model.getInstance(id,inputPort, outPutPort);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/mainWindow.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/splashScreen.fxml"));
         Parent root =fxmlLoader.load();
         primaryStage.setTitle("Messenger, en mieux");
         primaryStage.setScene(new Scene(root, 600, 400));

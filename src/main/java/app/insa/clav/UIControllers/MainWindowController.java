@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.transitions.hamburger.HamburgerSlideCloseTransition;
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,12 +16,16 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -47,6 +52,10 @@ public class MainWindowController implements PropertyChangeListener, Initializab
 
     @FXML
     private Label mainLabel;
+
+
+    @FXML
+    private AnchorPane rootPane;
 
 
     private HamburgerSlideCloseTransition hamburgerClick1;

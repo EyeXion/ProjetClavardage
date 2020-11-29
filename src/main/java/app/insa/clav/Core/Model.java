@@ -152,6 +152,27 @@ ID 2 -> Listening on 6002, sending on 5002
         }
     }
 
+    public void sendPseudoValideBroadcast(){
+        try {
+            if (user.getId() == 1 || user.getId() == 2) {
+                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
+                UDPOut.sendMsg(msg);
+            }
+            if (user.getId() == 2 || user.getId() == 3) {
+                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6000, this.user.getPseudo(),this.user.getId());
+                UDPOut.sendMsg(msg);
+            }
+            if (user.getId() == 1 || user.getId() == 3) {
+                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6001,this.user.getPseudo(),this.user.getId());
+                UDPOut.sendMsg(msg);
+            }
+        }
+        catch (UnknownHostException e){
+            System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Méthode appelée par le controleur quand la vue envoie un signal d'appuis bouton changer Pseudo
      * @param pseudo
@@ -211,6 +232,13 @@ ID 2 -> Listening on 6002, sending on 5002
                 this.support.firePropertyChange("pseudoRefused",this.user.getPseudo(),this.ancienPseudo);
                 this.user.setPseudo(this.ancienPseudo);
                 break;
+            case 4:
+                MessagePseudo msgP4 = (MessagePseudo) msg;
+                Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id,msgP4.srcResponsePort);
+                this.userList.remove(newUser4);
+                this.userList.add(newUser4);
+                this.support.firePropertyChange("newUserConnected",true,false);
+                break;
             default :
                 System.out.println("Message de type inconnu");
         }
@@ -256,6 +284,7 @@ ID 2 -> Listening on 6002, sending on 5002
             if (isPseudoOk == true){
                 //envoi message de type 4 pour confirmer.
                 support.firePropertyChange("pseudoValide",ancienPseudo,user.getPseudo());
+                sendPseudoValideBroadcast();
             }
             else{
                 isPseudoOk = true; //On reinitialise cet attribut.
