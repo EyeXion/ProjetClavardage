@@ -6,31 +6,19 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.effect.Shadow?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.paint.LinearGradient?>
-<?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="rootPane" maxHeight="400.0" maxWidth="600.0" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.MainWindowController">
+<AnchorPane id="rootPane" fx:id="rootPane" maxHeight="400.0" maxWidth="600.0" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" stylesheets="@../stylesheets/mainWindowStyle.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.MainWindowController">
    <children>
       <JFXHamburger fx:id="mainHamburger" layoutX="14.0" layoutY="21.0" onMouseClicked="#clickMainHamburgerHandler">
          <effect>
             <Shadow color="#b103ff" height="0.0" radius="0.0" width="0.0" />
          </effect></JFXHamburger>
       <JFXDrawer fx:id="mainDrawer" defaultDrawerSize="120.0" direction="RIGHT" layoutX="460.0" prefHeight="400.0" prefWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="460.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-      <JFXListView fx:id="userListView" layoutX="40.0" layoutY="96.0" prefHeight="304.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="360.0" AnchorPane.topAnchor="96.0" />
-      <Label fx:id="mainLabel" layoutX="74.0" layoutY="16.0" prefHeight="30.0" prefWidth="240.0" text="Welcome, please choose a pseudo" textAlignment="CENTER" wrapText="true">
+      <JFXListView fx:id="userListView" depth="10" layoutX="40.0" layoutY="96.0" prefHeight="304.0" prefWidth="200.0" style="-fx-background-color: a1c3f7;" verticalGap="1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="360.0" AnchorPane.topAnchor="96.0" />
+      <Label fx:id="mainLabel" layoutX="74.0" layoutY="16.0" prefHeight="30.0" prefWidth="302.0" style="-fx-font-weight: bold;" text="Welcome, please choose a pseudo" textAlignment="CENTER" textFill="#ed0e7f" wrapText="true">
          <font>
-            <Font name="Ubuntu" size="13.0" />
-         </font>
-         <textFill>
-            <LinearGradient endX="1.0" endY="1.0">
-               <stops>
-                  <Stop color="BLACK" />
-                  <Stop color="BLACK" offset="0.24444444444444446" />
-                  <Stop color="#b22e6c" offset="0.7925925925925926" />
-                  <Stop color="#b22e6c" offset="1.0" />
-               </stops>
-            </LinearGradient>
-         </textFill></Label>
+            <Font name="Ubuntu" size="17.0" />
+         </font></Label>
    </children>
 </AnchorPane>
