@@ -16,10 +16,24 @@ Notre conception est pour le moment pas très bonne car nous avions mal compris 
 - Quand on reçoit un msgPseudo, on répond avec un messagePseudo d'un autre type (type 2 ou 3)
 - Quand on recoit un Messages.MessagePseudo de n'importe quel type, on met à jour sa table des utilisateurs connectés si le pseudo n'est pas utilisé
 - Si pseudo déjà utilisé, on envoie un messagePseudo (type 3)
-- MVC ok (avec controlleur et vue qui sont simulés et qui sont pas hyper utiles bvu qu'on a pas de vue réelle)
+- MVC ok.
+- Migration projet Gradle
+- UI commecencée avec mainWindow, petite animation menu et PseudoWindow
+- Ajout table des users connetés (pas hyper cool, quand on change de pseudo 2 fois on se duplique dans la ListView)
 
 ###A faire
 
-- Quand on reçoit un messagPseudo de type 1, on vérifie toute la table des utilisateurs connectés.
+- Quand on reçoit un messagPseudo de type 1, on vérifie toute la table des utilisateurs connectés. (maybe?)
 - Envoyer à intervalle régulier des messages qui disent qu'on est bien connecté
-- Commencer une petite interface graphique pour demander un pseudo et afficher les utilisateurs connectés
+- MEssage de type 4 (confirmation envoi pseudo)
+- Page d'acceuil pour premier pseudo + splash screen.
+- Client TCP (reprendre les TD).
+- Design fenêtre de clavardage
+- Rendre l'UI jolie.
+
+###Technos
+
+- Java 11.0.9
+- JavaFX 11.0.2
+- JFoenix 9.0.9
+- Ikonli 11.5.0
