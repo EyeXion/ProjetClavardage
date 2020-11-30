@@ -11,6 +11,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.net.*;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 //Toutes les interactions avec l'utilisateur (pour tester)
@@ -218,6 +219,7 @@ ID 2 -> Listening on 6002, sending on 5002
                 Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id,msgP2.srcResponsePort);
                 if (!this.userList.contains(newUser2)) {
                     this.userList.add(newUser2);
+                    Collections.sort(this.userList);
                     this.support.firePropertyChange("newUserConnected",true,false);
                 }
                 break;
@@ -226,6 +228,7 @@ ID 2 -> Listening on 6002, sending on 5002
                 Utilisateurs newUser3 = new Utilisateurs(msgP3.pseudo,msgP3.srcIP,msgP3.id,msgP3.srcResponsePort);
                 if (!this.userList.contains(newUser3)) {
                     this.userList.add(newUser3);
+                    Collections.sort(this.userList);
                     this.support.firePropertyChange("newUserConnected",true,false);
                 }
                 this.isPseudoOk = false;
@@ -237,6 +240,7 @@ ID 2 -> Listening on 6002, sending on 5002
                 Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id,msgP4.srcResponsePort);
                 this.userList.remove(newUser4);
                 this.userList.add(newUser4);
+                Collections.sort(this.userList);
                 this.support.firePropertyChange("newUserConnected",true,false);
                 break;
             default :
@@ -281,7 +285,7 @@ ID 2 -> Listening on 6002, sending on 5002
         public void run() {
             UDPIn.setFilterValue(2, false);
             UDPIn.setFilterValue(2, false);
-            if (isPseudoOk == true){
+            if (isPseudoOk){
                 //envoi message de type 4 pour confirmer.
                 support.firePropertyChange("pseudoValide",ancienPseudo,user.getPseudo());
                 sendPseudoValideBroadcast();

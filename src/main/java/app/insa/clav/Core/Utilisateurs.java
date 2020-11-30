@@ -7,7 +7,7 @@ import java.net.*;
 
 //Classe qui permet d'identifier un utilisateur
 
-public class Utilisateurs{
+public class Utilisateurs implements Comparable{
     private String pseudo;
     private InetAddress inetAddress;
     private int id;
@@ -77,5 +77,11 @@ public class Utilisateurs{
         else{
             return false;
         }
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        Utilisateurs u = (Utilisateurs)  o;
+        return this.pseudo.compareTo(u.pseudo);
     }
 }
