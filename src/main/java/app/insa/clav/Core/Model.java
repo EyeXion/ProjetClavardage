@@ -2,8 +2,10 @@ package app.insa.clav.Core;
 
 import app.insa.clav.Messages.Message;
 import app.insa.clav.Messages.MessagePseudo;
-import app.insa.clav.reseau.UDPInput;
-import app.insa.clav.reseau.UDPOutput;
+import app.insa.clav.Reseau.TCPChatConnection;
+import app.insa.clav.Reseau.TCPListener;
+import app.insa.clav.Reseau.UDPInput;
+import app.insa.clav.Reseau.UDPOutput;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -64,6 +66,11 @@ public class Model implements PropertyChangeListener{
     private boolean isPseudoOk = true;
 
 
+    private ArrayList<TCPChatConnection> listTCPConnection;
+
+    private TCPListener tcpListener;
+
+
     /**
      * Constructeur
      * @param id
@@ -83,6 +90,7 @@ ID 2 -> Listening on 6002, sending on 5002
             this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), id, inputPort);
             this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), outputPort);
             this.UDPIn = new UDPInput(user.getInetAddress(),inputPort);
+            this.tcpListener = new TCPListener(this.user.getInetAddress(),this.user.getId());
             this.tim= new Timer();
             this.support = new PropertyChangeSupport(this);
         }
@@ -127,6 +135,21 @@ ID 2 -> Listening on 6002, sending on 5002
     public void openInputUDP(){
         UDPIn.start();
         this.UDPIn.addPropertyChangeListener(this);
+    }
+
+    public void openTCPListener(){
+        tcpListener.start();
+        this.tcpListener.addPropertyChangeListener(this);
+    }
+
+
+    /**
+     * permet de sauvegarder un socket TCP clanvardage qui vient d'être créé
+     * @param co
+     */
+    public void addTCPConnexion(TCPChatConnection co){
+        this.listTCPConnection.add(co);
+        co.addPropertyChangeListener(this);
     }
 
     /**
@@ -221,6 +244,13 @@ ID 2 -> Listening on 6002, sending on 5002
             case "UDPInput":
                 Message msgReceived = UDPIn.getMessageReceived();
                 this.messageHandler(msgReceived);
+                break;
+            case "chatCreated" :
+                TCPChatConnection tcpCo = this.tcpListener.getTCPChatConnection();
+                tcpCo.addPropertyChangeListener(this);
+                this.listTCPConnection.add(tcpCo);
+            case "TCPReceived" :
+                //Faire le handler de msgTCP
         }
     }
 

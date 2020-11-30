@@ -114,16 +114,6 @@ public class MainWindowController implements PropertyChangeListener, Initializab
     }
 
     /**
-     * Méthode appellée par le vue (appui boutton) pour enclencher le changement de pseudo
-     * @param pseudo
-     *              Pseudo rentré par l'utilisateur
-     */
-    public void choosePseudo(String pseudo){
-       model.choosePseudo(pseudo);
-    }
-
-
-    /**
      * handler signaux emis par la model
      * @param evt
      */

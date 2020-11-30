@@ -28,6 +28,7 @@ public class Main extends Application{
         primaryStage.setMinWidth(600);
         primaryStage.show();
         model.openInputUDP();
+        model.openTCPListener();
     }
 
     public static void main(String[] arg){

@@ -1,4 +1,4 @@
-package app.insa.clav.reseau;
+package app.insa.clav.Reseau;
 
 import app.insa.clav.Messages.Message;
 

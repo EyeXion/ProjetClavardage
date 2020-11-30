@@ -26,7 +26,6 @@ public class SplashScreenController implements Initializable {
      */
     @FXML
     private StackPane rootSplash;
-
     /**
      * c1 c2 c3 les petites cercles qui tournent en haut de la page
      */
@@ -38,6 +37,26 @@ public class SplashScreenController implements Initializable {
 
     @FXML
     private Circle c3;
+
+    /**
+     * Main scene chargée
+     */
+    private Parent rootMainScreen;
+
+    /**
+     * Scene basée sur la rootMainScene
+     */
+    private Scene scene;
+
+    /**
+     * loader pour la scene principale
+     */
+    private FXMLLoader fxmlLoader;
+
+    /**
+     *feneter principale
+     */
+    private Stage mainStage;
 
 
     public SplashScreenController(){}
@@ -68,21 +87,22 @@ public class SplashScreenController implements Initializable {
 
         fadeIn.play();
 
+
         fadeIn.setOnFinished((e) -> {
             fadeOut.play();
-        });
-
-        fadeOut.setOnFinished((e) -> {
-            Stage mainStage = (Stage) rootSplash.getScene().getWindow();
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/mainWindow.fxml"));
+            this.mainStage = (Stage) rootSplash.getScene().getWindow();
+            this.fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/mainWindow.fxml"));
             try {
-                Parent rootMainScreen = fxmlLoader.load();
-                Scene scene = new Scene(rootMainScreen);
-                mainStage.setScene(scene);
-                mainStage.show();
+                this.rootMainScreen = fxmlLoader.load();
+                this.scene = new Scene(rootMainScreen);
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
+        });
+
+        fadeOut.setOnFinished((e) -> {
+            mainStage.setScene(scene);
+            mainStage.show();
         });
 
     }

@@ -1,4 +1,4 @@
-package app.insa.clav.reseau;
+package app.insa.clav.Reseau;
 
 import app.insa.clav.Messages.Message;
 
@@ -97,7 +97,7 @@ public class UDPInput extends Thread{
      * Ecoute en permanance le socket UDP et si un message reçu passe le filtre, on notifie les observateurs
      */
     @Override
-    public void run() {
+    public void run(){
         byte[] buffer = new byte[9000];
         while(true){
             DatagramPacket inputPacket = new DatagramPacket(buffer,buffer.length);
