@@ -9,6 +9,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * Classe qui permet de créer la nouvelle fenetre pour le pseudo
+ */
 public class PseudoStage extends Stage {
 
     public PseudoStage(Model model){

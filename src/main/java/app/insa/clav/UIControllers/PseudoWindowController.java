@@ -17,33 +17,63 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 
+/**
+ * Controller de la fenetre de changement de pseudo
+ */
 public class PseudoWindowController implements PropertyChangeListener, Initializable {
 
+    /**
+     * Input pour l'utilisateur
+     */
     @FXML
     private TextField pseudoInput;
 
+    /**
+     * boutton qui permet à l'utilisateur d'envoyer le formulaire
+     */
     @FXML
     private JFXButton buttonValidatePseudo;
 
+    /**
+     * text affiché si pseudo non valide
+     */
     @FXML
     private Label errorLabel;
 
+    /**
+     * Petit spninner pour indiquer le chargement
+     */
     @FXML
     private ProgressIndicator spinnerPseudo;
 
-    private Model model;
+    /**
+     * Instance du model
+     */
+    private final Model model;
 
 
+    /**
+     * Constructeur
+     */
     public PseudoWindowController(){
         this.model = Model.getInstance();
         this.model.addPropertyChangeListener(this,"pseudoRefused");
     }
 
+    /**
+     * Appelé par le loader FXML
+     * @param location
+     * @param resources
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
     }
 
 
+    /**
+     * Ecoute les singaux du model
+     * @param evt
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()) {
@@ -59,6 +89,10 @@ public class PseudoWindowController implements PropertyChangeListener, Initializ
         }
     }
 
+    /**
+     * handler click sur le bouton d'envoi
+     * @param evt
+     */
     public void clickButtonValidatePseudo(ActionEvent evt){
         String newPseudo = this.pseudoInput.getText();
         if (!newPseudo.equals(this.model.user.getPseudo())){

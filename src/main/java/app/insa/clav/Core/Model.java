@@ -52,6 +52,9 @@ public class Model implements PropertyChangeListener{
      */
     private PropertyChangeSupport support;
 
+    /**
+     * Instance of the Model (Singleton Design Pattern)
+     */
     private static Model instance = null;
 
 
@@ -90,6 +93,17 @@ ID 2 -> Listening on 6002, sending on 5002
         this.userList = new ArrayList<Utilisateurs>();
     }
 
+    /**
+     * Returns the instance of the Model (and cretes it if null)
+     * @param id
+     *          id of user
+     * @param inputPort
+     *                  input Port UDP
+     * @param outputPort
+     *                  outPutPort UDP
+     * @return
+     *         instance of Model
+     */
     public static Model getInstance(int id, int inputPort, int outputPort){
         synchronized(Model.class){
             if (instance == null) {
@@ -99,6 +113,10 @@ ID 2 -> Listening on 6002, sending on 5002
         return instance;
     }
 
+    /**
+     * getInstance, but no paremters (dont crete if not existing
+     * @return instance of Model
+     */
     public static Model getInstance(){
         return instance;
     }
@@ -153,6 +171,9 @@ ID 2 -> Listening on 6002, sending on 5002
         }
     }
 
+    /**
+     * Envoi message de type 4 (confirmation pseudo)
+     */
     public void sendPseudoValideBroadcast(){
         try {
             if (user.getId() == 1 || user.getId() == 2) {
@@ -264,6 +285,9 @@ ID 2 -> Listening on 6002, sending on 5002
         this.UDPOut.sendMsg(msgResponse);
     }
 
+    /**
+     * @return the list of users
+     */
     public ArrayList<Utilisateurs> getUserList(){
         return userList;
     }

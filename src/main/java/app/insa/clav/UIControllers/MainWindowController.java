@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * Controleur du modèle MVC. Interface entre le modèle (Application) et l'UI.
+ * Controleur du modèle MVC pour la mainWindow. Interface entre le modèle (Application) et l'UI.
  * Un controleur pour chaque fenêtre (main window ou fenetre de clavardage).
  * Il est instancié par le vue direcement.
  */
@@ -41,25 +41,46 @@ public class MainWindowController implements PropertyChangeListener, Initializab
      */
     private Model model;
 
+    /**
+     * Boutton piur ouvirir le Drawerr
+     */
     @FXML
     private JFXHamburger mainHamburger;
 
+    /**
+     * mainDrawer. Le contenu est controllé par le MainDrawerController
+     */
     @FXML
     private JFXDrawer mainDrawer;
 
+    /**
+     * Affiche les utilisateurs connectés
+     */
     @FXML
     private JFXListView<String> userListView;
 
+    /**
+     * Titre en haut de la page
+     */
     @FXML
     private Label mainLabel;
 
 
+    /**
+     * AnchorPane qui "wrap" toute la scene
+     */
     @FXML
     private AnchorPane rootPane;
 
 
+    /**
+     * transition quand on clique sur le hamburger
+     */
     private HamburgerSlideCloseTransition hamburgerClick1;
 
+    /**
+     * Liste observable sur la ListView va suivre
+     */
     private ObservableList<String> listUsers;
 
     /**
@@ -71,6 +92,11 @@ public class MainWindowController implements PropertyChangeListener, Initializab
         this.model.addPropertyChangeListener(this,"newUserConnected");
     }
 
+    /**
+     * Appele lors de la creation de la classe par le loader FXML
+     * @param location
+     * @param resources
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
@@ -97,7 +123,10 @@ public class MainWindowController implements PropertyChangeListener, Initializab
     }
 
 
-
+    /**
+     * handler signaux emis par la model
+     * @param evt
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){
@@ -120,6 +149,10 @@ public class MainWindowController implements PropertyChangeListener, Initializab
         }
     }
 
+    /**
+     * handler click sur la hamburger. Ferme ou ouvre le mainDrawer
+     * @param evt
+     */
     public void clickMainHamburgerHandler(MouseEvent evt){
         this.hamburgerClick1.setRate(this.hamburgerClick1.getRate()*-1);
         this.hamburgerClick1.play();

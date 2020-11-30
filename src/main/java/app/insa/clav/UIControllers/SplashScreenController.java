@@ -16,11 +16,20 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * splash screen qui s'affiche quand on ouvre l'app
+ */
 public class SplashScreenController implements Initializable {
 
+    /**
+     * object qui "wrap" le tout
+     */
     @FXML
     private StackPane rootSplash;
 
+    /**
+     * c1 c2 c3 les petites cercles qui tournent en haut de la page
+     */
     @FXML
     private Circle c1;
 
@@ -34,6 +43,11 @@ public class SplashScreenController implements Initializable {
     public SplashScreenController(){}
 
 
+    /**
+     * Appelé par le loader FXML
+     * @param location
+     * @param resources
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -73,6 +87,13 @@ public class SplashScreenController implements Initializable {
 
     }
 
+    /**
+     * permet de faire tourner un cercle
+     * @param c
+     * @param reverse
+     * @param angle
+     * @param time
+     */
     private void setRotateCircles(Circle c, boolean reverse, int angle, int time){
         RotateTransition rot = new RotateTransition(Duration.seconds(time),c);
 

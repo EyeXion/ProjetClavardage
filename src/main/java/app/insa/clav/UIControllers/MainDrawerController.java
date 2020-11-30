@@ -13,6 +13,9 @@ import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller of the drawer of the main Window
+ */
 public class MainDrawerController implements PropertyChangeListener,Initializable {
 
     /**
@@ -20,17 +23,31 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
      */
     private Model model;
 
+    /**
+     * boutton de demande ouverture fenetre changement pseudo
+     */
     @FXML
     private JFXButton buttonPseudo;
+    /**
+     * fenetre de changemen de pseudo
+     */
     private PseudoStage pseudoWindow;
 
 
+    /**
+     * constructor. Gets the Model
+     */
     public MainDrawerController(){
         this.model = Model.getInstance();
         this.model.addPropertyChangeListener(this,"pseudoValide");
     }
 
 
+    /**
+     * Called by the loader of FXML files
+     * @param location
+     * @param resources
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
     }
@@ -43,6 +60,10 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
         this.pseudoWindow = new PseudoStage(this.model);
     }
 
+    /**
+     * Ecoute les signaux qui viennent du Model
+     * @param evt
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){

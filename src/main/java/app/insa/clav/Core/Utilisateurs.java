@@ -71,12 +71,7 @@ public class Utilisateurs implements Comparable{
     @Override
     public boolean equals(Object obj) {
         Utilisateurs aux = (Utilisateurs) obj;
-        if (this.id == aux.id){
-            return true;
-        }
-        else{
-            return false;
-        }
+        return this.id == aux.id;
     }
 
     @Override
