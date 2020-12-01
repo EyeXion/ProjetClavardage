@@ -57,7 +57,7 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
      * @param evt
      */
     public void buttonPseudoHandler(ActionEvent evt){
-        this.pseudoWindow = new PseudoStage(this.model);
+        this.pseudoWindow = new PseudoStage();
     }
 
     /**

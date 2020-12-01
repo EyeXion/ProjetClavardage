@@ -10,6 +10,7 @@ import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -83,6 +84,11 @@ public class MainWindowController implements PropertyChangeListener, Initializab
      */
     private ObservableList<String> listUsers;
 
+
+    @FXML
+    private MenuItem openChatButton;
+
+
     /**
      * Contructeur. Il crée lui même l'UI (plus tard on mettra quel type de fenetre en argument)
      */
@@ -155,4 +161,10 @@ public class MainWindowController implements PropertyChangeListener, Initializab
         }
     }
 
+
+    @FXML
+    void openChat(ActionEvent event) {
+        System.out.println("Dans le hanlder bouton chat, pseudo demandé : " + userListView.getFocusModel().getFocusedItem());
+        model.createChatFromLocalRequest(userListView.getFocusModel().getFocusedItem());
+    }
 }

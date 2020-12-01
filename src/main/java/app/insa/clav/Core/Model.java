@@ -1,11 +1,14 @@
 package app.insa.clav.Core;
 
 import app.insa.clav.Messages.Message;
+import app.insa.clav.Messages.MessageChatTxt;
+import app.insa.clav.Messages.MessageInit;
 import app.insa.clav.Messages.MessagePseudo;
 import app.insa.clav.Reseau.TCPChatConnection;
 import app.insa.clav.Reseau.TCPListener;
 import app.insa.clav.Reseau.UDPInput;
 import app.insa.clav.Reseau.UDPOutput;
+import jdk.jshell.execution.Util;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -81,16 +84,16 @@ public class Model implements PropertyChangeListener{
      *                  Port d'Output UDP
      */
 /*
-ID 1 -> Listening on 6000, sending on 5000
-ID 2 -> Listening on 6001, sending on 5001
-ID 2 -> Listening on 6002, sending on 5002
+ID 1 -> Listening on 6000, sending on 5000, tcpServer on 7000
+ID 2 -> Listening on 6001, sending on 5001, tcpServer on 7001
+ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
 */
-    private Model(int id, int inputPort, int outputPort){
+    private Model(int id, int inputPort, int outputPort, int tcpListenerPort){
         try {
             this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), id, inputPort);
             this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), outputPort);
             this.UDPIn = new UDPInput(user.getInetAddress(),inputPort);
-            this.tcpListener = new TCPListener(this.user.getInetAddress(),this.user.getId());
+            this.tcpListener = new TCPListener(this.user.getInetAddress(),tcpListenerPort,user.getId());
             this.tim= new Timer();
             this.support = new PropertyChangeSupport(this);
         }
@@ -99,6 +102,7 @@ ID 2 -> Listening on 6002, sending on 5002
             e.printStackTrace();
         }
         this.userList = new ArrayList<Utilisateurs>();
+        this.listTCPConnection = new ArrayList<TCPChatConnection>();
     }
 
     /**
@@ -112,10 +116,10 @@ ID 2 -> Listening on 6002, sending on 5002
      * @return
      *         instance of Model
      */
-    public static Model getInstance(int id, int inputPort, int outputPort){
+    public static Model getInstance(int id, int inputPort, int outputPort, int tcpListenerPort){
         synchronized(Model.class){
             if (instance == null) {
-                instance = new Model(id, inputPort, outputPort);
+                instance = new Model(id, inputPort, outputPort,tcpListenerPort);
             }
         }
         return instance;
@@ -138,6 +142,7 @@ ID 2 -> Listening on 6002, sending on 5002
     }
 
     public void openTCPListener(){
+        System.out.println(("Start tcp listener"));
         tcpListener.start();
         this.tcpListener.addPropertyChangeListener(this);
     }
@@ -234,6 +239,28 @@ ID 2 -> Listening on 6002, sending on 5002
         return true;
     }
 
+
+    public void createChatFromLocalRequest(String remotePseudo){
+        for (Utilisateurs u : userList){
+            if (u.getPseudo().equals(remotePseudo)){
+                int destPort;
+                if (u.getId() == 1){
+                    destPort = 7000;
+                }
+                else if (u.getId() == 2){
+                    destPort = 7001;
+                }
+                else{
+                    destPort = 7002;
+                }
+                System.out.println("Dans le createChat du Model, avec dest : " +u.getId() + " " + remotePseudo + " "  +destPort);
+                MessageInit msgInit = new MessageInit(7,user.getInetAddress(),user.getPort(),u.getInetAddress(),destPort,user.getId());
+                TCPChatConnection tcpCo = new TCPChatConnection(msgInit,u.getId());
+                listTCPConnection.add(tcpCo);
+            }
+        }
+    }
+
     /**
      * Handler de notification (Obsevateur) pour le thread UDP.
      * @param evt
@@ -246,11 +273,10 @@ ID 2 -> Listening on 6002, sending on 5002
                 this.messageHandler(msgReceived);
                 break;
             case "chatCreated" :
+                System.out.println(("Dans le handler chatCreated receveur"));
                 TCPChatConnection tcpCo = this.tcpListener.getTCPChatConnection();
                 tcpCo.addPropertyChangeListener(this);
                 this.listTCPConnection.add(tcpCo);
-            case "TCPReceived" :
-                //Faire le handler de msgTCP
         }
     }
 
@@ -320,6 +346,17 @@ ID 2 -> Listening on 6002, sending on 5002
      */
     public ArrayList<Utilisateurs> getUserList(){
         return userList;
+    }
+
+    public Utilisateurs getUserFromId(int id){
+        Utilisateurs res = null;
+        for (Utilisateurs u : userList){
+            if (u.getId() == id){
+                res = u;
+                break;
+            }
+        }
+        return res;
     }
 
 

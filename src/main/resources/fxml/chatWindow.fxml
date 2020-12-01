@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<AnchorPane fx:id="rootAnchor" prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.ChatWindowController">
+   <children>
+      <ListView fx:id="messageList" layoutX="20.0" layoutY="22.0" prefHeight="287.0" prefWidth="448.0" />
+      <TextField fx:id="messageInput" layoutX="31.0" layoutY="334.0" prefHeight="26.0" prefWidth="293.0" promptText="Message..." />
+      <JFXButton onAction="#buttonSendMessageClicked" fx:id="sendButton" buttonType="RAISED" layoutX="373.0" layoutY="334.0" ripplerFill="#36b90e" style="-fx-background-color: fc8c03;" text="Send">
+         <graphic>
+            <FontIcon iconLiteral="fa-send" wrappingWidth="16.0" />
+         </graphic>
+      </JFXButton>
+   </children>
+</AnchorPane>

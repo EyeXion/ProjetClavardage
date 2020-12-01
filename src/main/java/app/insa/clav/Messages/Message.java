@@ -10,6 +10,8 @@ import java.net.InetAddress;
     2 ---> Messages.MessagePseudo réponse à type 1 pseudo ok
     3 ---> Messages.MessagePseudo réponse à type 1 pseudo pas ok
     4 ---> Messages.MessagePseudo si après type 1 aucun type 2 pour un delai, envoi confirmation pseudo
+    5 ---> Message Init envoyé quand on se connecte en TCP à un user distant
+    6 ---> MessageChatTxt pour le chat
  */
 
 /**
@@ -28,8 +30,8 @@ public class Message implements Serializable {
     public int typeMessage;
     public InetAddress srcIP;
     public int srcResponsePort; //Seulement besoin car on teste en localHost
-    public InetAddress destIP;
-    public int destPort;
+    public InetAddress destIP; //Seulement pour UDP ou ouverture CO TCP
+    public int destPort; //Seulement pour UDP ou l'ouverture connexion TCP, sinon à 0.
 
     /**
      * Constructeur d'un message depuis un autre

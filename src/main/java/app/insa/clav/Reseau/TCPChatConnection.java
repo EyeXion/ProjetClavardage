@@ -1,12 +1,16 @@
 package app.insa.clav.Reseau;
 import app.insa.clav.Messages.Message;
+import app.insa.clav.Messages.MessageChatTxt;
 import app.insa.clav.Messages.MessageInit;
+import app.insa.clav.UISubStages.ChatStage;
+import javafx.application.Platform;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -16,7 +20,7 @@ public class TCPChatConnection extends Thread{
     /**
      * Buffer dans lequel on met les messages reçus si ils passent le filter
      */
-    private ArrayList<Message> msgReceivedBuffer;
+    private final ArrayList<Message> msgReceivedBuffer;
 
     private Socket link;
 
@@ -32,15 +36,15 @@ public class TCPChatConnection extends Thread{
      * Constructeur utilisé quand l'utilisateur distant inititie la connexion
      * @param link
      */
-    public TCPChatConnection(Socket link){
+    public TCPChatConnection(Socket link, int remoteUserId, ObjectInputStream ois, ObjectOutputStream oos){
         this.link = link;
-        try {
-            this.objectOutStream = new ObjectOutputStream(this.link.getOutputStream());
-            this.objectInStream = new ObjectInputStream(this.link.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.objectOutStream = oos;
+        this.objectInStream = ois;
         this.msgReceivedBuffer = new ArrayList<Message>();
+        this.remoteUserId = remoteUserId;
+        this.support = new PropertyChangeSupport(this);
+        Platform.runLater(() -> new ChatStage(this));
+        this.start();
     }
 
     /**
@@ -58,11 +62,15 @@ public class TCPChatConnection extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.msgReceivedBuffer = new ArrayList<Message>();
         this.remoteUserId = remoteUserId;
+        this.support = new PropertyChangeSupport(this);
+        Platform.runLater(() -> new ChatStage(this));
+        this.start();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pcl){
-        this.support.addPropertyChangeListener("TCPReceived",pcl);
+        this.support.addPropertyChangeListener("messageTextReceivedTCP",pcl);
     }
 
 
@@ -87,11 +95,12 @@ public class TCPChatConnection extends Thread{
                 e.printStackTrace();
             }
             this.msgReceivedBuffer.add(msgReceived);
-            this.support.firePropertyChange("TCPReceived",true,false);
+            this.support.firePropertyChange("messageTextReceivedTCP",true,false);
         }
     }
 
-    public void sendMessage(Message msg){
+    public void sendMessageTxt(String payload){
+        MessageChatTxt msg = new MessageChatTxt(6,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),payload);
         try {
             this.objectOutStream.writeObject(msg);
         } catch (IOException e) {

@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public class PseudoStage extends Stage {
 
-    public PseudoStage(Model model){
+    public PseudoStage(){
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/pseudoWindow.fxml"));
         try {
             Parent rootPseudo = fxmlLoader.load();

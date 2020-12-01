@@ -17,8 +17,9 @@ public class Main extends Application{
         int id = Integer.parseInt(args[0]);
         int inputPort = Integer.parseInt(args[1]);
         int outPutPort = Integer.parseInt(args[2]);
+        int tcpListenerPort = Integer.parseInt(args[3]);
 
-        Model model = Model.getInstance(id,inputPort, outPutPort);
+        Model model = Model.getInstance(id,inputPort, outPutPort,tcpListenerPort);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/splashScreen.fxml"));
         Parent root =fxmlLoader.load();
