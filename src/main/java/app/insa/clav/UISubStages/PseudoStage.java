@@ -22,6 +22,8 @@ public class PseudoStage extends Stage {
             this.setScene(new Scene(rootPseudo, 340, 290));
             this.setMinHeight(290);
             this.setMinWidth(340);
+            this.setMaxHeight(290);
+            this.setMaxWidth(340);
             this.show();
         } catch (IOException e) {
             e.printStackTrace();

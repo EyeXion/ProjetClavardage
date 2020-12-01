@@ -142,7 +142,6 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     }
 
     public void openTCPListener(){
-        System.out.println(("Start tcp listener"));
         tcpListener.start();
         this.tcpListener.addPropertyChangeListener(this);
     }
@@ -241,22 +240,29 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
 
 
     public void createChatFromLocalRequest(String remotePseudo){
-        for (Utilisateurs u : userList){
-            if (u.getPseudo().equals(remotePseudo)){
-                int destPort;
-                if (u.getId() == 1){
-                    destPort = 7000;
+        int remoteId = this.getUserFromPseudo(remotePseudo).getId();
+        boolean isChatAlreadyCreated = false;
+        for (TCPChatConnection tcpCo : listTCPConnection){
+            if (tcpCo.remoteUserId == remoteId){
+                isChatAlreadyCreated = true;
+                break;
+            }
+        }
+        if (!isChatAlreadyCreated) {
+            for (Utilisateurs u : userList) {
+                if (u.getPseudo().equals(remotePseudo)) {
+                    int destPort;
+                    if (u.getId() == 1) {
+                        destPort = 7000;
+                    } else if (u.getId() == 2) {
+                        destPort = 7001;
+                    } else {
+                        destPort = 7002;
+                    }
+                    MessageInit msgInit = new MessageInit(7, user.getInetAddress(), user.getPort(), u.getInetAddress(), destPort, user.getId());
+                    TCPChatConnection tcpCo = new TCPChatConnection(msgInit, u.getId());
+                    listTCPConnection.add(tcpCo);
                 }
-                else if (u.getId() == 2){
-                    destPort = 7001;
-                }
-                else{
-                    destPort = 7002;
-                }
-                System.out.println("Dans le createChat du Model, avec dest : " +u.getId() + " " + remotePseudo + " "  +destPort);
-                MessageInit msgInit = new MessageInit(7,user.getInetAddress(),user.getPort(),u.getInetAddress(),destPort,user.getId());
-                TCPChatConnection tcpCo = new TCPChatConnection(msgInit,u.getId());
-                listTCPConnection.add(tcpCo);
             }
         }
     }
@@ -273,7 +279,6 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 this.messageHandler(msgReceived);
                 break;
             case "chatCreated" :
-                System.out.println(("Dans le handler chatCreated receveur"));
                 TCPChatConnection tcpCo = this.tcpListener.getTCPChatConnection();
                 tcpCo.addPropertyChangeListener(this);
                 this.listTCPConnection.add(tcpCo);
@@ -358,6 +363,19 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         }
         return res;
     }
+
+
+    public Utilisateurs getUserFromPseudo(String pseudo){
+        Utilisateurs res = null;
+        for (Utilisateurs u : userList){
+            if (u.getPseudo().equals(pseudo)){
+                res = u;
+                break;
+            }
+        }
+        return res;
+    }
+
 
 
     /**

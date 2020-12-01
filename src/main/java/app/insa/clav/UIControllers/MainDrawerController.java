@@ -29,7 +29,7 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
     @FXML
     private JFXButton buttonPseudo;
     /**
-     * fenetre de changemen de pseudo
+     * fenetre de changement de pseudo
      */
     private PseudoStage pseudoWindow;
 
@@ -57,7 +57,12 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
      * @param evt
      */
     public void buttonPseudoHandler(ActionEvent evt){
-        this.pseudoWindow = new PseudoStage();
+        if (this.pseudoWindow == null || !this.pseudoWindow.isShowing()) {
+            this.pseudoWindow = new PseudoStage();
+        }
+        else{
+            this.pseudoWindow.requestFocus();
+        }
     }
 
     /**

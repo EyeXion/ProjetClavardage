@@ -27,6 +27,8 @@ public class Main extends Application{
         primaryStage.setScene(new Scene(root, 600, 400));
         primaryStage.setMinHeight(400);
         primaryStage.setMinWidth(600);
+        primaryStage.setMaxHeight(450);
+        primaryStage.setMaxWidth(650);
         primaryStage.show();
         model.openInputUDP();
         model.openTCPListener();

@@ -164,7 +164,6 @@ public class MainWindowController implements PropertyChangeListener, Initializab
 
     @FXML
     void openChat(ActionEvent event) {
-        System.out.println("Dans le hanlder bouton chat, pseudo demandé : " + userListView.getFocusModel().getFocusedItem());
         model.createChatFromLocalRequest(userListView.getFocusModel().getFocusedItem());
     }
 }
