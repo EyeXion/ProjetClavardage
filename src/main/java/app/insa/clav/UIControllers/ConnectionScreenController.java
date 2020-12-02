@@ -65,11 +65,12 @@ public class ConnectionScreenController implements Initializable, PropertyChange
 
     @FXML
     void submitConnection(ActionEvent event) {
-        String pseudo = this.pseudoInput.getText();
-        if (pseudo != null && !this.isSubmitting) {
+        String login = this.loginInput.getText();
+        if (login != null && !this.isSubmitting) {
             this.isSubmitting = true;
             this.spinnerSubmit.setVisible(true);
-            this.model.choosePseudo(this.pseudoInput.getText());
+            String pseudo = this.dbAccess.getPseudoFromLogin(login);
+            this.model.choosePseudo(pseudo);
         }
     }
 

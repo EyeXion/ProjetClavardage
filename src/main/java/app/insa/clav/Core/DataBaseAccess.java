@@ -10,7 +10,12 @@ public class DataBaseAccess {
 
     private DataBaseAccess() {
         try {
-            con = DriverManager.getConnection("jdbc:localhost:testDBChat");
+            Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/testDBChat?useSSL=false","root","0000");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -26,9 +31,23 @@ public class DataBaseAccess {
         }
     }
 
-    public String getPseudoFromLogin(String login){
-        //Faire la requete à la BDD
-        return "";
+    public String getPseudoFromLogin(String login) {
+        String pseudo = null;
+        String preparedQuery = "SELECT * FROM Utilisateurs WHERE login=?";
+        PreparedStatement prSt = null;
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.setString(1, login);
+            System.out.println(prSt.toString());
+            ResultSet rs = prSt.executeQuery();
+            if (rs.first()){
+                pseudo = rs.getString("pseudo");
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return pseudo;
     }
 
 }
