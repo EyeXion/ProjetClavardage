@@ -117,6 +117,7 @@ public class MainWindowController implements PropertyChangeListener, Initializab
         this.userListView.setItems(this.listUsers);
         this.hamburgerClick1 = new HamburgerSlideCloseTransition(this.mainHamburger);
         this.hamburgerClick1.setRate(-1);
+        this.mainLabel.setText("Welcome, " + model.user.getPseudo() + "!");
     }
 
     /**

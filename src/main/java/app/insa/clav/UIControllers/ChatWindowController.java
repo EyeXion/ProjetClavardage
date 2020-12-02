@@ -36,7 +36,6 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
 
     private Utilisateurs remoteUser;
 
-
     @FXML
     private ListView<String> messageList;
 

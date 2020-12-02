@@ -73,6 +73,8 @@ public class Model implements PropertyChangeListener{
 
     private TCPListener tcpListener;
 
+    private DataBaseAccess dbAccess;
+
 
     /**
      * Constructeur
@@ -103,6 +105,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         }
         this.userList = new ArrayList<Utilisateurs>();
         this.listTCPConnection = new ArrayList<TCPChatConnection>();
+        this.dbAccess = DataBaseAccess.getInstance();
     }
 
     /**
@@ -126,7 +129,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     }
 
     /**
-     * getInstance, but no paremters (dont crete if not existing
+     * getInstance, but no parameters (dont crete if not existing
      * @return instance of Model
      */
     public static Model getInstance(){

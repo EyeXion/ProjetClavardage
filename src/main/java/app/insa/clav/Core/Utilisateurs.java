@@ -12,6 +12,7 @@ public class Utilisateurs implements Comparable{
     private InetAddress inetAddress;
     private int id;
     private int port;
+    private String login;
 
     public Date getLatestUpdate() {
         return latestUpdate;
@@ -78,5 +79,13 @@ public class Utilisateurs implements Comparable{
     public int compareTo(Object o) {
         Utilisateurs u = (Utilisateurs)  o;
         return this.pseudo.compareTo(u.pseudo);
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
     }
 }

@@ -91,7 +91,7 @@ public class SplashScreenController implements Initializable {
         fadeIn.setOnFinished((e) -> {
             fadeOut.play();
             this.mainStage = (Stage) rootSplash.getScene().getWindow();
-            this.fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/mainWindow.fxml"));
+            this.fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/connectionScreen.fxml"));
             try {
                 this.rootMainScreen = fxmlLoader.load();
                 this.scene = new Scene(rootMainScreen);
