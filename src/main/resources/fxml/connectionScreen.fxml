@@ -5,22 +5,49 @@
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.ConnectionScreenController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: dff8b4;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.ConnectionScreenController">
    <children>
-      <TextField fx:id="loginInput" layoutX="215.0" layoutY="129.0" promptText="Login..." />
-      <TextField fx:id="pseudoInput" layoutX="215.0" layoutY="234.0" promptText="Pseudo..." />
-      <JFXButton buttonType="RAISED" layoutX="247.0" layoutY="315.0" onAction="#submitConnection" prefHeight="26.0" prefWidth="92.0" ripplerFill="#1fbf3e" style="-fx-background-color: d4d17d;" text="Submit">
+      <TextField fx:id="loginInputIn" layoutX="64.0" layoutY="118.0" promptText="Login..." />
+      <TextField fx:id="pseudoInputIn" layoutX="65.0" layoutY="224.0" promptText="Pseudo... (optional)" />
+      <JFXButton fx:id="signInButton" buttonType="RAISED" layoutX="104.0" layoutY="328.0" onAction="#submitConnection" prefHeight="26.0" prefWidth="92.0" ripplerFill="#1fbf3e" style="-fx-background-color: d4d17d;" text="Sign in">
          <graphic>
-            <FontIcon fx:id="submitButton" iconColor="#010005" iconLiteral="fa-arrow-circle-up" text="" wrappingWidth="10.0" />
+            <FontIcon iconColor="#010005" iconLiteral="fa-arrow-circle-up" text="" wrappingWidth="10.0" />
          </graphic>
       </JFXButton>
-      <ProgressIndicator fx:id="spinnerSubmit" layoutX="394.0" layoutY="315.0" prefHeight="26.0" prefWidth="30.0" visible="false" />
-      <Label fx:id="errorLabel" layoutX="165.0" layoutY="179.0" text="Connection refused, try again ! " textFill="#b52a2a" visible="false">
+      <Line endX="-100.0" endY="329.0" fill="#9a2c2c" layoutX="402.0" layoutY="49.0" opacity="0.8" startX="-100.0" startY="-26.0" stroke="#2dba6fe4" strokeDashOffset="2.0" strokeWidth="2.0" />
+      <TextField fx:id="loginInputUp" layoutX="366.0" layoutY="118.0" promptText="Login..." />
+      <TextField fx:id="pseudoInputUp" layoutX="371.0" layoutY="224.0" promptText="Pseudo..." />
+      <JFXButton fx:id="signUpButton" buttonType="RAISED" layoutX="406.0" layoutY="328.0" onAction="#submitSignUp" prefHeight="26.0" prefWidth="92.0" ripplerFill="#1fbf3e" style="-fx-background-color: d4d17d;" text="Sign up">
+         <graphic>
+            <FontIcon iconLiteral="fa-address-card" wrappingWidth="18.0" />
+         </graphic>
+      </JFXButton>
+      <ProgressIndicator fx:id="spinnerIn" layoutX="221.0" layoutY="329.0" prefHeight="26.0" prefWidth="29.0" visible="false" />
+      <ProgressIndicator fx:id="spinnerUp" layoutX="516.0" layoutY="329.0" prefHeight="26.0" prefWidth="29.0" visible="false" />
+      <Label fx:id="errorLabelIn" layoutX="58.0" layoutY="263.0" prefHeight="39.0" prefWidth="184.0" text="Pseudo already used, choose another one please" textFill="#722929" visible="false" wrapText="true" />
+      <Label fx:id="errorLabelUp" layoutX="360.0" layoutY="263.0" prefHeight="39.0" prefWidth="184.0" text="Pseudo already used, choose another one please" textFill="#722929" visible="false" wrapText="true" />
+      <Label layoutX="114.0" layoutY="55.0" text="Sign In !">
          <font>
-            <Font size="17.0" />
+            <Font name="Ubuntu" size="20.0" />
+         </font>
+      </Label>
+      <Label layoutX="416.0" layoutY="55.0" text="Sign Up !">
+         <font>
+            <Font name="Ubuntu" size="20.0" />
+         </font>
+      </Label>
+      <Label fx:id="labelErrorInLogin" layoutX="65.0" layoutY="171.0" prefHeight="16.0" prefWidth="171.0" text="This login does not exist" textFill="#8a3535" visible="false">
+         <font>
+            <Font name="Ubuntu" size="14.0" />
+         </font>
+      </Label>
+      <Label fx:id="labelErrorUpLogin" layoutX="366.0" layoutY="171.0" prefHeight="16.0" prefWidth="171.0" text="This login is already used" textFill="#8a3535" visible="false">
+         <font>
+            <Font name="Ubuntu" size="14.0" />
          </font>
       </Label>
    </children>

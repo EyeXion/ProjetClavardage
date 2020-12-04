@@ -3,6 +3,7 @@ package app.insa.clav.UIControllers;
 import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Core.Model;
 import app.insa.clav.Core.Utilisateurs;
+import com.jfoenix.controls.JFXButton;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -26,27 +27,54 @@ import java.util.stream.Collectors;
 
 public class ConnectionScreenController implements Initializable, PropertyChangeListener {
 
-    @FXML
-    private TextField loginInput;
 
     @FXML
-    private TextField pseudoInput;
+    private TextField loginInputIn;
 
     @FXML
-    private FontIcon submitButton;
+    private TextField pseudoInputIn;
 
     @FXML
-    private ProgressIndicator spinnerSubmit;
+    private JFXButton signInButton;
 
     @FXML
-    private Label errorLabel;
+    private TextField loginInputUp;
+
+    @FXML
+    private TextField pseudoInputUp;
+
+    @FXML
+    private JFXButton signUpButton;
+
+    @FXML
+    private ProgressIndicator spinnerIn;
+
+    @FXML
+    private ProgressIndicator spinnerUp;
+
+    @FXML
+    private Label errorLabelIn;
+
+    @FXML
+    private Label errorLabelUp;
+
+    @FXML
+    private Label labelErrorInLogin;
+
+    @FXML
+    private Label labelErrorUpLogin;
 
     @FXML
     private Model model;
 
-    private boolean isSubmitting;
+    private boolean isSubmittingIn;
+
+    private boolean isSubmittingUp;
 
     private DataBaseAccess dbAccess;
+
+    private String loginUp;
+    private String pseudoUp;
 
 
 
@@ -55,7 +83,8 @@ public class ConnectionScreenController implements Initializable, PropertyChange
         this.dbAccess = DataBaseAccess.getInstance();
         this.model.addPropertyChangeListener(this,"pseudoRefused");
         this.model.addPropertyChangeListener(this,"pseudoValide");
-        isSubmitting = false;
+        isSubmittingIn = false;
+        isSubmittingUp = false;
     }
 
 
@@ -65,24 +94,59 @@ public class ConnectionScreenController implements Initializable, PropertyChange
 
     @FXML
     void submitConnection(ActionEvent event) {
-        String login = this.loginInput.getText();
-        if (login != null && !this.isSubmitting) {
-            this.isSubmitting = true;
-            this.spinnerSubmit.setVisible(true);
+        String login = this.loginInputIn.getText();
+        if (!login.equals("") && !this.isSubmittingIn && !this.isSubmittingUp) {
+            this.isSubmittingIn = true;
+            this.spinnerIn.setVisible(true);
             String pseudo = this.dbAccess.getPseudoFromLogin(login);
-            this.model.choosePseudo(pseudo);
+            if (pseudo == null){
+                this.labelErrorInLogin.setVisible(true);
+            }
+            else {
+                this.model.choosePseudo(pseudo,true);
+            }
         }
     }
+
+    @FXML
+    void submitSignUp(ActionEvent event) {
+        this.loginUp = this.loginInputUp.getText();
+        this.pseudoUp = this.pseudoInputUp.getText();
+        System.out.println("login = " + loginUp + " and pseudo = " + pseudoUp);
+        if (!this.loginUp.equals("") && !this.pseudoUp.equals("") && !this.isSubmittingIn && !this.isSubmittingUp){
+            this.isSubmittingUp = true;
+            this.spinnerUp.setVisible(true);
+            boolean isLoginOk = this.dbAccess.isLoginUsed(this.loginUp);
+            if (isLoginOk){
+                this.model.choosePseudo(this.pseudoUp,false);
+            }
+            else{
+                this.labelErrorUpLogin.setVisible(true);
+                this.spinnerUp.setVisible(false);
+                this.isSubmittingUp = false;
+            }
+        }
+    }
+
+    private void pseudoValideUp(){
+        this.model.setUserId(this.dbAccess.addUtilisateur(this.loginUp,this.pseudoUp));
+        this.model.sendPseudoValideBroadcast();
+    }
+
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){
             case "pseudoValide" :
-                this.isSubmitting = false;
+                if (isSubmittingUp){
+                    this.pseudoValideUp();
+                }
+                this.isSubmittingUp = false;
+                this.isSubmittingIn = false;
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        Stage mainStage = (Stage) submitButton.getScene().getWindow();
+                        Stage mainStage = (Stage) signUpButton.getScene().getWindow();
                         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/mainWindow.fxml"));
                         try {
                             Parent rootMainScreen = fxmlLoader.load();
@@ -95,17 +159,25 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                     }
                 });
             case "pseudoRefused" :
-                this.isSubmitting = false;
-                Platform.runLater(() ->
-                        this.errorLabel.setVisible(true)
-                );
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        errorLabel.setVisible(true);
-                        spinnerSubmit.setVisible(false);
-                    }
-                });
+                if (this.isSubmittingIn) {
+                    this.isSubmittingIn = false;
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            errorLabelIn.setVisible(true);
+                            spinnerIn.setVisible(false);
+                        }
+                    });
+                }else if (this.isSubmittingUp){
+                    this.isSubmittingUp = false;
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            errorLabelUp.setVisible(true);
+                            spinnerUp.setVisible(false);
+                        }
+                    });
+                }
         }
     }
 }

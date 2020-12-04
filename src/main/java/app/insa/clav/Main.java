@@ -14,12 +14,11 @@ public class Main extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception{
         String[] args = this.getParameters().getUnnamed().toArray(new String[0]);
-        int id = Integer.parseInt(args[0]);
-        int inputPort = Integer.parseInt(args[1]);
-        int outPutPort = Integer.parseInt(args[2]);
-        int tcpListenerPort = Integer.parseInt(args[3]);
+        int inputPort = Integer.parseInt(args[0]);
+        int outPutPort = Integer.parseInt(args[1]);
+        int tcpListenerPort = Integer.parseInt(args[2]);
 
-        Model model = Model.getInstance(id,inputPort, outPutPort,tcpListenerPort);
+        Model model = Model.getInstance(inputPort, outPutPort,tcpListenerPort);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/splashScreen.fxml"));
         Parent root =fxmlLoader.load();

@@ -38,7 +38,6 @@ public class DataBaseAccess {
         try {
             prSt = con.prepareStatement(preparedQuery);
             prSt.setString(1, login);
-            System.out.println(prSt.toString());
             ResultSet rs = prSt.executeQuery();
             if (rs.first()){
                 pseudo = rs.getString("pseudo");
@@ -48,6 +47,51 @@ public class DataBaseAccess {
             throwables.printStackTrace();
         }
         return pseudo;
+    }
+
+    public boolean isLoginUsed(String login){
+        String loginAux = null;
+        String preparedQuery = "SELECT * FROM Utilisateurs WHERE login=?";
+        PreparedStatement prSt = null;
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.setString(1, login);
+            ResultSet rs = prSt.executeQuery();
+            if (rs.first()){
+                loginAux = rs.getString("login");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        System.out.println("login Aux = " + loginAux);
+        return loginAux == null;
+    }
+
+    public int addUtilisateur(String login, String pseudo){
+        String loginAux = null;
+        String preparedQuery = "INSERT INTO Utilisateurs (`login`, `pseudo`,`password`) VALUES (?,?,'pouet')";
+        PreparedStatement prSt = null;
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.setString(1, login);
+            prSt.setString(2,pseudo);
+            prSt.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        preparedQuery = "SELECT * FROM Utilisateurs WHERE login=?";
+        int id = 0;
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.setString(1, login);
+            ResultSet rs = prSt.executeQuery();
+            if (rs.first()){
+                id = rs.getInt("id");
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return id;
     }
 
 }

@@ -96,7 +96,7 @@ public class PseudoWindowController implements PropertyChangeListener, Initializ
     public void clickButtonValidatePseudo(ActionEvent evt){
         String newPseudo = this.pseudoInput.getText();
         if (!newPseudo.equals(this.model.user.getPseudo())){
-            this.model.choosePseudo(newPseudo);
+            this.model.choosePseudo(newPseudo,true);
             this.spinnerPseudo.setVisible(true);
         }
     }

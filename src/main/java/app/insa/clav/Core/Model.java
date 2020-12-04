@@ -78,7 +78,7 @@ public class Model implements PropertyChangeListener{
 
     /**
      * Constructeur
-     * @param id
+
      *           Id de l'utilisateur (unique dans toutes les machines)
      * @param inputPort
      *                  Port d'input UDP
@@ -90,9 +90,9 @@ ID 1 -> Listening on 6000, sending on 5000, tcpServer on 7000
 ID 2 -> Listening on 6001, sending on 5001, tcpServer on 7001
 ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
 */
-    private Model(int id, int inputPort, int outputPort, int tcpListenerPort){
+    private Model(int inputPort, int outputPort, int tcpListenerPort){
         try {
-            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), id, inputPort);
+            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0, inputPort);
             this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), outputPort);
             this.UDPIn = new UDPInput(user.getInetAddress(),inputPort);
             this.tcpListener = new TCPListener(this.user.getInetAddress(),tcpListenerPort,user.getId());
@@ -109,8 +109,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     }
 
     /**
-     * Returns the instance of the Model (and cretes it if null)
-     * @param id
+     * Returns the instance of the Model (and creates it if null)
      *          id of user
      * @param inputPort
      *                  input Port UDP
@@ -119,10 +118,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      * @return
      *         instance of Model
      */
-    public static Model getInstance(int id, int inputPort, int outputPort, int tcpListenerPort){
+    public static Model getInstance(int inputPort, int outputPort, int tcpListenerPort){
         synchronized(Model.class){
             if (instance == null) {
-                instance = new Model(id, inputPort, outputPort,tcpListenerPort);
+                instance = new Model(inputPort, outputPort,tcpListenerPort);
             }
         }
         return instance;
@@ -231,14 +230,18 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      *              Pseudo rentré par l'utilisateur
      * @return
      */
-    public boolean choosePseudo(String pseudo){
+    public boolean choosePseudo(String pseudo, boolean isConfirmationNeeded){
         this.ancienPseudo = this.user.getPseudo();
         this.user.setPseudo(pseudo);
         this.UDPIn.setFilterValue(2,true);
         this.UDPIn.setFilterValue(3,true);
         this.sendPseudoBroadcast();
-        this.tim.schedule(new TimerTaskResponseWait(),1000);
+        this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded),1000);
         return true;
+    }
+
+    public void setUserId(int id){
+        this.user.setId(id);
     }
 
 
@@ -387,8 +390,9 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      */
     class TimerTaskResponseWait extends TimerTask {
 
-
-        public TimerTaskResponseWait() {
+        boolean isConfirmationNeeded;
+        public TimerTaskResponseWait(boolean isConfirmationNeeded) {
+            this.isConfirmationNeeded = isConfirmationNeeded;
         }
 
         /**
@@ -400,7 +404,9 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
             if (isPseudoOk){
                 //envoi message de type 4 pour confirmer.
                 support.firePropertyChange("pseudoValide",ancienPseudo,user.getPseudo());
-                sendPseudoValideBroadcast();
+                if (isConfirmationNeeded){
+                    sendPseudoValideBroadcast();
+                }
             }
             else{
                 isPseudoOk = true; //On reinitialise cet attribut.
