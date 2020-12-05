@@ -13,10 +13,10 @@ public class Main extends Application{
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        String[] args = this.getParameters().getUnnamed().toArray(new String[0]);
-        int inputPort = Integer.parseInt(args[0]);
-        int outPutPort = Integer.parseInt(args[1]);
-        int tcpListenerPort = Integer.parseInt(args[2]);
+        //String[] args = this.getParameters().getUnnamed().toArray(new String[0]);
+        int inputPort = 5000;//Integer.parseInt(args[0]);
+        int outPutPort = 6000; //Integer.parseInt(args[1]);
+        int tcpListenerPort = 7000; //Integer.parseInt(args[2]);
 
         Model model = Model.getInstance(inputPort, outPutPort,tcpListenerPort);
 

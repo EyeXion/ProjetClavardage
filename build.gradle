@@ -3,6 +3,7 @@ plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.9'
     id 'org.beryx.jlink' version '2.15.1'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
 
 group 'app.insa.clav'
@@ -17,7 +18,7 @@ repositories {
 
 javafx {
     version = "11.0.2"
-    modules = [ 'javafx.controls', 'javafx.fxml','javafx.graphics','javafx.base' ]
+    modules = [ 'javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.base']
 }
 
 
@@ -28,40 +29,36 @@ dependencies {
     compile group: 'org.kordamp.ikonli', name: 'ikonli-core', version: '11.5.0'
     compile group: 'org.kordamp.ikonli', name: 'ikonli-javafx', version: '11.5.0'
     compile group: 'org.kordamp.ikonli', name: 'ikonli-fontawesome-pack', version: '11.5.0'
+    runtimeOnly "org.openjfx:javafx-graphics:$javafx.version:win"
+    runtimeOnly "org.openjfx:javafx-graphics:$javafx.version:linux"
+    runtimeOnly "org.openjfx:javafx-graphics:$javafx.version:mac"
 }
 
-application {
-    mainClassName = 'app.insa.clav.Main'
-    applicationDefaultJvmArgs = [
+mainClassName = 'app.insa.clav.Launcher'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'app.insa.clav.Launcher'
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+shadowJar {
+    mergeServiceFiles()
+}
+
+run {
+    jvmArgs = [
             "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED",
             "--add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED",
             "--add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED",
             "--add-exports=javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED",
             "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED"
     ]
-    applicationName = "JigglypuffMessenger"
 }
-
-run {
-    jvmArgs = [
-        "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED",
-        "--add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED",
-        "--add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED",
-        "--add-exports=javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED",
-        "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED"
-]
-}
-
-
-jar {
-    manifest {
-        attributes("Implementation-Title": "Gradle",
-                "Implementation-Version": archiveVersion)
-    }
-}
-
-
-
 
 jlink {
     launcher {
