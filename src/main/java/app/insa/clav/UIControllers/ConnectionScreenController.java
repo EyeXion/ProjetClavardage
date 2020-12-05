@@ -98,12 +98,13 @@ public class ConnectionScreenController implements Initializable, PropertyChange
         if (!login.equals("") && !this.isSubmittingIn && !this.isSubmittingUp) {
             this.isSubmittingIn = true;
             this.spinnerIn.setVisible(true);
-            String pseudo = this.dbAccess.getPseudoFromLogin(login);
-            if (pseudo == null){
-                this.labelErrorInLogin.setVisible(true);
-            }
-            else {
+            if (this.dbAccess.LoginExist(login)) {
+                String pseudo = this.dbAccess.getPseudoFromLogin(login);
+                int id = this.dbAccess.getIdFromLogin(login);
+                this.model.setUserId(id);
                 this.model.choosePseudo(pseudo,true);
+            } else {
+                this.labelErrorInLogin.setVisible(true);
             }
         }
     }

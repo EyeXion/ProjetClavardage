@@ -57,7 +57,9 @@ public class UDPOutput{
             }
             //InetAddress broadcastAdress = InetAddress.getByAddress("255.255.255.255".getBytes());
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length,msg.destIP,msg.destPort);
+            System.out.println(packet.toString());
             this.socket.send(packet);
+            System.out.println("UDP Packet Sended");
         }
         catch (UnknownHostException e){
             System.out.println("Unknown host dans broadcast address");

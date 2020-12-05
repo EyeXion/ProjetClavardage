@@ -67,6 +67,35 @@ public class DataBaseAccess {
         return loginAux == null;
     }
 
+    public boolean LoginExist(String login) {
+        String Query = "SELECT * FROM Utilisateurs WHERE login = '" + login + "'";
+        System.out.println(Query);
+        boolean Ok = false;
+        try {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(Query);
+            Ok = rs.next();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return Ok;
+    }
+
+    public int getIdFromLogin(String login) {
+        String Query = "SELECT id FROM Utilisateurs WHERE login = '" + login + "'";
+        int id = -1;
+        try {
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(Query);
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return id;
+    }
+
     public int addUtilisateur(String login, String pseudo){
         String loginAux = null;
         String preparedQuery = "INSERT INTO Utilisateurs (`login`, `pseudo`,`password`) VALUES (?,?,'pouet')";

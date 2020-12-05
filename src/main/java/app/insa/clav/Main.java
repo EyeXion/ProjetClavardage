@@ -37,7 +37,7 @@ public class Main extends Application{
         //String ipAdress = arg[0];
         launch(arg);
 
-        /* while (true){
+        /*while (true){
             Scanner myScan = new Scanner(System.in);
             System.out.println("Entrez un pseudo svp : ");
             String pseudo = myScan.nextLine();
