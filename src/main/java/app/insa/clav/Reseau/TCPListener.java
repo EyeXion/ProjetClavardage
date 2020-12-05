@@ -19,13 +19,12 @@ public class TCPListener extends Thread{
     private InetAddress inetAddress;
     private int port;
     private  ServerSocket servSocket;
-    private int localId;
 
     private PropertyChangeSupport support;
 
     private ArrayList<TCPChatConnection> bufferTCPConnection;
 
-    public TCPListener(InetAddress inetAddress, int tcpListenerPort,int localId){
+    public TCPListener(InetAddress inetAddress, int tcpListenerPort){
         this.inetAddress = inetAddress;
         try {
             this.servSocket = new ServerSocket(tcpListenerPort,1000,inetAddress); //0 alloue un port dispo
@@ -33,7 +32,6 @@ public class TCPListener extends Thread{
             e.printStackTrace();
         }
         this.port = servSocket.getLocalPort();
-        this.localId = localId;
         this.bufferTCPConnection = new ArrayList<TCPChatConnection>();
         this.support = new PropertyChangeSupport(this);
     }

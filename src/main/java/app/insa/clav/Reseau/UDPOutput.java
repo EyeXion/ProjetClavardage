@@ -26,9 +26,9 @@ public class UDPOutput{
      * @param outputPort
      *                  Port du socket output
      */
-    public UDPOutput(InetAddress localAddress, int outputPort){
+    public UDPOutput(){
         try {
-            this.socket = new DatagramSocket(outputPort, localAddress);
+            this.socket = new DatagramSocket();
             this.socket.setBroadcast(true);
         }
         catch (SocketException e){

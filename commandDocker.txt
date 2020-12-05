@@ -1,0 +1,2 @@
+xhosts +x
+sudo docker run --rm -ti -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v "$PWD":/home/gradle/project -w /home/gradle/project chat gradle run

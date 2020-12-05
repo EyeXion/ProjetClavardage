@@ -14,11 +14,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 import java.net.*;
-import java.util.Collections;
-import java.util.Timer;
-import java.util.TimerTask;
 //Toutes les interactions avec l'utilisateur (pour tester)
 
 /**
@@ -75,6 +72,8 @@ public class Model implements PropertyChangeListener{
 
     private DataBaseAccess dbAccess;
 
+    private InetAddress broadcastAdress;
+
 
     /**
      * Constructeur
@@ -82,27 +81,36 @@ public class Model implements PropertyChangeListener{
      *           Id de l'utilisateur (unique dans toutes les machines)
      * @param inputPort
      *                  Port d'input UDP
-     * @param outputPort
-     *                  Port d'Output UDP
      */
 /*
 ID 1 -> Listening on 6000, sending on 5000, tcpServer on 7000
 ID 2 -> Listening on 6001, sending on 5001, tcpServer on 7001
 ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
 */
-    private Model(int inputPort, int outputPort, int tcpListenerPort){
+    private Model(int inputPort, int tcpListenerPort) {
+        Enumeration<NetworkInterface> interfaces = null;
+        InetAddress localAdress = null;
         try {
-            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0, inputPort);
-            this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), outputPort);
-            this.UDPIn = new UDPInput(user.getInetAddress(),inputPort);
-            this.tcpListener = new TCPListener(this.user.getInetAddress(),tcpListenerPort,user.getId());
-            this.tim= new Timer();
-            this.support = new PropertyChangeSupport(this);
-        }
-        catch (IOException e){
-            System.out.println("IOException dans la creation de l'utilisateur local");
+            interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements())
+            {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                if (networkInterface.getName().equals("eth0")){
+                    localAdress = networkInterface.getInterfaceAddresses().get(0).getAddress();
+                    this.broadcastAdress = networkInterface.getInterfaceAddresses().get(0).getBroadcast();
+                    System.out.println("FOund adress : " + localAdress);
+                    break;
+                }
+            }
+        } catch (SocketException e) {
             e.printStackTrace();
         }
+        this.user = new Utilisateurs("NA", localAdress, 0, inputPort);
+        this.UDPOut = new UDPOutput();
+        this.UDPIn = new UDPInput(localAdress,inputPort);
+        this.tcpListener = new TCPListener(localAdress,tcpListenerPort);
+        this.tim= new Timer();
+        this.support = new PropertyChangeSupport(this);
         this.userList = new ArrayList<Utilisateurs>();
         this.listTCPConnection = new ArrayList<TCPChatConnection>();
         this.dbAccess = DataBaseAccess.getInstance();
@@ -113,20 +121,17 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      *          id of user
      * @param inputPort
      *                  input Port UDP
-     * @param outputPort
-     *                  outPutPort UDP
      * @return
      *         instance of Model
      */
-    public static Model getInstance(int inputPort, int outputPort, int tcpListenerPort){
+    public static Model getInstance(int inputPort, int tcpListenerPort){
         synchronized(Model.class){
             if (instance == null) {
-                instance = new Model(inputPort, outputPort,tcpListenerPort);
+                instance = new Model(inputPort,tcpListenerPort);
             }
         }
         return instance;
     }
-
     /**
      * getInstance, but no parameters (dont crete if not existing
      * @return instance of Model
@@ -180,48 +185,16 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      * Envoi un messagePseudo de type 1 aux 3 machines de test
      */
     public void sendPseudoBroadcast(){
-        try {
-            if (user.getId() == 1 || user.getId() == 2) {
-                MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 2 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6000, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 1 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6001,this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-        }
-        catch (UnknownHostException e){
-            System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
-            e.printStackTrace();
-        }
+        MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPort(), this.broadcastAdress, 6000,this.user.getPseudo(),this.user.getId());
+        UDPOut.sendMsg(msg);
     }
 
     /**
      * Envoi message de type 4 (confirmation pseudo)
      */
     public void sendPseudoValideBroadcast(){
-        try {
-            if (user.getId() == 1 || user.getId() == 2) {
-                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 2 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6000, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 1 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6001,this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-        }
-        catch (UnknownHostException e){
-            System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
-            e.printStackTrace();
-        }
+        MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(),  this.broadcastAdress, 6000,this.user.getPseudo(),this.user.getId());
+        UDPOut.sendMsg(msg);
     }
 
     /**

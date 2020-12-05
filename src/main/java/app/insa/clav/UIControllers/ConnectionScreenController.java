@@ -98,13 +98,15 @@ public class ConnectionScreenController implements Initializable, PropertyChange
         if (!login.equals("") && !this.isSubmittingIn && !this.isSubmittingUp) {
             this.isSubmittingIn = true;
             this.spinnerIn.setVisible(true);
-            if (this.dbAccess.LoginExist(login)) {
-                String pseudo = this.dbAccess.getPseudoFromLogin(login);
+            String pseudo = this.dbAccess.getPseudoFromLogin(login);
+            if (pseudo != null){
                 int id = this.dbAccess.getIdFromLogin(login);
                 this.model.setUserId(id);
                 this.model.choosePseudo(pseudo,true);
             } else {
                 this.labelErrorInLogin.setVisible(true);
+                this.spinnerIn.setVisible(false);
+                this.isSubmittingIn = false;
             }
         }
     }
@@ -129,19 +131,10 @@ public class ConnectionScreenController implements Initializable, PropertyChange
         }
     }
 
-    private void pseudoValideUp(){
-        this.model.setUserId(this.dbAccess.addUtilisateur(this.loginUp,this.pseudoUp));
-        this.model.sendPseudoValideBroadcast();
-    }
-
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){
             case "pseudoValide" :
-                if (isSubmittingUp){
-                    this.pseudoValideUp();
-                }
                 this.isSubmittingUp = false;
                 this.isSubmittingIn = false;
                 Platform.runLater(new Runnable() {

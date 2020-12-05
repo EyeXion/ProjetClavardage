@@ -15,7 +15,7 @@ public class DataBaseAccess {
             e.printStackTrace();
         }
         try {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/testDBChat?useSSL=false","root","0000");
+            con = DriverManager.getConnection("jdbc:mysql://172.17.0.1:3306/testDBChat?allowPublicKeyRetrieval=TRUE&useSSL=FALSE","admin","0000");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
