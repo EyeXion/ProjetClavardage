@@ -1,8 +1,10 @@
 package app.insa.clav.UIControllers;
 
+import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Core.Model;
 import app.insa.clav.Core.Utilisateurs;
 import app.insa.clav.Messages.MessageChatTxt;
+import app.insa.clav.Messages.MessageHistoryList;
 import app.insa.clav.Reseau.TCPChatConnection;
 import com.jfoenix.controls.JFXButton;
 import javafx.application.Platform;
@@ -43,6 +45,10 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
 
     private ObservableList<String> listMessages;
 
+    private DataBaseAccess dbAccess;
+
+    private int localUserId;
+
 
     public ChatWindowController(){
         this.model = Model.getInstance();
@@ -50,7 +56,17 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        this.listMessages = FXCollections.observableList(new ArrayList<String>());
+        this.localUserId = model.user.getId();
+    }
+
+    private void getHistory(){
+        this.dbAccess = DataBaseAccess.getInstance();
+        ArrayList<MessageHistoryList> history = this.dbAccess.getMessageHistory(this.localUserId,remoteUser.getId());
+        ArrayList<String> listMessagesAux = new ArrayList<String>();
+        for (MessageHistoryList msg : history){
+            listMessagesAux.add(msg.getPayload() + "****Envoyé à " + msg.getDate());
+        }
+        this.listMessages = FXCollections.observableList(listMessagesAux);
         this.messageList.setItems(this.listMessages);
     }
 
@@ -59,6 +75,7 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         tcpCo.addPropertyChangeListener(this);
         int remoteUserId = tcpCo.remoteUserId;
         this.remoteUser = model.getUserFromId(remoteUserId);
+        this.getHistory();
     }
 
     @Override
@@ -76,5 +93,6 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         this.listMessages.add(payload);
         this.messageInput.clear();
         this.tcpCo.sendMessageTxt(payload);
+        this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),payload);
     }
 }
