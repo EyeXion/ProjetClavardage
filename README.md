@@ -22,16 +22,26 @@ Notre conception est pour le moment pas très bonne car nous avions mal compris 
 - Ajout table des users connetés (pas hyper cool, quand on change de pseudo 2 fois on se duplique dans la ListView)
 - Message de type 4 (confirmation envoi pseudo)
 - Splash screen
+- Page d'acceuil connection/inscription
+- Client TCP (reprendre les TD).
+- Fix le bug quand on ouvre 2 fenêtres de changement de pseudo (mettre un flag pour pouvoir en ouvrir qu'une seule)
+- Design fenêtre de clavardage (draft)
 
 ###A faire
 
 - Quand on reçoit un messagPseudo de type 1, on vérifie toute la table des utilisateurs connectés. (maybe?)
 - Envoyer à intervalle régulier des messages qui disent qu'on est bien connecté
-- Page d'acceuil pour premier pseudo.
-- Client TCP (reprendre les TD).
-- Design fenêtre de clavardage
-- Rendre l'UI jolie.
-- Fix le bug quand on ouvre 2 fenêtres de changement de pseudo (mettre un flag pour pouvoir en ouvrir qu'une seule)
+- Envoyer les messages dans la BDD
+- Horadater les messages
+- Tester le broadcast
+- Concevoir archi BDD pour les messages
+- Handler fermetures des fenêtres
+- Bouton déconnexion
+- Effacer un utilisateur
+- Mots de passe
+- Serveur distant utilisateurs extérieurs (demander au prof)
+- Design UI
+
 
 ###Technos
 
