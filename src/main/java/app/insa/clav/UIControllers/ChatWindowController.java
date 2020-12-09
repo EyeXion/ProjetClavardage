@@ -11,11 +11,14 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -85,6 +88,13 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                 MessageChatTxt msg = (MessageChatTxt) tcpCo.getMessageReceived();
                 String payload = msg.payload;
                 Platform.runLater(() -> this.listMessages.add(payload));
+                break;
+            case "connectionChatClosed":
+                tcpCo.sendCloseChat();
+                model.notifyCloseChat(tcpCo);
+                Stage mainStage = (Stage) rootAnchor.getScene().getWindow();
+                Platform.runLater(mainStage::close);
+                break;
         }
     }
 
@@ -94,5 +104,17 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         this.messageInput.clear();
         this.tcpCo.sendMessageTxt(payload);
         this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),payload);
+    }
+
+    public void setHandler() {
+        Stage mainStage = (Stage) rootAnchor.getScene().getWindow();
+        mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t) {
+                tcpCo.sendCloseChat();
+                model.notifyCloseChat(tcpCo);
+                Platform.runLater(mainStage::close);
+            }
+        });
     }
 }

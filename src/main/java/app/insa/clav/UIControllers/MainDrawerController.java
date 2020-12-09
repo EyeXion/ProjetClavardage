@@ -33,6 +33,8 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
      */
     private PseudoStage pseudoWindow;
 
+    @FXML
+    private JFXButton disconnectButton;
 
     /**
      * constructor. Gets the Model
@@ -81,5 +83,10 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
                 });
                 break;
         }
+    }
+
+    @FXML
+    void disconnectButtonHandler(ActionEvent event) {
+        model.sendDeconnectionMessage();
     }
 }

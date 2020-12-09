@@ -25,6 +25,7 @@ public class ChatStage extends Stage {
             this.setMaxHeight(450);
             this.setMaxWidth(550);
             this.show();
+            ctrl.setHandler();
         } catch (IOException e) {
             e.printStackTrace();
         }

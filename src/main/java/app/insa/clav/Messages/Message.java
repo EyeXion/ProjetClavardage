@@ -12,6 +12,8 @@ import java.net.InetAddress;
     4 ---> Messages.MessagePseudo si après type 1 aucun type 2 pour un delai, envoi confirmation pseudo
     5 ---> Message Init envoyé quand on se connecte en TCP à un user distant
     6 ---> MessageChatTxt pour le chat
+    7 ---> Message.MessagePseudo de deconnexion
+    8 ---> Message fermeture fenetre chat
  */
 
 /**

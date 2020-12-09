@@ -1,5 +1,6 @@
 package app.insa.clav.UIControllers;
 
+import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Core.Model;
 import app.insa.clav.Core.Utilisateurs;
 import com.jfoenix.controls.JFXDrawer;
@@ -11,6 +12,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -20,8 +22,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
+import javax.xml.crypto.Data;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -165,6 +170,12 @@ public class MainWindowController implements PropertyChangeListener, Initializab
 
     @FXML
     void openChat(ActionEvent event) {
-        model.createChatFromLocalRequest(userListView.getFocusModel().getFocusedItem());
+        String remotePseudo = userListView.getFocusModel().getFocusedItem();
+        int remoteId = model.getUserFromPseudo(remotePseudo).getId();
+        DataBaseAccess dbAccess = DataBaseAccess.getInstance();
+        if (!dbAccess.isTableCreated(model.user.getId(),remoteId)){
+            dbAccess.createChatTable(remoteId, model.user.getId());
+        }
+        model.createChatFromLocalRequest(remoteId, remotePseudo);
     }
 }

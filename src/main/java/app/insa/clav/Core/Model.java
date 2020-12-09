@@ -8,6 +8,8 @@ import app.insa.clav.Reseau.TCPChatConnection;
 import app.insa.clav.Reseau.TCPListener;
 import app.insa.clav.Reseau.UDPInput;
 import app.insa.clav.Reseau.UDPOutput;
+import javafx.application.Application;
+import javafx.application.Platform;
 import jdk.jshell.execution.Util;
 
 import java.beans.PropertyChangeEvent;
@@ -75,6 +77,8 @@ public class Model implements PropertyChangeListener{
 
     private DataBaseAccess dbAccess;
 
+    private Application app;
+
 
     /**
      * Constructeur
@@ -90,7 +94,7 @@ ID 1 -> Listening on 6000, sending on 5000, tcpServer on 7000
 ID 2 -> Listening on 6001, sending on 5001, tcpServer on 7001
 ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
 */
-    private Model(int inputPort, int outputPort, int tcpListenerPort){
+    private Model(int inputPort, int outputPort, int tcpListenerPort, Application app){
         try {
             this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0, inputPort);
             this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), outputPort);
@@ -106,6 +110,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         this.userList = new ArrayList<Utilisateurs>();
         this.listTCPConnection = new ArrayList<TCPChatConnection>();
         this.dbAccess = DataBaseAccess.getInstance();
+        this.app = app;
     }
 
     /**
@@ -118,10 +123,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      * @return
      *         instance of Model
      */
-    public static Model getInstance(int inputPort, int outputPort, int tcpListenerPort){
+    public static Model getInstance(int inputPort, int outputPort, int tcpListenerPort, Application app){
         synchronized(Model.class){
             if (instance == null) {
-                instance = new Model(inputPort, outputPort,tcpListenerPort);
+                instance = new Model(inputPort, outputPort,tcpListenerPort, app);
             }
         }
         return instance;
@@ -245,8 +250,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     }
 
 
-    public void createChatFromLocalRequest(String remotePseudo){
-        int remoteId = this.getUserFromPseudo(remotePseudo).getId();
+    public void createChatFromLocalRequest(int remoteId, String remotePseudo){
         boolean isChatAlreadyCreated = false;
         for (TCPChatConnection tcpCo : listTCPConnection){
             if (tcpCo.remoteUserId == remoteId){
@@ -382,6 +386,44 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         return res;
     }
 
+    public void sendDeconnectionMessage() {
+        try {
+            if (user.getId() == 1 || user.getId() == 2) {
+                MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
+                UDPOut.sendMsg(msg);
+            }
+            if (user.getId() == 2 || user.getId() == 3) {
+                MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6000, this.user.getPseudo(),this.user.getId());
+                UDPOut.sendMsg(msg);
+            }
+            if (user.getId() == 1 || user.getId() == 3) {
+                MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6001,this.user.getPseudo(),this.user.getId());
+                UDPOut.sendMsg(msg);
+            }
+        }
+        catch (UnknownHostException e){
+            System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
+            e.printStackTrace();
+        }
+        try {
+            this.app.stop();
+            Platform.exit();
+            System.exit(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void notifyCloseChat(TCPChatConnection tcpCo) {
+        this.listTCPConnection.remove(tcpCo);
+        Socket link = tcpCo.getSocket();
+        tcpCo.interrupt();
+        try {
+            link.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     /**

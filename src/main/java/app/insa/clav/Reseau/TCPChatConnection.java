@@ -1,4 +1,5 @@
 package app.insa.clav.Reseau;
+import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Messages.Message;
 import app.insa.clav.Messages.MessageChatTxt;
 import app.insa.clav.Messages.MessageInit;
@@ -30,6 +31,7 @@ public class TCPChatConnection extends Thread{
     PropertyChangeSupport support;
 
     public int remoteUserId;
+    public boolean exit = false;
 
 
     /**
@@ -71,6 +73,8 @@ public class TCPChatConnection extends Thread{
 
     public void addPropertyChangeListener(PropertyChangeListener pcl){
         this.support.addPropertyChangeListener("messageTextReceivedTCP",pcl);
+        this.support.addPropertyChangeListener("connectionChatClosed",pcl);
+
     }
 
 
@@ -85,7 +89,7 @@ public class TCPChatConnection extends Thread{
 
     @Override
     public void run() {
-        while (true){
+        while (!exit){
             Message msgReceived = null;
             try {
                 msgReceived = (Message) this.objectInStream.readObject();
@@ -94,8 +98,20 @@ public class TCPChatConnection extends Thread{
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            this.msgReceivedBuffer.add(msgReceived);
-            this.support.firePropertyChange("messageTextReceivedTCP",true,false);
+            if (msgReceived.typeMessage == 8){
+                this.support.firePropertyChange("connectionChatClosed",true,false);
+                try {
+                    synchronized (this){
+                        this.wait();
+                    }
+                } catch (InterruptedException e) {
+                    exit = true;
+                }
+            }
+            else {
+                this.msgReceivedBuffer.add(msgReceived);
+                this.support.firePropertyChange("messageTextReceivedTCP", true, false);
+            }
         }
     }
 
@@ -106,5 +122,18 @@ public class TCPChatConnection extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendCloseChat() {
+        Message msg = new Message(8,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort());
+        try {
+            this.objectOutStream.writeObject(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Socket getSocket() {
+        return link;
     }
 }

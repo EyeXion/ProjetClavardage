@@ -1,7 +1,9 @@
 package app.insa.clav.UIControllers;
 
+import app.insa.clav.Core.Model;
 import javafx.animation.FadeTransition;
 import javafx.animation.RotateTransition;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -10,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -91,6 +94,12 @@ public class SplashScreenController implements Initializable {
         fadeIn.setOnFinished((e) -> {
             fadeOut.play();
             this.mainStage = (Stage) rootSplash.getScene().getWindow();
+            mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent t) {
+                    Model.getInstance().sendDeconnectionMessage();
+                }
+            });
             this.fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/connectionScreen.fxml"));
             try {
                 this.rootMainScreen = fxmlLoader.load();

@@ -127,6 +127,31 @@ public class DataBaseAccess {
         return id;
     }
 
+    public boolean isTableCreated(int id1, int id2){
+        int idGrand;
+        int idPetit;
+        boolean res = true;
+        if (id1 > id2) {
+            idGrand = id1;
+            idPetit = id2;
+        } else {
+            idGrand = id2;
+            idPetit = id1;
+        }
+        String nomTable = "Chat" + idPetit + "_" + idGrand;
+        String preparedQuery = "SELECT * FROM " + nomTable;
+        PreparedStatement prSt = null;
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            ResultSet rs = prSt.executeQuery();
+        } catch (SQLException throwables) {
+            res = false;
+            throwables.printStackTrace();
+        }
+        System.out.println(res);
+        return res;
+    }
+
     public ArrayList<MessageHistoryList> getMessageHistory(int id1, int id2) {
         ArrayList<MessageHistoryList> history = new ArrayList<MessageHistoryList>();
         int idPetit;
@@ -174,6 +199,34 @@ public class DataBaseAccess {
             prSt = con.prepareStatement(preparedQuery);
             prSt.setInt(1,idLocal);
             prSt.setString(2,payload);
+            prSt.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public void createChatTable(int id1, int id2){
+        int idPetit;
+        int idGrand;
+        if (id1 > id2) {
+            idGrand = id1;
+            idPetit = id2;
+        } else {
+            idGrand = id2;
+            idPetit = id1;
+        }
+        String nomTable = "Chat" + idPetit + "_" + idGrand;
+        String preparedQuery = "CREATE TABLE `" +  nomTable +"` (\n" + "`id` int NOT NULL,\n" + "  `sourceId` int NOT NULL,\n" +  "  `date` timestamp NOT NULL,\n" +  "  `payload` mediumtext NOT NULL\n" +  ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
+        PreparedStatement prSt = null;
+        System.out.println(preparedQuery);
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.executeUpdate();
+            preparedQuery = "\nALTER TABLE `"+ nomTable + "`\n" + "  ADD PRIMARY KEY (`id`);";
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.executeUpdate();
+            preparedQuery = "\nALTER TABLE `" + nomTable + "`\n" + "  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;";
+            prSt = con.prepareStatement(preparedQuery);
             prSt.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
