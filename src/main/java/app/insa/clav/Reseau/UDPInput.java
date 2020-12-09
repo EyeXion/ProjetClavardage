@@ -48,11 +48,12 @@ public class UDPInput extends Thread{
     public UDPInput(InetAddress localAddress, int localPort){
         try {
             this.socket = new DatagramSocket(localPort,localAddress);
-            this.filter = new boolean[5];
-            this.filter[1] = true;
+            this.filter = new boolean[8];
+            this.filter[1] = false;
             this.filter[2] = false;
             this.filter[3] = false;
             this.filter[4] = true;
+            this.filter[7] = true;
             this.socket.setBroadcast(true);
             this.msgReceivedBuffer = new ArrayList<Message>();
             this.support = new PropertyChangeSupport(this);

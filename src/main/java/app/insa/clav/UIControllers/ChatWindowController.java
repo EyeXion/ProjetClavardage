@@ -90,7 +90,7 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                 Platform.runLater(() -> this.listMessages.add(payload));
                 break;
             case "connectionChatClosed":
-                tcpCo.sendCloseChat();
+            case "userDisconnected" :
                 model.notifyCloseChat(tcpCo);
                 Stage mainStage = (Stage) rootAnchor.getScene().getWindow();
                 Platform.runLater(mainStage::close);

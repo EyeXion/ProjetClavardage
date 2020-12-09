@@ -292,6 +292,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 TCPChatConnection tcpCo = this.tcpListener.getTCPChatConnection();
                 tcpCo.addPropertyChangeListener(this);
                 this.listTCPConnection.add(tcpCo);
+                break;
         }
     }
 
@@ -335,6 +336,11 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 Collections.sort(this.userList);
                 this.support.firePropertyChange("newUserConnected",true,false);
                 break;
+            case 7 :
+                MessagePseudo msgP7 = (MessagePseudo) msg;
+                Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id,msgP7.srcResponsePort);
+                this.userList.remove(User7);
+                this.support.firePropertyChange("newUserConnected",true,false);
             default :
                 System.out.println("Message de type inconnu");
         }
@@ -417,7 +423,6 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     public void notifyCloseChat(TCPChatConnection tcpCo) {
         this.listTCPConnection.remove(tcpCo);
         Socket link = tcpCo.getSocket();
-        tcpCo.interrupt();
         try {
             link.close();
         } catch (IOException e) {
@@ -446,6 +451,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
             if (isPseudoOk){
                 //envoi message de type 4 pour confirmer.
                 support.firePropertyChange("pseudoValide",ancienPseudo,user.getPseudo());
+                UDPIn.setFilterValue(1,true);
                 if (isConfirmationNeeded){
                     sendPseudoValideBroadcast();
                 }

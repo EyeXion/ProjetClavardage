@@ -1,5 +1,4 @@
 package app.insa.clav.Reseau;
-import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Messages.Message;
 import app.insa.clav.Messages.MessageChatTxt;
 import app.insa.clav.Messages.MessageInit;
@@ -11,7 +10,6 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -31,8 +29,6 @@ public class TCPChatConnection extends Thread{
     PropertyChangeSupport support;
 
     public int remoteUserId;
-    public boolean exit = false;
-
 
     /**
      * Constructeur utilisé quand l'utilisateur distant inititie la connexion
@@ -74,6 +70,7 @@ public class TCPChatConnection extends Thread{
     public void addPropertyChangeListener(PropertyChangeListener pcl){
         this.support.addPropertyChangeListener("messageTextReceivedTCP",pcl);
         this.support.addPropertyChangeListener("connectionChatClosed",pcl);
+        this.support.addPropertyChangeListener("userDisconnected",pcl);
 
     }
 
@@ -89,24 +86,19 @@ public class TCPChatConnection extends Thread{
 
     @Override
     public void run() {
-        while (!exit){
+        while (true){
             Message msgReceived = null;
             try {
                 msgReceived = (Message) this.objectInStream.readObject();
             } catch (IOException e) {
-                e.printStackTrace();
+                this.support.firePropertyChange("userDisconnected",true,false);
+                break;
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
             if (msgReceived.typeMessage == 8){
                 this.support.firePropertyChange("connectionChatClosed",true,false);
-                try {
-                    synchronized (this){
-                        this.wait();
-                    }
-                } catch (InterruptedException e) {
-                    exit = true;
-                }
+                break;
             }
             else {
                 this.msgReceivedBuffer.add(msgReceived);
