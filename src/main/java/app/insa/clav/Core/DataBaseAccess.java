@@ -232,5 +232,18 @@ public class DataBaseAccess {
             throwables.printStackTrace();
         }
     }
+
+    public void updatePseudo(int id, String pseudo){
+        String preparedQuery = "UPDATE `Utilisateurs` SET `pseudo`=? WHERE id=?";
+        PreparedStatement prSt = null;
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.setString(1, pseudo);
+            prSt.setInt(2,id);
+            prSt.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
 }
 

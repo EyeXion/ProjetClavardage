@@ -70,11 +70,14 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     private boolean isSubmittingIn;
 
     private boolean isSubmittingUp;
+    private boolean isSubmittingNewPseudoIn;
 
     private DataBaseAccess dbAccess;
 
     private String loginUp;
     private String pseudoUp;
+    private String pseudoIn;
+
 
 
 
@@ -85,6 +88,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
         this.model.addPropertyChangeListener(this,"pseudoValide");
         isSubmittingIn = false;
         isSubmittingUp = false;
+        isSubmittingNewPseudoIn = false;
     }
 
 
@@ -139,8 +143,13 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){
             case "pseudoValide" :
+                System.out.println("Pseudo valide");
                 if (isSubmittingUp){
                     this.pseudoValideUp();
+                }
+                if (this.isSubmittingNewPseudoIn){
+                    System.out.println("Update pseudo with " + this.model.user.getPseudo());
+                    this.dbAccess.updatePseudo(this.model.user.getId(),this.pseudoIn);
                 }
                 this.isSubmittingUp = false;
                 this.isSubmittingIn = false;
@@ -162,13 +171,22 @@ public class ConnectionScreenController implements Initializable, PropertyChange
             case "pseudoRefused" :
                 if (this.isSubmittingIn) {
                     this.isSubmittingIn = false;
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            errorLabelIn.setVisible(true);
-                            spinnerIn.setVisible(false);
-                        }
-                    });
+                    if (this.isSubmittingNewPseudoIn || this.pseudoInputIn.getText().equals("")) {
+                        this.isSubmittingNewPseudoIn = false;
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                errorLabelIn.setVisible(true);
+                                spinnerIn.setVisible(false);
+                            }
+                        });
+                    }
+                    else{
+                        this.pseudoIn = this.pseudoInputIn.getText();
+                        this.isSubmittingNewPseudoIn = true;
+                        System.out.println("Pseudo refused, trying new " + this.pseudoIn);
+                        this.model.choosePseudo(this.pseudoIn,true);
+                    }
                 }else if (this.isSubmittingUp){
                     this.isSubmittingUp = false;
                     Platform.runLater(new Runnable() {

@@ -185,6 +185,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      * Envoi un messagePseudo de type 1 aux 3 machines de test
      */
     public void sendPseudoBroadcast(){
+        System.out.println("Send pseudo broadcast with" + this.user.getPseudo());
         try {
             if (user.getId() == 1 || user.getId() == 2) {
                 MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
@@ -209,6 +210,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      * Envoi message de type 4 (confirmation pseudo)
      */
     public void sendPseudoValideBroadcast(){
+        System.out.println("Send pseudo Valide broadcast with" + this.user.getPseudo());
         try {
             if (user.getId() == 1 || user.getId() == 2) {
                 MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
@@ -317,6 +319,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 }
                 break;
             case 3 :
+                System.out.println("Received message type 3");
                 MessagePseudo msgP3 = (MessagePseudo) msg;
                 Utilisateurs newUser3 = new Utilisateurs(msgP3.pseudo,msgP3.srcIP,msgP3.id,msgP3.srcResponsePort);
                 if (!this.userList.contains(newUser3)) {
@@ -325,8 +328,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                     this.support.firePropertyChange("newUserConnected",true,false);
                 }
                 this.isPseudoOk = false;
-                this.support.firePropertyChange("pseudoRefused",this.user.getPseudo(),this.ancienPseudo);
                 this.user.setPseudo(this.ancienPseudo);
+                this.ancienPseudo = "";
+                this.support.firePropertyChange("pseudoRefused",this.user.getPseudo(),this.ancienPseudo);
+                System.out.println("After pseudo refused");
                 break;
             case 4:
                 MessagePseudo msgP4 = (MessagePseudo) msg;
@@ -447,7 +452,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
          */
         public void run() {
             UDPIn.setFilterValue(2, false);
-            UDPIn.setFilterValue(2, false);
+            UDPIn.setFilterValue(3, false);
             if (isPseudoOk){
                 //envoi message de type 4 pour confirmer.
                 support.firePropertyChange("pseudoValide",ancienPseudo,user.getPseudo());
