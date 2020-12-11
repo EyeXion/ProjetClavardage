@@ -1,5 +1,6 @@
 package app.insa.clav.UIControllers;
 
+import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Core.Model;
 import app.insa.clav.UISubStages.PseudoStage;
 import com.jfoenix.controls.JFXButton;
@@ -75,6 +76,7 @@ public class MainDrawerController implements PropertyChangeListener,Initializabl
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){
             case "pseudoValide" :
+                DataBaseAccess.getInstance().updatePseudo(this.model.user.getId(),this.model.user.getPseudo());
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
