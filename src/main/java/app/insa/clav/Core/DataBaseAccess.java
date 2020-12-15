@@ -19,7 +19,7 @@ public class DataBaseAccess {
             e.printStackTrace();
         }
         try {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/testDBChat?useSSL=false", "root", "0000");
+            con = DriverManager.getConnection("jdbc:mysql://srv-bdens.insa-toulouse.fr:3306/tp_servlet_013?useSSL=false", "tp_servlet_013", "eiN3ahng");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
