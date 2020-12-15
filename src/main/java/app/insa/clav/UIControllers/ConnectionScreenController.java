@@ -143,6 +143,8 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){
             case "pseudoValide" :
+                this.model.deletePropertyChangeListener(this,"pseudoValide");
+                this.model.deletePropertyChangeListener(this,"pseudoRefused");
                 System.out.println("Pseudo valide");
                 if (isSubmittingUp){
                     this.pseudoValideUp();

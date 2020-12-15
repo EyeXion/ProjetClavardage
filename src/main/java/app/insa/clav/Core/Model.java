@@ -181,6 +181,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         this.support.addPropertyChangeListener(propertyName, pcl);
     }
 
+    public void deletePropertyChangeListener(PropertyChangeListener pcl, String propertyName){
+        this.support.removePropertyChangeListener(propertyName,pcl);
+    }
+
     /**
      * Envoi un messagePseudo de type 1 aux 3 machines de test
      */
