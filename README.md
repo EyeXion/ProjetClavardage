@@ -26,21 +26,26 @@ Notre conception est pour le moment pas très bonne car nous avions mal compris 
 - Client TCP (reprendre les TD).
 - Fix le bug quand on ouvre 2 fenêtres de changement de pseudo (mettre un flag pour pouvoir en ouvrir qu'une seule)
 - Design fenêtre de clavardage (draft)
+- Envoyer les messages dans la BDD
+- Horadater les messages
+- Serveur distant utilisateurs extérieurs (demander au prof)
+- Handler fermetures des fenêtres
+- Bouton déconnexion
+- Concevoir archi BDD pour les messages
 
 ###A faire
 
-- Quand on reçoit un messagPseudo de type 1, on vérifie toute la table des utilisateurs connectés. (maybe?)
 - Envoyer à intervalle régulier des messages qui disent qu'on est bien connecté
-- Envoyer les messages dans la BDD
-- Horadater les messages
 - Tester le broadcast
-- Concevoir archi BDD pour les messages
-- Handler fermetures des fenêtres
-- Bouton déconnexion
 - Effacer un utilisateur
 - Mots de passe
-- Serveur distant utilisateurs extérieurs (demander au prof)
 - Design UI
+
+###A faire si tenemos el tiempo y no cagna
+
+- Vérifier la liste des users connectés quand on reçoit un msg de type 1 (au lieu de juste comparer avec son propre pseudo)
+- Envoi fichiers texte/images
+- Envoi audio ?
 
 
 ###Technos
