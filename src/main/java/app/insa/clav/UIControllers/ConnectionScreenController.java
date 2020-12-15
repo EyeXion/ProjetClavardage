@@ -28,48 +28,93 @@ import java.util.stream.Collectors;
 public class ConnectionScreenController implements Initializable, PropertyChangeListener {
 
 
+    /**
+     * Text input login for sign in
+     */
     @FXML
     private TextField loginInputIn;
 
+    /**
+     * Text input pseudo for sign in
+     */
     @FXML
     private TextField pseudoInputIn;
 
+    /**
+     * Sign in button
+     */
     @FXML
     private JFXButton signInButton;
 
+    /**
+     * Text input login for sign up
+     */
     @FXML
     private TextField loginInputUp;
 
+    /**
+     * Text input pseudo for sign in
+     */
     @FXML
     private TextField pseudoInputUp;
 
+    /**
+     * Sign up Button
+     */
     @FXML
     private JFXButton signUpButton;
 
+    /**
+     * Spinner Sign in
+     */
     @FXML
     private ProgressIndicator spinnerIn;
 
+    /**
+     * Spinner Sign Up
+     */
     @FXML
     private ProgressIndicator spinnerUp;
 
+    /**
+     * Error text displayed when pseudo already used sign in
+     */
     @FXML
     private Label errorLabelIn;
 
+    /**
+     * Error text displayed when pseudo already used sign up
+     */
     @FXML
     private Label errorLabelUp;
 
+    /**
+     * Error text displayed when login wrong sign in
+     */
     @FXML
     private Label labelErrorInLogin;
 
+    /**
+     * Error text displayed when login wrong sign up
+     */
     @FXML
     private Label labelErrorUpLogin;
 
     @FXML
     private Model model;
 
+    /**
+     * True if trying to sign in
+     */
     private boolean isSubmittingIn;
 
+    /**
+     * True if trying to sign up
+     */
     private boolean isSubmittingUp;
+    /**
+     * True if pseudo in DB already used when sign in and trying new one
+     */
     private boolean isSubmittingNewPseudoIn;
 
     private DataBaseAccess dbAccess;
@@ -96,13 +141,16 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     public void initialize(URL location, ResourceBundle resources) {
     }
 
+    /**Called when button Sign In pushed
+     * @param event
+     */
     @FXML
     void submitConnection(ActionEvent event) {
         String login = this.loginInputIn.getText();
         if (!login.equals("") && !this.isSubmittingIn && !this.isSubmittingUp) {
             this.isSubmittingIn = true;
             this.spinnerIn.setVisible(true);
-            if (this.dbAccess.LoginExist(login)) {
+            if (this.dbAccess.isLoginUsed(login)) {
                 String pseudo = this.dbAccess.getPseudoFromLogin(login);
                 int id = this.dbAccess.getIdFromLogin(login);
                 this.model.setUserId(id);
@@ -113,6 +161,9 @@ public class ConnectionScreenController implements Initializable, PropertyChange
         }
     }
 
+    /**Called when Butto sign in pushed
+     * @param event
+     */
     @FXML
     void submitSignUp(ActionEvent event) {
         this.loginUp = this.loginInputUp.getText();
@@ -133,12 +184,19 @@ public class ConnectionScreenController implements Initializable, PropertyChange
         }
     }
 
+    /**
+     * Called when signing up and pseudo valid, used to update DB ad send pseudo Confirmation
+     */
     private void pseudoValideUp(){
         this.model.setUserId(this.dbAccess.addUtilisateur(this.loginUp,this.pseudoUp));
         this.model.sendPseudoValideBroadcast();
     }
 
 
+    /**
+     * Handler of notifications sent by te model
+     * @param evt
+     */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){

@@ -13,6 +13,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+/**
+ * TCPListeer that created TCPChatConnection on remote request
+ */
 public class TCPListener extends Thread{
 
 
@@ -23,6 +26,9 @@ public class TCPListener extends Thread{
 
     private PropertyChangeSupport support;
 
+    /**
+     * Buffer where the TCPChatConnecition are stored for the model.
+     */
     private ArrayList<TCPChatConnection> bufferTCPConnection;
 
     public TCPListener(InetAddress inetAddress, int tcpListenerPort,int localId){

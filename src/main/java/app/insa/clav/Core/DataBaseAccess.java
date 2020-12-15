@@ -8,8 +8,14 @@ import java.util.ArrayList;
 
 public class DataBaseAccess {
 
+    /**
+     * Instance of the singleton class
+     */
     private static DataBaseAccess instance = null;
 
+    /**
+     * Used to connect to the DB
+     */
     public Connection con;
 
     private DataBaseAccess() {
@@ -25,6 +31,9 @@ public class DataBaseAccess {
         }
     }
 
+    /** Used to get Instance/Create Instance of DBAccess if necessary
+     * @return Singleton Instance of DB
+     */
     public static DataBaseAccess getInstance() {
         synchronized (DataBaseAccess.class) {
             DataBaseAccess res = instance;
@@ -35,6 +44,11 @@ public class DataBaseAccess {
         }
     }
 
+    /**
+     * Returns the pseudo of the user that has the login in parameters
+     * @param login login of the user
+     * @return pseudo of the user
+     */
     public String getPseudoFromLogin(String login) {
         String pseudo = null;
         String preparedQuery = "SELECT * FROM Utilisateurs WHERE login=?";
@@ -53,6 +67,11 @@ public class DataBaseAccess {
         return pseudo;
     }
 
+    /**
+     * Checks if a user with the login is already created or not
+     * @param login login of user
+     * @return true if already exists, else false
+     */
     public boolean isLoginUsed(String login) {
         String loginAux = null;
         String preparedQuery = "SELECT * FROM Utilisateurs WHERE login=?";
@@ -71,20 +90,10 @@ public class DataBaseAccess {
         return loginAux == null;
     }
 
-    public boolean LoginExist(String login) {
-        String Query = "SELECT * FROM Utilisateurs WHERE login = '" + login + "'";
-        System.out.println(Query);
-        boolean Ok = false;
-        try {
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(Query);
-            Ok = rs.next();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return Ok;
-    }
-
+    /** Gets id of user identified by the login
+     * @param login
+     * @return id of user
+     */
     public int getIdFromLogin(String login) {
         String Query = "SELECT id FROM Utilisateurs WHERE login = '" + login + "'";
         int id = -1;
@@ -100,6 +109,11 @@ public class DataBaseAccess {
         return id;
     }
 
+    /**Add an user to the DB
+     * @param login login of user
+     * @param pseudo pseudo of user
+     * @return if of user
+     */
     public int addUtilisateur(String login, String pseudo) {
         String loginAux = null;
         String preparedQuery = "INSERT INTO Utilisateurs (`login`, `pseudo`,`password`) VALUES (?,?,'pouet')";
@@ -127,6 +141,11 @@ public class DataBaseAccess {
         return id;
     }
 
+    /** Checks if the Message table between 2 users id1 and id2 exists
+     * @param id1
+     * @param id2
+     * @return true if table exists, else false
+     */
     public boolean isTableCreated(int id1, int id2){
         int idGrand;
         int idPetit;
@@ -152,6 +171,11 @@ public class DataBaseAccess {
         return res;
     }
 
+    /** Gets the message history between id1 and id2
+     * @param id1
+     * @param id2
+     * @return list of MessageHistoryList
+     */
     public ArrayList<MessageHistoryList> getMessageHistory(int id1, int id2) {
         ArrayList<MessageHistoryList> history = new ArrayList<MessageHistoryList>();
         int idPetit;
@@ -182,6 +206,11 @@ public class DataBaseAccess {
         return history;
     }
 
+    /** Ajoute un message à la DB envoyé par l'user local à l'user remote
+     * @param idLocal
+     * @param idRemote
+     * @param payload
+     */
     public void addMessage(int idLocal, int idRemote, String payload){
         int idPetit;
         int idGrand;
@@ -205,6 +234,10 @@ public class DataBaseAccess {
         }
     }
 
+    /** Create a message Table between id1 and id2
+     * @param id1
+     * @param id2
+     */
     public void createChatTable(int id1, int id2){
         int idPetit;
         int idGrand;
@@ -233,6 +266,10 @@ public class DataBaseAccess {
         }
     }
 
+    /** Updates the pseudo of the user in the DB
+     * @param id
+     * @param pseudo
+     */
     public void updatePseudo(int id, String pseudo){
         String preparedQuery = "UPDATE `Utilisateurs` SET `pseudo`=? WHERE id=?";
         PreparedStatement prSt = null;

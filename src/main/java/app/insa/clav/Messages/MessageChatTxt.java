@@ -3,6 +3,9 @@ package app.insa.clav.Messages;
 import java.net.InetAddress;
 
 
+/**
+ * Messages texte dans un chat
+ */
 //Message de type 6
 public class MessageChatTxt extends Message{
 

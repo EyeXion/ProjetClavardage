@@ -1,5 +1,8 @@
 package app.insa.clav.Messages;
 
+/**
+ * Element of the list that contains the history of messages returned by the DB
+ */
 public class MessageHistoryList {
 
     private int sourceId;

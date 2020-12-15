@@ -13,6 +13,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
+/**
+ * Manager of the connection for a what room.
+ */
 public class TCPChatConnection extends Thread{
 
 
@@ -116,6 +119,9 @@ public class TCPChatConnection extends Thread{
         }
     }
 
+    /**
+     * When receiving a type 8 message, closed the chat connection
+     */
     public void sendCloseChat() {
         Message msg = new Message(8,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort());
         try {

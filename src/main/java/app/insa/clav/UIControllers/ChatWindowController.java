@@ -62,6 +62,9 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         this.localUserId = model.user.getId();
     }
 
+    /**
+     * Returns the message history and puts it in the ListView
+     */
     private void getHistory(){
         this.dbAccess = DataBaseAccess.getInstance();
         ArrayList<MessageHistoryList> history = this.dbAccess.getMessageHistory(this.localUserId,remoteUser.getId());
@@ -73,6 +76,9 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         this.messageList.setItems(this.listMessages);
     }
 
+    /** Sets the TcpCo attribute and adds propertyChangeListener for the TCPChatConnection
+     * @param tcpCo
+     */
     public void setTCPCo(TCPChatConnection tcpCo){
         this.tcpCo = tcpCo;
         tcpCo.addPropertyChangeListener(this);
@@ -98,6 +104,9 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         }
     }
 
+    /** Handler to send message
+     * @param actionEvent
+     */
     public void buttonSendMessageClicked(ActionEvent actionEvent) {
         String payload = model.user.getPseudo() + " : " + this.messageInput.getText();
         this.listMessages.add(payload);
@@ -106,6 +115,9 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),payload);
     }
 
+    /**
+     * Sets handler chen Window closed
+     */
     public void setHandler() {
         Stage mainStage = (Stage) rootAnchor.getScene().getWindow();
         mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {

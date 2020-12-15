@@ -71,12 +71,21 @@ public class Model implements PropertyChangeListener{
     private boolean isPseudoOk = true;
 
 
+    /**
+     * List of all TCPChatConnextions that are used
+     */
     private ArrayList<TCPChatConnection> listTCPConnection;
 
+    /**
+     * Instance of TCPListener to listen for chat oppening demands
+     */
     private TCPListener tcpListener;
 
     private DataBaseAccess dbAccess;
 
+    /**
+     * Instance of the Main JavaFx Application
+     */
     private Application app;
 
 
@@ -251,11 +260,18 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         return true;
     }
 
+    /** Sets the id
+     * @param id
+     */
     public void setUserId(int id){
         this.user.setId(id);
     }
 
 
+    /** Creates a Chat Room and TCPConnection between remote id and local id when local user initiates it
+     * @param remoteId
+     * @param remotePseudo
+     */
     public void createChatFromLocalRequest(int remoteId, String remotePseudo){
         boolean isChatAlreadyCreated = false;
         for (TCPChatConnection tcpCo : listTCPConnection){
@@ -378,6 +394,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         return userList;
     }
 
+    /** returns connected the user identified by the id
+     * @param id
+     * @return User identified by id
+     */
     public Utilisateurs getUserFromId(int id){
         Utilisateurs res = null;
         for (Utilisateurs u : userList){
@@ -390,6 +410,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     }
 
 
+    /** Returns connected user identified by pseudo
+     * @param pseudo
+     * @return User identified by pseudo
+     */
     public Utilisateurs getUserFromPseudo(String pseudo){
         Utilisateurs res = null;
         for (Utilisateurs u : userList){
@@ -401,6 +425,9 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         return res;
     }
 
+    /**
+     * Sends a deconnection Messages (type 7) in broadcast
+     */
     public void sendDeconnectionMessage() {
         try {
             if (user.getId() == 1 || user.getId() == 2) {
@@ -429,6 +456,9 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         }
     }
 
+    /** Closes the Chat Connection when asked
+     * @param tcpCo
+     */
     public void notifyCloseChat(TCPChatConnection tcpCo) {
         this.listTCPConnection.remove(tcpCo);
         Socket link = tcpCo.getSocket();
@@ -447,6 +477,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     class TimerTaskResponseWait extends TimerTask {
 
         boolean isConfirmationNeeded;
+
+        /**
+         * @param isConfirmationNeeded if true, will send type 4 messages in broadcast else does not send
+         */
         public TimerTaskResponseWait(boolean isConfirmationNeeded) {
             this.isConfirmationNeeded = isConfirmationNeeded;
         }
