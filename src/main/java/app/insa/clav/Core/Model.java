@@ -335,7 +335,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 if (!this.userList.contains(newUser2)) {
                     this.userList.add(newUser2);
                     Collections.sort(this.userList);
-                    this.support.firePropertyChange("newUserConnected",true,false);
+                    this.support.firePropertyChange("newUserConnected",-1,-2);
                 }
                 break;
             case 3 :
@@ -345,7 +345,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 if (!this.userList.contains(newUser3)) {
                     this.userList.add(newUser3);
                     Collections.sort(this.userList);
-                    this.support.firePropertyChange("newUserConnected",true,false);
+                    this.support.firePropertyChange("newUserConnected",-1,-2);
                 }
                 this.isPseudoOk = false;
                 this.user.setPseudo(this.ancienPseudo);
@@ -359,7 +359,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 this.userList.remove(newUser4);
                 this.userList.add(newUser4);
                 Collections.sort(this.userList);
-                this.support.firePropertyChange("newUserConnected",true,false);
+                this.support.firePropertyChange("newUserConnected",-1,newUser4.getId());
                 break;
             case 7 :
                 MessagePseudo msgP7 = (MessagePseudo) msg;

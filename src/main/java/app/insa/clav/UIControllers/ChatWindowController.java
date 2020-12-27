@@ -78,6 +78,7 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
 
     public ChatWindowController(){
         this.model = Model.getInstance();
+        model.addPropertyChangeListener(this,"newUserConnected");
     }
 
     @Override
@@ -100,6 +101,7 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                         setContentDisplay(ContentDisplay.RIGHT);
                         setAlignment(Pos.CENTER_RIGHT);
                         setTextAlignment(TextAlignment.RIGHT);
+                        setPadding(new Insets(0,0,0,param.getWidth()*0.3));
                     }
                     else{
                         ImageView img = new ImageView();
@@ -108,11 +110,10 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                         setContentDisplay(ContentDisplay.LEFT);
                         setAlignment(Pos.CENTER_LEFT);
                         setTextAlignment(TextAlignment.LEFT);
+                        setPadding(new Insets(0,param.getWidth()*0.3,0,0));
                     }
-                    // set the width's
-                    setMinWidth(param.getWidth()*0.5);
-                    setMaxWidth(param.getWidth()*0.5);
-                    setPrefWidth(param.getWidth()*0.5);
+                    setMaxWidth(param.getPrefWidth()*0.9);
+                    setPrefWidth(param.getPrefWidth()*0.9);
                     // allow wrapping
                     setWrapText(true);
                     setText(item.getPayload());
@@ -134,6 +135,8 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
             public void run() {
                 int size = messageList.getItems().size();
                 messageList.scrollTo(size - 1);
+                Stage chatStage = (Stage) rootAnchor.getScene().getWindow();
+                chatStage.setTitle("Chat room with " + remoteUser.getPseudo());
             }
         });
     }
@@ -170,6 +173,17 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                 Stage mainStage = (Stage) rootAnchor.getScene().getWindow();
                 Platform.runLater(mainStage::close);
                 break;
+            case "newUserConnected" :
+                if ((int) evt.getNewValue() == remoteUser.getId()) {
+                    this.remoteUser = model.getUserFromId(remoteUser.getId());
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            Stage chatStage = (Stage) rootAnchor.getScene().getWindow();
+                            chatStage.setTitle("Chat room with " + remoteUser.getPseudo());
+                        }
+                    });
+                }
         }
     }
 
