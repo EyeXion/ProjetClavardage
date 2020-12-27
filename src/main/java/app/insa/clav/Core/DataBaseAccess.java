@@ -1,7 +1,6 @@
 package app.insa.clav.Core;
 
-import app.insa.clav.Messages.Message;
-import app.insa.clav.Messages.MessageHistoryList;
+import app.insa.clav.Messages.MessageDisplay;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -25,7 +24,8 @@ public class DataBaseAccess {
             e.printStackTrace();
         }
         try {
-            con = DriverManager.getConnection("jdbc:mysql://srv-bdens.insa-toulouse.fr:3306/tp_servlet_013?useSSL=false", "tp_servlet_013", "eiN3ahng");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/testDBChat?useSSL=false", "root", "0000");
+            //con = DriverManager.getConnection("jdbc:mysql://srv-bdens.insa-toulouse.fr:3306/tp_servlet_013?useSSL=false", "tp_servlet_013", "eiN3ahng");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -87,7 +87,7 @@ public class DataBaseAccess {
             throwables.printStackTrace();
         }
         System.out.println("login Aux = " + loginAux);
-        return loginAux == null;
+        return !(loginAux == null);
     }
 
     /** Gets id of user identified by the login
@@ -174,10 +174,10 @@ public class DataBaseAccess {
     /** Gets the message history between id1 and id2
      * @param id1
      * @param id2
-     * @return list of MessageHistoryList
+     * @return list of MessageDisplay
      */
-    public ArrayList<MessageHistoryList> getMessageHistory(int id1, int id2) {
-        ArrayList<MessageHistoryList> history = new ArrayList<MessageHistoryList>();
+    public ArrayList<MessageDisplay> getMessageHistory(int id1, int id2) {
+        ArrayList<MessageDisplay> history = new ArrayList<MessageDisplay>();
         int idPetit;
         int idGrand;
         if (id1 > id2) {
@@ -194,9 +194,9 @@ public class DataBaseAccess {
             prSt = con.prepareStatement(preparedQuery);
             ResultSet rs = prSt.executeQuery();
             while (rs.next()){
-                MessageHistoryList msg = new MessageHistoryList();
+                MessageDisplay msg = new MessageDisplay();
                 msg.setSourceId(rs.getInt(2));
-                msg.setDate(rs.getTimestamp(3).toString());
+                msg.setDate(rs.getString(3));
                 msg.setPayload(rs.getString(4));
                 history.add(msg);
             }
@@ -209,9 +209,9 @@ public class DataBaseAccess {
     /** Ajoute un message à la DB envoyé par l'user local à l'user remote
      * @param idLocal
      * @param idRemote
-     * @param payload
+     * @param message
      */
-    public void addMessage(int idLocal, int idRemote, String payload){
+    public void addMessage(int idLocal, int idRemote, MessageDisplay message){
         int idPetit;
         int idGrand;
         if (idLocal > idRemote) {
@@ -222,12 +222,13 @@ public class DataBaseAccess {
             idPetit = idLocal;
         }
         String nomTable = "Chat" + idPetit + "_" + idGrand;
-        String preparedQuery = "INSERT INTO `" + nomTable + "`(`sourceId`, `date`, `payload`) VALUES (?,CURRENT_TIME,?)";
+        String preparedQuery = "INSERT INTO `" + nomTable + "`(`sourceId`, `date`, `payload`) VALUES (?,?,?)";
         PreparedStatement prSt = null;
         try {
             prSt = con.prepareStatement(preparedQuery);
-            prSt.setInt(1,idLocal);
-            prSt.setString(2,payload);
+            prSt.setInt(1,message.getSourceId());
+            prSt.setString(2,message.getDate());
+            prSt.setString(3,message.getPayload());
             prSt.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -249,7 +250,7 @@ public class DataBaseAccess {
             idPetit = id1;
         }
         String nomTable = "Chat" + idPetit + "_" + idGrand;
-        String preparedQuery = "CREATE TABLE `" +  nomTable +"` (\n" + "`id` int NOT NULL,\n" + "  `sourceId` int NOT NULL,\n" +  "  `date` timestamp NOT NULL,\n" +  "  `payload` mediumtext NOT NULL\n" +  ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
+        String preparedQuery = "CREATE TABLE `" +  nomTable +"` (\n" + "`id` int NOT NULL,\n" + "  `sourceId` int NOT NULL,\n" +  "  `date` varchar(30) NOT NULL,\n" +  "  `payload` mediumtext NOT NULL\n" +  ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
         PreparedStatement prSt = null;
         System.out.println(preparedQuery);
         try {

@@ -1,13 +1,20 @@
 package app.insa.clav.Messages;
-
 /**
  * Element of the list that contains the history of messages returned by the DB
  */
-public class MessageHistoryList {
+public class MessageDisplay {
 
     private int sourceId;
     private String date;
     private String payload;
+
+    public MessageDisplay(int sourceId, String date, String payload) {
+        this.sourceId = sourceId;
+        this.date = date;
+        this.payload = payload;
+    }
+
+    public MessageDisplay(){}
 
     public int getSourceId() {
         return sourceId;
@@ -33,3 +40,4 @@ public class MessageHistoryList {
         this.payload = payload;
     }
 }
+

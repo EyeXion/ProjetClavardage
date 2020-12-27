@@ -1,6 +1,7 @@
 package app.insa.clav.Reseau;
 import app.insa.clav.Messages.Message;
 import app.insa.clav.Messages.MessageChatTxt;
+import app.insa.clav.Messages.MessageDisplay;
 import app.insa.clav.Messages.MessageInit;
 import app.insa.clav.UISubStages.ChatStage;
 import javafx.application.Platform;
@@ -110,8 +111,8 @@ public class TCPChatConnection extends Thread{
         }
     }
 
-    public void sendMessageTxt(String payload){
-        MessageChatTxt msg = new MessageChatTxt(6,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),payload);
+    public void sendMessageTxt(MessageDisplay msgDisp){
+        MessageChatTxt msg = new MessageChatTxt(6,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate());
         try {
             this.objectOutStream.writeObject(msg);
         } catch (IOException e) {

@@ -4,7 +4,7 @@ import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Core.Model;
 import app.insa.clav.Core.Utilisateurs;
 import app.insa.clav.Messages.MessageChatTxt;
-import app.insa.clav.Messages.MessageHistoryList;
+import app.insa.clav.Messages.MessageDisplay;
 import app.insa.clav.Reseau.TCPChatConnection;
 import com.jfoenix.controls.JFXButton;
 import javafx.application.Platform;
@@ -14,16 +14,28 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.ResourceBundle;
 
 public class ChatWindowController implements Initializable, PropertyChangeListener {
@@ -38,7 +50,15 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
     private Utilisateurs remoteUser;
 
     @FXML
-    private ListView<String> messageList;
+    private ListView<MessageDisplay> messageList;
+
+
+    @FXML
+    private ContextMenu contextMenu;
+
+    @FXML
+    private MenuItem dateMsg;
+
 
     @FXML
     private TextField messageInput;
@@ -46,12 +66,15 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
     @FXML
     private JFXButton sendButton;
 
-    private ObservableList<String> listMessages;
+    private ObservableList<MessageDisplay> listMessages;
 
     private DataBaseAccess dbAccess;
 
     private int localUserId;
 
+    private Image imageSource;
+
+    private Image imageRemote;
 
     public ChatWindowController(){
         this.model = Model.getInstance();
@@ -60,6 +83,42 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.localUserId = model.user.getId();
+        this.imageSource = new Image(getClass().getResourceAsStream("/logos/pinkDot.png"));
+        this.imageRemote = new Image(getClass().getResourceAsStream("/logos/blueDot.png"));
+        messageList.setCellFactory(param -> new ListCell<MessageDisplay>(){
+            @Override
+            protected void updateItem(MessageDisplay item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item==null) {
+                    setText(null);
+                    // other stuff to do...
+                }else{
+                    if (item.getSourceId() == remoteUser.getId()){
+                        ImageView img = new ImageView();
+                        img.setImage(imageRemote);
+                        setGraphic(img);
+                        setContentDisplay(ContentDisplay.RIGHT);
+                        setAlignment(Pos.CENTER_RIGHT);
+                        setTextAlignment(TextAlignment.RIGHT);
+                    }
+                    else{
+                        ImageView img = new ImageView();
+                        img.setImage(imageSource);
+                        setGraphic(img);
+                        setContentDisplay(ContentDisplay.LEFT);
+                        setAlignment(Pos.CENTER_LEFT);
+                        setTextAlignment(TextAlignment.LEFT);
+                    }
+                    // set the width's
+                    setMinWidth(param.getWidth()*0.5);
+                    setMaxWidth(param.getWidth()*0.5);
+                    setPrefWidth(param.getWidth()*0.5);
+                    // allow wrapping
+                    setWrapText(true);
+                    setText(item.getPayload());
+                }
+            }
+        });
     }
 
     /**
@@ -67,13 +126,16 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
      */
     private void getHistory(){
         this.dbAccess = DataBaseAccess.getInstance();
-        ArrayList<MessageHistoryList> history = this.dbAccess.getMessageHistory(this.localUserId,remoteUser.getId());
-        ArrayList<String> listMessagesAux = new ArrayList<String>();
-        for (MessageHistoryList msg : history){
-            listMessagesAux.add(msg.getPayload() + "****Envoyé à " + msg.getDate());
-        }
-        this.listMessages = FXCollections.observableList(listMessagesAux);
+        ArrayList<MessageDisplay> history = this.dbAccess.getMessageHistory(this.localUserId,remoteUser.getId());
+        this.listMessages = FXCollections.observableList(history);
         this.messageList.setItems(this.listMessages);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                int size = messageList.getItems().size();
+                messageList.scrollTo(size - 1);
+            }
+        });
     }
 
     /** Sets the TcpCo attribute and adds propertyChangeListener for the TCPChatConnection
@@ -92,8 +154,15 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         switch(evt.getPropertyName()){
             case "messageTextReceivedTCP" :
                 MessageChatTxt msg = (MessageChatTxt) tcpCo.getMessageReceived();
-                String payload = msg.payload;
-                Platform.runLater(() -> this.listMessages.add(payload));
+                MessageDisplay msgDisp = new MessageDisplay(remoteUser.getId(), msg.date, msg.payload);
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        listMessages.add(msgDisp);
+                        int size = messageList.getItems().size();
+                        messageList.scrollTo(size - 1);
+                    }
+                });
                 break;
             case "connectionChatClosed":
             case "userDisconnected" :
@@ -108,11 +177,15 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
      * @param actionEvent
      */
     public void buttonSendMessageClicked(ActionEvent actionEvent) {
-        String payload = model.user.getPseudo() + " : " + this.messageInput.getText();
-        this.listMessages.add(payload);
+        String payload = this.messageInput.getText();
+        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        MessageDisplay msg = new MessageDisplay(model.user.getId(),timeStamp,payload);
+        this.listMessages.add(msg);
+        int size = messageList.getItems().size();
+        messageList.scrollTo(size - 1);
         this.messageInput.clear();
-        this.tcpCo.sendMessageTxt(payload);
-        this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),payload);
+        this.tcpCo.sendMessageTxt(msg);
+        this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),msg);
     }
 
     /**
@@ -128,5 +201,11 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                 Platform.runLater(mainStage::close);
             }
         });
+    }
+
+    @FXML
+    void showDate() {
+        String dateMsg = messageList.getFocusModel().getFocusedItem().getDate();
+        this.dateMsg.setText(dateMsg);
     }
 }
