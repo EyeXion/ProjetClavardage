@@ -19,10 +19,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
@@ -91,27 +88,33 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
             protected void updateItem(MessageDisplay item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item==null) {
+                    setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()),null,null)));
+                    setGraphic(null);
                     setText(null);
                     // other stuff to do...
                 }else{
                     if (item.getSourceId() == remoteUser.getId()){
+                        setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.AZURE.toString()),null,null)));
                         ImageView img = new ImageView();
                         img.setImage(imageRemote);
                         setGraphic(img);
                         setContentDisplay(ContentDisplay.RIGHT);
                         setAlignment(Pos.CENTER_RIGHT);
                         setTextAlignment(TextAlignment.RIGHT);
-                        setPadding(new Insets(0,0,0,param.getWidth()*0.3));
+                        setPadding(new Insets(10,0,10,param.getWidth()*0.3));
                     }
                     else{
+                        setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.CORNSILK.toString()),null,null)));
                         ImageView img = new ImageView();
                         img.setImage(imageSource);
                         setGraphic(img);
                         setContentDisplay(ContentDisplay.LEFT);
                         setAlignment(Pos.CENTER_LEFT);
                         setTextAlignment(TextAlignment.LEFT);
-                        setPadding(new Insets(0,param.getWidth()*0.3,0,0));
+                        setPadding(new Insets(10,param.getWidth()*0.3,10,0));
                     }
+                    setGraphicTextGap(5.0);
+                    setBorder(new Border(new BorderStroke(Paint.valueOf(Color.LIGHTGRAY.toString()),BorderStrokeStyle.DASHED,new CornerRadii(40.0),BorderStroke.THIN)));
                     setMaxWidth(param.getPrefWidth()*0.9);
                     setPrefWidth(param.getPrefWidth()*0.9);
                     // allow wrapping
