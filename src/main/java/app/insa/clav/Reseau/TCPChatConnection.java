@@ -1,18 +1,14 @@
 package app.insa.clav.Reseau;
-import app.insa.clav.Messages.Message;
-import app.insa.clav.Messages.MessageChatTxt;
-import app.insa.clav.Messages.MessageDisplay;
-import app.insa.clav.Messages.MessageInit;
+import app.insa.clav.Messages.*;
 import app.insa.clav.UISubStages.ChatStage;
 import javafx.application.Platform;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * Manager of the connection for a what room.
@@ -25,10 +21,19 @@ public class TCPChatConnection extends Thread{
      */
     private final ArrayList<Message> msgReceivedBuffer;
 
+
+    /**
+     * Buffer dans lequel on met les messages reçus pour les fichiers
+     */
+    private final ArrayList<MessageDisplayFile> msgReceivedBufferFiles;
+
+
     private Socket link;
 
     private ObjectOutputStream objectOutStream;
     private ObjectInputStream objectInStream;
+    private DataInputStream dis;
+    private DataOutputStream dos;
 
     PropertyChangeSupport support;
 
@@ -38,11 +43,14 @@ public class TCPChatConnection extends Thread{
      * Constructeur utilisé quand l'utilisateur distant inititie la connexion
      * @param link
      */
-    public TCPChatConnection(Socket link, int remoteUserId, ObjectInputStream ois, ObjectOutputStream oos){
+    public TCPChatConnection(Socket link, int remoteUserId, InputStream is, OutputStream os, ObjectOutputStream objectOutputStream, ObjectInputStream objectInputStream){
         this.link = link;
-        this.objectOutStream = oos;
-        this.objectInStream = ois;
+        this.objectOutStream = objectOutputStream;
+        this.objectInStream = objectInputStream;
+        this.dos = new DataOutputStream(os);
+        this.dis = new DataInputStream(is);
         this.msgReceivedBuffer = new ArrayList<Message>();
+        this.msgReceivedBufferFiles = new ArrayList<MessageDisplayFile>();
         this.remoteUserId = remoteUserId;
         this.support = new PropertyChangeSupport(this);
         Platform.runLater(() -> new ChatStage(this));
@@ -58,13 +66,18 @@ public class TCPChatConnection extends Thread{
     public TCPChatConnection(MessageInit msgInit, int remoteUserId){
         try {
             this.link = new Socket(msgInit.destIP,msgInit.destPort);
-            this.objectOutStream = new ObjectOutputStream(this.link.getOutputStream());
-            this.objectInStream = new ObjectInputStream(this.link.getInputStream());
+            OutputStream os = this.link.getOutputStream();
+            InputStream is = this.link.getInputStream();
+            this.objectOutStream = new ObjectOutputStream(os);
+            this.objectInStream = new ObjectInputStream(is);
+            this.dos = new DataOutputStream(os);
+            this.dis = new DataInputStream(is);
             this.objectOutStream.writeObject(msgInit);
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.msgReceivedBuffer = new ArrayList<Message>();
+        this.msgReceivedBufferFiles = new ArrayList<MessageDisplayFile>();
         this.remoteUserId = remoteUserId;
         this.support = new PropertyChangeSupport(this);
         Platform.runLater(() -> new ChatStage(this));
@@ -75,6 +88,7 @@ public class TCPChatConnection extends Thread{
         this.support.addPropertyChangeListener("messageTextReceivedTCP",pcl);
         this.support.addPropertyChangeListener("connectionChatClosed",pcl);
         this.support.addPropertyChangeListener("userDisconnected",pcl);
+        this.support.addPropertyChangeListener("fileReceived",pcl);
 
     }
 
@@ -88,12 +102,22 @@ public class TCPChatConnection extends Thread{
         return this.msgReceivedBuffer.remove(0);
     }
 
+    /**
+     * Renvoi le message le plus ancien du buffer de files et le supprime du buffer
+     * @return Le message le plus ancien du buffer
+     */
+    public MessageDisplayFile getMessageFileReceived(){
+        return this.msgReceivedBufferFiles.remove(0);
+    }
+
+
     @Override
     public void run() {
         while (true){
             Message msgReceived = null;
             try {
                 msgReceived = (Message) this.objectInStream.readObject();
+                System.out.println("Message reçu");
             } catch (IOException e) {
                 this.support.firePropertyChange("userDisconnected",true,false);
                 break;
@@ -103,6 +127,27 @@ public class TCPChatConnection extends Thread{
             if (msgReceived.typeMessage == 8){
                 this.support.firePropertyChange("connectionChatClosed",true,false);
                 break;
+            }
+            else if (msgReceived.typeMessage == 9){
+                int bytes = 0;
+                MessageChatFile msgFile = (MessageChatFile) msgReceived;
+                try {
+                    File file = new File("./"+"file_"+msgFile.date+ "." +msgFile.ext);
+                    FileOutputStream fileOutputStream = new FileOutputStream(file);
+                    long size = msgFile.fileSize;
+                    byte[] buffer = new byte[4*1024];
+                    while (size > 0){
+                        bytes = dis.read(buffer, 0, (int)Math.min(buffer.length, size));
+                        fileOutputStream.write(buffer,0,bytes);
+                        size -= bytes;
+                    }
+                    System.out.println("Reception fichier terminée");
+                    this.msgReceivedBufferFiles.add(new MessageDisplayFile(this.remoteUserId,msgFile.date,msgFile.payload,2,file));
+                    this.support.firePropertyChange("fileReceived",true,false);
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             else {
                 this.msgReceivedBuffer.add(msgReceived);
@@ -115,6 +160,30 @@ public class TCPChatConnection extends Thread{
         MessageChatTxt msg = new MessageChatTxt(6,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate());
         try {
             this.objectOutStream.writeObject(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void sendMessageFile(MessageDisplayFile msgDisp){
+        int bytes = 0;
+        String ext = FilenameUtils.getExtension(msgDisp.getFile().getPath());
+        MessageChatFile msgStartofFile = new MessageChatFile(9,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate(),msgDisp.getFile().length(),ext);
+        try {
+            this.objectOutStream.writeObject(msgStartofFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            FileInputStream fis = new FileInputStream(msgDisp.getFile());
+            byte[] buffer = new byte[4*1024];
+            while ((bytes=fis.read(buffer))!=-1){
+                dos.write(buffer,0,bytes);
+                dos.flush();
+            }
+            fis.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

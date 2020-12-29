@@ -14,6 +14,7 @@ import java.net.InetAddress;
     6 ---> MessageChatTxt pour le chat
     7 ---> Message.MessagePseudo de deconnexion
     8 ---> Message fermeture fenetre chat
+    9 ---> MessageChatFile to say a file is going to be sent
  */
 
 /**

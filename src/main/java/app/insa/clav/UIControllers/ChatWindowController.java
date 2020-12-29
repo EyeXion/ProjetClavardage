@@ -5,6 +5,7 @@ import app.insa.clav.Core.Model;
 import app.insa.clav.Core.Utilisateurs;
 import app.insa.clav.Messages.MessageChatTxt;
 import app.insa.clav.Messages.MessageDisplay;
+import app.insa.clav.Messages.MessageDisplayFile;
 import app.insa.clav.Reseau.TCPChatConnection;
 import com.jfoenix.controls.JFXButton;
 import javafx.application.Platform;
@@ -17,18 +18,25 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,6 +71,15 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
     @FXML
     private JFXButton sendButton;
 
+    @FXML
+    private JFXButton pickFileButton;
+
+    @FXML
+    private JFXButton removeFileButton;
+
+    @FXML
+    private Label labelFile;
+
     private ObservableList<MessageDisplay> listMessages;
 
     private DataBaseAccess dbAccess;
@@ -73,9 +90,14 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
 
     private Image imageRemote;
 
+    private File filePicked;
+
+    private FileChooser fileChooser;
+
     public ChatWindowController(){
         this.model = Model.getInstance();
         model.addPropertyChangeListener(this,"newUserConnected");
+        this.filePicked = null;
     }
 
     @Override
@@ -93,33 +115,73 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                     setText(null);
                     // other stuff to do...
                 }else{
-                    if (item.getSourceId() == remoteUser.getId()){
-                        setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.AZURE.toString()),null,null)));
-                        ImageView img = new ImageView();
-                        img.setImage(imageRemote);
-                        setGraphic(img);
-                        setContentDisplay(ContentDisplay.RIGHT);
-                        setAlignment(Pos.CENTER_RIGHT);
-                        setTextAlignment(TextAlignment.RIGHT);
-                        setPadding(new Insets(10,0,10,param.getWidth()*0.3));
+                    if (item.getType() == 1) {
+                        if (item.getSourceId() == remoteUser.getId()) {
+                            setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.AZURE.toString()), null, null)));
+                            ImageView img = new ImageView();
+                            img.setImage(imageRemote);
+                            setGraphic(img);
+                            setContentDisplay(ContentDisplay.RIGHT);
+                            setAlignment(Pos.CENTER_RIGHT);
+                            setTextAlignment(TextAlignment.RIGHT);
+                            setPadding(new Insets(10, 0, 10, param.getWidth() * 0.3));
+                        } else {
+                            setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.CORNSILK.toString()), null, null)));
+                            ImageView img = new ImageView();
+                            img.setImage(imageSource);
+                            setGraphic(img);
+                            setContentDisplay(ContentDisplay.LEFT);
+                            setAlignment(Pos.CENTER_LEFT);
+                            setTextAlignment(TextAlignment.LEFT);
+                            setPadding(new Insets(10, param.getWidth() * 0.3, 10, 0));
+                        }
+                        setGraphicTextGap(5.0);
+                        setBorder(new Border(new BorderStroke(Paint.valueOf(Color.LIGHTGRAY.toString()), BorderStrokeStyle.DASHED, new CornerRadii(40.0), BorderStroke.THIN)));
+                        setMaxWidth(param.getPrefWidth() * 0.9);
+                        setPrefWidth(param.getPrefWidth() * 0.9);
+                        // allow wrapping
+                        setWrapText(true);
+                        setText(item.getPayload());
                     }
-                    else{
-                        setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.CORNSILK.toString()),null,null)));
-                        ImageView img = new ImageView();
-                        img.setImage(imageSource);
-                        setGraphic(img);
-                        setContentDisplay(ContentDisplay.LEFT);
-                        setAlignment(Pos.CENTER_LEFT);
-                        setTextAlignment(TextAlignment.LEFT);
-                        setPadding(new Insets(10,param.getWidth()*0.3,10,0));
+                    else if (item.getType() == 2){
+                        Hyperlink hyperlink = new Hyperlink();
+                        MessageDisplayFile msgFile = (MessageDisplayFile) item;
+                        hyperlink.setText(msgFile.getPayload());
+                        hyperlink.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent e) {
+                                //Desktop.getDesktop().browseFileDirectory(msgFile.getFile());
+                            }
+                        });
+                        if (item.getSourceId() == remoteUser.getId()) {
+                            HBox hbox = new HBox();
+                            hbox.setSpacing(2.0);
+                            hbox.setAlignment(Pos.CENTER_RIGHT);
+                            hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
+                            setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.AZURE.toString()), null, null)));
+                            ImageView img = new ImageView();
+                            img.setImage(imageRemote);
+                            hbox.getChildren().addAll(hyperlink, img);
+                            setGraphic(hbox);
+                            setContentDisplay(ContentDisplay.RIGHT);
+                            setAlignment(Pos.CENTER_RIGHT);
+                            setTextAlignment(TextAlignment.RIGHT);
+                            setPadding(new Insets(10, 0, 10, param.getWidth() * 0.3));
+                        } else {
+                            HBox hbox = new HBox();
+                            hbox.setSpacing(2.0);
+                            hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
+                            setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.CORNSILK.toString()), null, null)));
+                            ImageView img = new ImageView();
+                            img.setImage(imageSource);
+                            hbox.getChildren().addAll(img, hyperlink);
+                            setGraphic(hbox);
+                            setContentDisplay(ContentDisplay.LEFT);
+                            setAlignment(Pos.CENTER_LEFT);
+                            setTextAlignment(TextAlignment.LEFT);
+                            setPadding(new Insets(10, param.getWidth() * 0.3, 10, 0));
+                        }
                     }
-                    setGraphicTextGap(5.0);
-                    setBorder(new Border(new BorderStroke(Paint.valueOf(Color.LIGHTGRAY.toString()),BorderStrokeStyle.DASHED,new CornerRadii(40.0),BorderStroke.THIN)));
-                    setMaxWidth(param.getPrefWidth()*0.9);
-                    setPrefWidth(param.getPrefWidth()*0.9);
-                    // allow wrapping
-                    setWrapText(true);
-                    setText(item.getPayload());
                 }
             }
         });
@@ -160,7 +222,7 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         switch(evt.getPropertyName()){
             case "messageTextReceivedTCP" :
                 MessageChatTxt msg = (MessageChatTxt) tcpCo.getMessageReceived();
-                MessageDisplay msgDisp = new MessageDisplay(remoteUser.getId(), msg.date, msg.payload);
+                MessageDisplay msgDisp = new MessageDisplay(remoteUser.getId(), msg.date, msg.payload,1);
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -187,6 +249,16 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                         }
                     });
                 }
+            case "fileReceived" :
+                MessageDisplayFile msgFile = tcpCo.getMessageFileReceived();
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        listMessages.add(msgFile);
+                        int size = messageList.getItems().size();
+                        messageList.scrollTo(size - 1);
+                    }
+                });
         }
     }
 
@@ -194,15 +266,28 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
      * @param actionEvent
      */
     public void buttonSendMessageClicked(ActionEvent actionEvent) {
+        this.sendButton.setDisable(true);
+        String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
         String payload = this.messageInput.getText();
-        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-        MessageDisplay msg = new MessageDisplay(model.user.getId(),timeStamp,payload);
-        this.listMessages.add(msg);
+        if (!payload.equals("")) {
+            MessageDisplay msg = new MessageDisplay(model.user.getId(),timeStamp,payload,1);
+            this.listMessages.add(msg);
+            this.messageInput.clear();
+            this.tcpCo.sendMessageTxt(msg);
+            this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),msg);
+        }
+
+        //We send the File if the filed is not null
+        if (this.filePicked != null){
+            MessageDisplayFile msgFile = new MessageDisplayFile(model.user.getId(),timeStamp,this.filePicked.getName(),2,this.filePicked);
+            this.listMessages.add(msgFile);
+            this.tcpCo.sendMessageFile(msgFile);
+            this.filePicked = null;
+            this.labelFile.setVisible(false);
+        }
+        this.sendButton.setDisable(false);
         int size = messageList.getItems().size();
         messageList.scrollTo(size - 1);
-        this.messageInput.clear();
-        this.tcpCo.sendMessageTxt(msg);
-        this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),msg);
     }
 
     /**
@@ -224,5 +309,28 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
     void showDate() {
         String dateMsg = messageList.getFocusModel().getFocusedItem().getDate();
         this.dateMsg.setText(dateMsg);
+    }
+
+    @FXML
+    void pickFile(ActionEvent event) {
+        this.fileChooser = new FileChooser();
+        this.filePicked = this.fileChooser.showOpenDialog(this.rootAnchor.getScene().getWindow());
+        if (this.filePicked != null){
+            if (filePicked.length() / (1024*1024) > 5){
+                this.labelFile.setText("File too large, limit is 5Mb");
+                this.labelFile.setVisible(true);
+                this.filePicked = null;
+            }
+            else {
+                this.labelFile.setText("File : " + this.filePicked.getName());
+                this.labelFile.setVisible(true);
+            }
+        }
+    }
+
+    @FXML
+    void removeFile(ActionEvent event) {
+        this.labelFile.setVisible(false);
+        this.filePicked = null;
     }
 }

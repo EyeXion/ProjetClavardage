@@ -5,9 +5,7 @@ import app.insa.clav.Messages.MessageInit;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -63,11 +61,13 @@ public class TCPListener extends Thread{
         while (true) {
             try {
                 Socket link = servSocket.accept();
-                ObjectOutputStream objectOutStream = new ObjectOutputStream(link.getOutputStream());
-                ObjectInputStream objectInStream = new ObjectInputStream(link.getInputStream());
+                OutputStream os = link.getOutputStream();
+                InputStream is = link.getInputStream();
+                ObjectOutputStream objectOutStream = new ObjectOutputStream(os);
+                ObjectInputStream objectInStream = new ObjectInputStream(is);
                 MessageInit msgInit = (MessageInit) objectInStream.readObject();
                 int remoteUserId = msgInit.id;
-                this.bufferTCPConnection.add(new TCPChatConnection(link,remoteUserId,objectInStream,objectOutStream));
+                this.bufferTCPConnection.add(new TCPChatConnection(link,remoteUserId,is,os,objectOutStream,objectInStream));
                 this.support.firePropertyChange("chatCreated",true,false);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();

@@ -198,6 +198,7 @@ public class DataBaseAccess {
                 msg.setSourceId(rs.getInt(2));
                 msg.setDate(rs.getString(3));
                 msg.setPayload(rs.getString(4));
+                msg.setType(1);
                 history.add(msg);
             }
         } catch (SQLException throwables) {

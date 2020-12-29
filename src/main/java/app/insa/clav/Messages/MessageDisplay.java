@@ -1,17 +1,28 @@
 package app.insa.clav.Messages;
+
+import java.io.File;
+
 /**
  * Element of the list that contains the history of messages returned by the DB
  */
 public class MessageDisplay {
 
+
+
     private int sourceId;
     private String date;
     private String payload;
+    /**
+     * Type 1 --> Normal text message
+     * Type 2 --> File message
+     */
+    private int type;
 
-    public MessageDisplay(int sourceId, String date, String payload) {
+    public MessageDisplay(int sourceId, String date, String payload,int type) {
         this.sourceId = sourceId;
         this.date = date;
         this.payload = payload;
+        this.type = type;
     }
 
     public MessageDisplay(){}
@@ -38,6 +49,14 @@ public class MessageDisplay {
 
     public void setPayload(String payload) {
         this.payload = payload;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }
 

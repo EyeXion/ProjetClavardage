@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
@@ -19,10 +21,20 @@
             </ContextMenu>
          </contextMenu></ListView>
       <TextField fx:id="messageInput" layoutX="31.0" layoutY="334.0" prefHeight="26.0" prefWidth="293.0" promptText="Message..." />
-      <JFXButton fx:id="sendButton" buttonType="RAISED" layoutX="373.0" layoutY="334.0" onAction="#buttonSendMessageClicked" ripplerFill="#36b90e" style="-fx-background-color: fc8c03;" text="Send">
+      <JFXButton fx:id="sendButton" buttonType="RAISED" layoutX="336.0" layoutY="334.0" onAction="#buttonSendMessageClicked" ripplerFill="#36b90e" style="-fx-background-color: fc8c03;" text="Send">
          <graphic>
             <FontIcon iconLiteral="fa-send" wrappingWidth="16.0" />
          </graphic>
       </JFXButton>
+      <JFXButton fx:id="pickFileButton" buttonType="RAISED" layoutX="416.0" layoutY="334.0" onAction="#pickFile" prefHeight="26.0" prefWidth="71.0" ripplerFill="#ee8080" style="-fx-background-color: f08eb6;" text="File" AnchorPane.rightAnchor="13.0">
+         <graphic>
+            <FontIcon iconLiteral="fa-clone" wrappingWidth="19.0" />
+         </graphic>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+      </JFXButton>
+      <JFXButton fx:id="removeFileButton" buttonType="RAISED" layoutX="365.0" layoutY="361.0" onAction="#removeFile" prefHeight="26.0" prefWidth="102.0" ripplerFill="#d01919" style="-fx-background-color: e9f08e;" text="Remove File" />
+      <Label fx:id="labelFile" layoutX="20.0" layoutY="366.0" prefHeight="16.0" prefWidth="340.0" text="Label" visible="false" />
    </children>
 </AnchorPane>
