@@ -14,7 +14,8 @@ public class MessageDisplay {
     private String payload;
     /**
      * Type 1 --> Normal text message
-     * Type 2 --> File message
+     * Type 2 --> File message not image
+     * Type 3 --> Image file (png, jpg, gif, jpeg, svg)
      */
     private int type;
 

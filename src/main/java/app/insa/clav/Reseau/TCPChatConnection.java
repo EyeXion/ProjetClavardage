@@ -142,7 +142,17 @@ public class TCPChatConnection extends Thread{
                         size -= bytes;
                     }
                     System.out.println("Reception fichier terminée");
-                    this.msgReceivedBufferFiles.add(new MessageDisplayFile(this.remoteUserId,msgFile.date,msgFile.payload,2,file));
+                    int type = 2;
+                    switch (msgFile.ext) {
+                        case "png":
+                        case "gif":
+                        case "jpeg":
+                        case "svg":
+                        case "jpg":
+                            type = 3;
+                            break;
+                    }
+                    this.msgReceivedBufferFiles.add(new MessageDisplayFile(this.remoteUserId,msgFile.date,msgFile.payload,type,file,msgFile.ext));
                     this.support.firePropertyChange("fileReceived",true,false);
                     fileOutputStream.close();
                 } catch (IOException e) {
@@ -168,8 +178,7 @@ public class TCPChatConnection extends Thread{
 
     public void sendMessageFile(MessageDisplayFile msgDisp){
         int bytes = 0;
-        String ext = FilenameUtils.getExtension(msgDisp.getFile().getPath());
-        MessageChatFile msgStartofFile = new MessageChatFile(9,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate(),msgDisp.getFile().length(),ext);
+        MessageChatFile msgStartofFile = new MessageChatFile(9,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate(),msgDisp.getFile().length(),msgDisp.getExt());
         try {
             this.objectOutStream.writeObject(msgStartofFile);
         } catch (IOException e) {

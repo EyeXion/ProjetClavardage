@@ -30,6 +30,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,6 +38,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -153,9 +155,9 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                                 //Desktop.getDesktop().browseFileDirectory(msgFile.getFile());
                             }
                         });
+                        HBox hbox = new HBox();
+                        hbox.setSpacing(2.0);
                         if (item.getSourceId() == remoteUser.getId()) {
-                            HBox hbox = new HBox();
-                            hbox.setSpacing(2.0);
                             hbox.setAlignment(Pos.CENTER_RIGHT);
                             hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
                             setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.AZURE.toString()), null, null)));
@@ -168,13 +170,51 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                             setTextAlignment(TextAlignment.RIGHT);
                             setPadding(new Insets(10, 0, 10, param.getWidth() * 0.3));
                         } else {
-                            HBox hbox = new HBox();
-                            hbox.setSpacing(2.0);
+                            hbox.setAlignment(Pos.CENTER_LEFT);
                             hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
                             setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.CORNSILK.toString()), null, null)));
                             ImageView img = new ImageView();
                             img.setImage(imageSource);
                             hbox.getChildren().addAll(img, hyperlink);
+                            setGraphic(hbox);
+                            setContentDisplay(ContentDisplay.LEFT);
+                            setAlignment(Pos.CENTER_LEFT);
+                            setTextAlignment(TextAlignment.LEFT);
+                            setPadding(new Insets(10, param.getWidth() * 0.3, 10, 0));
+                        }
+                    } else if (item.getType() == 3){
+                        MessageDisplayFile msgFile = (MessageDisplayFile) item;
+                        Image imageFileSource = null;
+                        try {
+                            imageFileSource = new Image(msgFile.getFile().toURI().toURL().toExternalForm());
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        ImageView imageFileView = new ImageView();
+                        imageFileView.setImage(imageFileSource);
+                        HBox hbox = new HBox();
+                        hbox.setSpacing(2.0);
+                        imageFileView.setPreserveRatio(true);
+                        imageFileView.fitWidthProperty().bind(this.widthProperty());
+                        if (item.getSourceId() == remoteUser.getId()) {
+                            hbox.setAlignment(Pos.CENTER_RIGHT);
+                            hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
+                            setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.AZURE.toString()), null, null)));
+                            ImageView img = new ImageView();
+                            img.setImage(imageRemote);
+                            hbox.getChildren().addAll(imageFileView, img);
+                            setGraphic(hbox);
+                            setContentDisplay(ContentDisplay.RIGHT);
+                            setAlignment(Pos.CENTER_RIGHT);
+                            setTextAlignment(TextAlignment.RIGHT);
+                            setPadding(new Insets(10, 0, 10, param.getWidth() * 0.3));
+                        } else {
+                            hbox.setAlignment(Pos.CENTER_LEFT);
+                            hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
+                            setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.CORNSILK.toString()), null, null)));
+                            ImageView img = new ImageView();
+                            img.setImage(imageSource);
+                            hbox.getChildren().addAll(img, imageFileView);
                             setGraphic(hbox);
                             setContentDisplay(ContentDisplay.LEFT);
                             setAlignment(Pos.CENTER_LEFT);
@@ -279,7 +319,18 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
 
         //We send the File if the filed is not null
         if (this.filePicked != null){
-            MessageDisplayFile msgFile = new MessageDisplayFile(model.user.getId(),timeStamp,this.filePicked.getName(),2,this.filePicked);
+            String ext = FilenameUtils.getExtension(this.filePicked.getPath());
+            int type = 2;
+            switch (ext) {
+                case "png":
+                case "gif":
+                case "jpeg":
+                case "svg":
+                case "jpg":
+                    type = 3;
+                    break;
+            }
+            MessageDisplayFile msgFile = new MessageDisplayFile(model.user.getId(),timeStamp,this.filePicked.getName(),type,this.filePicked, ext);
             this.listMessages.add(msgFile);
             this.tcpCo.sendMessageFile(msgFile);
             this.filePicked = null;
