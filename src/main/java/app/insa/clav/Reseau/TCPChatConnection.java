@@ -38,12 +38,13 @@ public class TCPChatConnection extends Thread{
     PropertyChangeSupport support;
 
     public int remoteUserId;
+    public int localUserId;
 
     /**
      * Constructeur utilisé quand l'utilisateur distant inititie la connexion
      * @param link
      */
-    public TCPChatConnection(Socket link, int remoteUserId, InputStream is, OutputStream os, ObjectOutputStream objectOutputStream, ObjectInputStream objectInputStream){
+    public TCPChatConnection(Socket link, int remoteUserId, int localUserId,InputStream is, OutputStream os, ObjectOutputStream objectOutputStream, ObjectInputStream objectInputStream){
         this.link = link;
         this.objectOutStream = objectOutputStream;
         this.objectInStream = objectInputStream;
@@ -52,6 +53,7 @@ public class TCPChatConnection extends Thread{
         this.msgReceivedBuffer = new ArrayList<Message>();
         this.msgReceivedBufferFiles = new ArrayList<MessageDisplayFile>();
         this.remoteUserId = remoteUserId;
+        this.localUserId = localUserId;
         this.support = new PropertyChangeSupport(this);
         Platform.runLater(() -> new ChatStage(this));
         this.start();
@@ -79,6 +81,7 @@ public class TCPChatConnection extends Thread{
         this.msgReceivedBuffer = new ArrayList<Message>();
         this.msgReceivedBufferFiles = new ArrayList<MessageDisplayFile>();
         this.remoteUserId = remoteUserId;
+        this.localUserId = msgInit.id;
         this.support = new PropertyChangeSupport(this);
         Platform.runLater(() -> new ChatStage(this));
         this.start();
@@ -132,7 +135,14 @@ public class TCPChatConnection extends Thread{
                 int bytes = 0;
                 MessageChatFile msgFile = (MessageChatFile) msgReceived;
                 try {
-                    File file = new File("./"+"file_"+msgFile.date+ "." +msgFile.ext);
+                    String path;
+                    if (localUserId > remoteUserId){
+                        path = "./file_" + remoteUserId + "_" + localUserId + "_" + msgFile.date + "." + msgFile.ext;
+                    }
+                    else{
+                        path = "./file_" + localUserId + "_" + remoteUserId + "_" + msgFile.date + "." + msgFile.ext;
+                    }
+                    File file = new File(path);
                     FileOutputStream fileOutputStream = new FileOutputStream(file);
                     long size = msgFile.fileSize;
                     byte[] buffer = new byte[4*1024];
@@ -152,9 +162,10 @@ public class TCPChatConnection extends Thread{
                             type = 3;
                             break;
                     }
-                    this.msgReceivedBufferFiles.add(new MessageDisplayFile(this.remoteUserId,msgFile.date,msgFile.payload,type,file,msgFile.ext));
+                    this.msgReceivedBufferFiles.add(new MessageDisplayFile(this.remoteUserId,msgFile.date,msgFile.payload,type,file,msgFile.ext, -1));
                     this.support.firePropertyChange("fileReceived",true,false);
                     fileOutputStream.close();
+                    file.deleteOnExit();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

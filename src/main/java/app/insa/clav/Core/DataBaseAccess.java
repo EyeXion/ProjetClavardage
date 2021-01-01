@@ -1,7 +1,9 @@
 package app.insa.clav.Core;
 
 import app.insa.clav.Messages.MessageDisplay;
+import app.insa.clav.Messages.MessageDisplayFile;
 
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -194,17 +196,90 @@ public class DataBaseAccess {
             prSt = con.prepareStatement(preparedQuery);
             ResultSet rs = prSt.executeQuery();
             while (rs.next()){
-                MessageDisplay msg = new MessageDisplay();
-                msg.setSourceId(rs.getInt(2));
-                msg.setDate(rs.getString(3));
-                msg.setPayload(rs.getString(4));
-                msg.setType(1);
-                history.add(msg);
+                int type;
+                if ((type = rs.getInt(4)) == 1) {
+                    MessageDisplay msg = new MessageDisplay();
+                    msg.setSourceId(rs.getInt(2));
+                    msg.setDate(rs.getString(3));
+                    msg.setPayload(rs.getString(5));
+                    msg.setType(rs.getInt(4));
+                    history.add(msg);
+                }
+                else if (type == 3){
+                    MessageDisplayFile msg = new MessageDisplayFile();
+                    msg.setSourceId(rs.getInt(2));
+                    msg.setDate(rs.getString(3));
+                    msg.setType(rs.getInt(4));
+                    msg.setPayload(rs.getString(7));
+                    msg.setDBId(rs.getInt(1));
+                    Blob blob = rs.getBlob(6);
+                    InputStream is = blob.getBinaryStream();
+                    String path = "file_" + idPetit + "_" + idGrand + "_" + msg.getDate() + "." + msg.getExt();
+                    FileOutputStream os = new FileOutputStream(path);
+                    int bytesRead = -1;
+                    byte[] buffer = new byte[4096];
+                    while ((bytesRead = is.read(buffer)) != -1) {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                    is.close();
+                    os.close();
+                    msg.setFile(new File(path));
+                    msg.getFile().deleteOnExit();
+                    history.add(msg);
+                }
+                else{
+                    MessageDisplayFile msg = new MessageDisplayFile();
+                    msg.setSourceId(rs.getInt(2));
+                    msg.setDate(rs.getString(3));
+                    msg.setType(rs.getInt(4));
+                    msg.setPayload(rs.getString(7));
+                    msg.setDBId(rs.getInt(1));
+                    history.add(msg);
+                }
             }
-        } catch (SQLException throwables) {
+        } catch (SQLException | IOException throwables) {
             throwables.printStackTrace();
         }
         return history;
+    }
+
+    public void getFile(int DBid, File file,int id1, int id2){
+        int idPetit;
+        int idGrand;
+        if (id1 > id2) {
+            idGrand = id1;
+            idPetit = id2;
+        } else {
+            idGrand = id2;
+            idPetit = id1;
+        }
+        String nomTable = "Chat" + idPetit + "_" + idGrand;
+        String preparedQuery = "SELECT * FROM " + nomTable + " WHERE id=?";
+        PreparedStatement prSt = null;
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.setInt(1,DBid);
+            ResultSet rs = prSt.executeQuery();
+            if (rs.next()){
+                Blob blob = rs.getBlob(6);
+                InputStream is = blob.getBinaryStream();
+                FileOutputStream os = null;
+                try {
+                    os = new FileOutputStream(file.getPath());
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                int bytesRead = -1;
+                byte[] buffer = new byte[4096];
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
+                is.close();
+                os.close();
+            }
+        } catch (SQLException | IOException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
     /** Ajoute un message à la DB envoyé par l'user local à l'user remote
@@ -223,16 +298,36 @@ public class DataBaseAccess {
             idPetit = idLocal;
         }
         String nomTable = "Chat" + idPetit + "_" + idGrand;
-        String preparedQuery = "INSERT INTO `" + nomTable + "`(`sourceId`, `date`, `payload`) VALUES (?,?,?)";
-        PreparedStatement prSt = null;
-        try {
-            prSt = con.prepareStatement(preparedQuery);
-            prSt.setInt(1,message.getSourceId());
-            prSt.setString(2,message.getDate());
-            prSt.setString(3,message.getPayload());
-            prSt.executeUpdate();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        if (message.getType() == 1) {
+            String preparedQuery = "INSERT INTO `" + nomTable + "`(`sourceId`, `date`, `payload`, `type`) VALUES (?,?,?,?)";
+            PreparedStatement prSt = null;
+            try {
+                prSt = con.prepareStatement(preparedQuery);
+                prSt.setInt(1, message.getSourceId());
+                prSt.setString(2, message.getDate());
+                prSt.setString(3, message.getPayload());
+                prSt.setInt(4,message.getType());
+                prSt.executeUpdate();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        else{
+            String preparedQuery = "INSERT INTO `" + nomTable + "`(`sourceId`, `date`, `file`, `type`, `fileName`) VALUES (?,?,?,?,?)";
+            PreparedStatement prSt = null;
+            MessageDisplayFile msgFile = (MessageDisplayFile) message;
+            try {
+                prSt = con.prepareStatement(preparedQuery);
+                prSt.setInt(1, message.getSourceId());
+                prSt.setString(2, message.getDate());
+                prSt.setBinaryStream(3, new FileInputStream(msgFile.getFile()));
+                prSt.setInt(4,message.getType());
+                prSt.setString(5,message.getPayload());
+                prSt.executeUpdate();
+            } catch (SQLException | FileNotFoundException throwables) {
+                throwables.printStackTrace();
+            }
+
         }
     }
 
@@ -251,7 +346,7 @@ public class DataBaseAccess {
             idPetit = id1;
         }
         String nomTable = "Chat" + idPetit + "_" + idGrand;
-        String preparedQuery = "CREATE TABLE `" +  nomTable +"` (\n" + "`id` int NOT NULL,\n" + "  `sourceId` int NOT NULL,\n" +  "  `date` varchar(30) NOT NULL,\n" +  "  `payload` mediumtext NOT NULL\n" +  ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
+        String preparedQuery = "CREATE TABLE `" +  nomTable +"` (\n" + "`id` int NOT NULL,\n" + "  `sourceId` int NOT NULL,\n" +  "  `date` varchar(30) NOT NULL,\n" +  " `type` int NOT NULL,\n"  + "  `payload` mediumtext,\n" + " `file` mediumblob\n,\n" + " `fileName` varchar(50) DEFAULT NULL\n" + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
         PreparedStatement prSt = null;
         System.out.println(preparedQuery);
         try {

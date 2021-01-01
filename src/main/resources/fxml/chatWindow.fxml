@@ -12,7 +12,7 @@
 
 <AnchorPane fx:id="rootAnchor" prefHeight="400.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.insa.clav.UIControllers.ChatWindowController">
    <children>
-      <ListView fx:id="messageList" layoutX="20.0" layoutY="22.0" prefHeight="287.0" prefWidth="448.0">
+      <ListView fx:id="messageList" layoutX="20.0" layoutY="22.0" prefHeight="287.0" prefWidth="448.0" stylesheets="/stylesheets/chatWindow.css">
          <contextMenu>
             <ContextMenu fx:id="contextMenu" onShown="#showDate">
               <items>

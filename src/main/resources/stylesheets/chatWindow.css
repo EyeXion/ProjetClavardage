@@ -1,0 +1,7 @@
+.list-cell:selected {
+    -fx-text-fill: black;
+}
+
+.hyperlink {
+    -fx-text-fill: blue;
+}

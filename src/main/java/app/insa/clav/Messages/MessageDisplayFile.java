@@ -6,16 +6,18 @@ public class MessageDisplayFile extends MessageDisplay{
 
     private File file;
     private String ext;
+    private int DBId;
 
 
-    public MessageDisplayFile(int sourceId, String date, String payload, int type, File file, String ext) {
+
+    public MessageDisplayFile(int sourceId, String date, String payload, int type, File file, String ext, int DBid) {
         super(sourceId, date, payload, type);
         this.file = file;
         this.ext = ext;
+        this.DBId = DBid;
     }
 
-    public MessageDisplayFile(File file) {
-        this.file = file;
+    public MessageDisplayFile() {
     }
 
     public File getFile() {
@@ -33,4 +35,14 @@ public class MessageDisplayFile extends MessageDisplay{
     public void setExt(String ext) {
         this.ext = ext;
     }
+
+    public int getDBId() {
+        return DBId;
+    }
+
+    public void setDBId(int DBId) {
+        this.DBId = DBId;
+    }
+
+
 }

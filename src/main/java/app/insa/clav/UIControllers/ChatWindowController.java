@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -40,6 +41,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -115,7 +119,7 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                     setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()),null,null)));
                     setGraphic(null);
                     setText(null);
-                    // other stuff to do...
+                    setPadding(new Insets(0,0,0,0));
                 }else{
                     if (item.getType() == 1) {
                         if (item.getSourceId() == remoteUser.getId()) {
@@ -146,13 +150,17 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                         setText(item.getPayload());
                     }
                     else if (item.getType() == 2){
+                        setText(null);
                         Hyperlink hyperlink = new Hyperlink();
                         MessageDisplayFile msgFile = (MessageDisplayFile) item;
                         hyperlink.setText(msgFile.getPayload());
                         hyperlink.setOnAction(new EventHandler<ActionEvent>() {
                             @Override
                             public void handle(ActionEvent e) {
-                                //Desktop.getDesktop().browseFileDirectory(msgFile.getFile());
+                                fileChooser = new FileChooser();
+                                fileChooser.setInitialFileName(msgFile.getPayload());
+                                File savedFile = fileChooser.showSaveDialog(rootAnchor.getScene().getWindow());
+                                dbAccess.getFile(msgFile.getDBId(),savedFile,localUserId,remoteUser.getId());
                             }
                         });
                         HBox hbox = new HBox();
@@ -183,7 +191,25 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                             setPadding(new Insets(10, param.getWidth() * 0.3, 10, 0));
                         }
                     } else if (item.getType() == 3){
+                        setText(null);
                         MessageDisplayFile msgFile = (MessageDisplayFile) item;
+                        Hyperlink hyperlink = new Hyperlink();
+                        hyperlink.setText(msgFile.getPayload());
+                        hyperlink.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent e) {
+                                fileChooser = new FileChooser();
+                                fileChooser.setInitialFileName(msgFile.getPayload());
+                                File savedFile = fileChooser.showSaveDialog(rootAnchor.getScene().getWindow());
+                                Path original = Path.of(msgFile.getFile().toURI());
+                                Path dest = Path.of(savedFile.toURI());
+                                try {
+                                    Files.copy(original,dest, StandardCopyOption.REPLACE_EXISTING);
+                                } catch (IOException ioException) {
+                                    ioException.printStackTrace();
+                                }
+                            }
+                        });
                         Image imageFileSource = null;
                         try {
                             imageFileSource = new Image(msgFile.getFile().toURI().toURL().toExternalForm());
@@ -194,15 +220,21 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                         imageFileView.setImage(imageFileSource);
                         HBox hbox = new HBox();
                         hbox.setSpacing(2.0);
+                        hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
+                        VBox vbox = new VBox();
+                        vbox.setSpacing(5.0);
+                        vbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
                         imageFileView.setPreserveRatio(true);
-                        imageFileView.fitWidthProperty().bind(this.widthProperty());
+                        imageFileView.fitWidthProperty().bind(messageList.widthProperty().multiply(0.5));
+                        imageFileView.fitHeightProperty().bind(hbox.heightProperty());
+                        vbox.setAlignment(Pos.TOP_CENTER);
+                        vbox.getChildren().addAll(imageFileView,hyperlink);
+                        vbox.setPrefWidth(messageList.getWidth() * 0.5);
                         if (item.getSourceId() == remoteUser.getId()) {
-                            hbox.setAlignment(Pos.CENTER_RIGHT);
-                            hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
-                            setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.AZURE.toString()), null, null)));
+                            hbox.setAlignment(Pos.CENTER_RIGHT);setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.AZURE.toString()), null, null)));
                             ImageView img = new ImageView();
                             img.setImage(imageRemote);
-                            hbox.getChildren().addAll(imageFileView, img);
+                            hbox.getChildren().addAll(vbox, img);
                             setGraphic(hbox);
                             setContentDisplay(ContentDisplay.RIGHT);
                             setAlignment(Pos.CENTER_RIGHT);
@@ -210,11 +242,10 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                             setPadding(new Insets(10, 0, 10, param.getWidth() * 0.3));
                         } else {
                             hbox.setAlignment(Pos.CENTER_LEFT);
-                            hbox.setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.TRANSPARENT.toString()), null, null)));
                             setBackground(new Background(new BackgroundFill(Paint.valueOf(Color.CORNSILK.toString()), null, null)));
                             ImageView img = new ImageView();
                             img.setImage(imageSource);
-                            hbox.getChildren().addAll(img, imageFileView);
+                            hbox.getChildren().addAll(img, vbox);
                             setGraphic(hbox);
                             setContentDisplay(ContentDisplay.LEFT);
                             setAlignment(Pos.CENTER_LEFT);
@@ -330,9 +361,10 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                     type = 3;
                     break;
             }
-            MessageDisplayFile msgFile = new MessageDisplayFile(model.user.getId(),timeStamp,this.filePicked.getName(),type,this.filePicked, ext);
+            MessageDisplayFile msgFile = new MessageDisplayFile(model.user.getId(),timeStamp,this.filePicked.getName(),type,this.filePicked, ext, -1);
             this.listMessages.add(msgFile);
             this.tcpCo.sendMessageFile(msgFile);
+            this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),msgFile);
             this.filePicked = null;
             this.labelFile.setVisible(false);
         }
