@@ -157,10 +157,24 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                         hyperlink.setOnAction(new EventHandler<ActionEvent>() {
                             @Override
                             public void handle(ActionEvent e) {
-                                fileChooser = new FileChooser();
-                                fileChooser.setInitialFileName(msgFile.getPayload());
-                                File savedFile = fileChooser.showSaveDialog(rootAnchor.getScene().getWindow());
-                                dbAccess.getFile(msgFile.getDBId(),savedFile,localUserId,remoteUser.getId());
+                                if (msgFile.getDBId() == -1){
+                                    fileChooser = new FileChooser();
+                                    fileChooser.setInitialFileName(msgFile.getPayload());
+                                    File savedFile = fileChooser.showSaveDialog(rootAnchor.getScene().getWindow());
+                                    Path original = Path.of(msgFile.getFile().toURI());
+                                    Path dest = Path.of(savedFile.toURI());
+                                    try {
+                                        Files.copy(original,dest, StandardCopyOption.REPLACE_EXISTING);
+                                    } catch (IOException ioException) {
+                                        ioException.printStackTrace();
+                                    }
+                                }
+                                else {
+                                    fileChooser = new FileChooser();
+                                    fileChooser.setInitialFileName(msgFile.getPayload());
+                                    File savedFile = fileChooser.showSaveDialog(rootAnchor.getScene().getWindow());
+                                    dbAccess.getFile(msgFile.getDBId(), savedFile, localUserId, remoteUser.getId());
+                                }
                             }
                         });
                         HBox hbox = new HBox();
