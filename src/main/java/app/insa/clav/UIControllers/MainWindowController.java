@@ -3,6 +3,7 @@ package app.insa.clav.UIControllers;
 import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Core.Model;
 import app.insa.clav.Core.Utilisateurs;
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDrawer;
 import com.jfoenix.controls.JFXHamburger;
 import com.jfoenix.controls.JFXListView;
@@ -32,6 +33,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -93,6 +95,9 @@ public class MainWindowController implements PropertyChangeListener, Initializab
     @FXML
     private MenuItem openChatButton;
 
+
+    @FXML
+    private MenuItem deleteHistoryButton;
 
     /**
      * Contructeur. Il crée lui même l'UI (plus tard on mettra quel type de fenetre en argument)
@@ -178,4 +183,19 @@ public class MainWindowController implements PropertyChangeListener, Initializab
         }
         model.createChatFromLocalRequest(remoteId, remotePseudo);
     }
+
+    @FXML
+    void deleteHistory(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation Delete History");
+        String remotePseudo = userListView.getFocusModel().getFocusedItem();
+        alert.setHeaderText("Delete history with " + remotePseudo + "?");
+        alert.setContentText("This will also delete it for "+ remotePseudo + "!");
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK){
+            this.model.deleteHistory(remotePseudo);
+        }
+    }
+
 }

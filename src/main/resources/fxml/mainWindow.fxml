@@ -22,6 +22,7 @@
             <ContextMenu>
               <items>
                 <MenuItem fx:id="openChatButton" mnemonicParsing="false" onAction="#openChat" text="Open Chat" />
+                  <MenuItem fx:id="deleteHistoryButton" mnemonicParsing="false" onAction="#deleteHistory" text="Delete History" />
               </items>
             </ContextMenu>
          </contextMenu></JFXListView>

@@ -379,5 +379,26 @@ public class DataBaseAccess {
             throwables.printStackTrace();
         }
     }
+
+    public void deleteHistory(int id1, int id2) {
+        int idPetit;
+        int idGrand;
+        if (id1 > id2) {
+            idGrand = id1;
+            idPetit = id2;
+        } else {
+            idGrand = id2;
+            idPetit = id1;
+        }
+        String nomTable = "Chat" + idPetit + "_" + idGrand;
+        String preparedQuery = "DROP TABLE " + nomTable;
+        PreparedStatement prSt = null;
+        try {
+            prSt = con.prepareStatement(preparedQuery);
+            prSt.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
 }
 

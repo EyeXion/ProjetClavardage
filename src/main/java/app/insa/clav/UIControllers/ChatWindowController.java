@@ -24,6 +24,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -334,6 +336,7 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                         }
                     });
                 }
+                break;
             case "fileReceived" :
                 MessageDisplayFile msgFile = tcpCo.getMessageFileReceived();
                 Platform.runLater(new Runnable() {
@@ -400,6 +403,12 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                 Platform.runLater(mainStage::close);
             }
         });
+        mainStage.getScene().setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                System.out.println("Fire");
+                this.sendButton.fire();
+            }
+        });
     }
 
     @FXML
@@ -410,6 +419,7 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
 
     @FXML
     void pickFile(ActionEvent event) {
+        File previousFile = this.filePicked;
         this.fileChooser = new FileChooser();
         this.filePicked = this.fileChooser.showOpenDialog(this.rootAnchor.getScene().getWindow());
         if (this.filePicked != null){
@@ -423,11 +433,16 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
                 this.labelFile.setVisible(true);
             }
         }
+        else{
+            this.filePicked = previousFile;
+        }
+        this.sendButton.requestFocus();
     }
 
     @FXML
     void removeFile(ActionEvent event) {
         this.labelFile.setVisible(false);
         this.filePicked = null;
+        this.sendButton.requestFocus();
     }
 }

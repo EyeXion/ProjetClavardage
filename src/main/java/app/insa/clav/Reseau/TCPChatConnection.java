@@ -92,7 +92,6 @@ public class TCPChatConnection extends Thread{
         this.support.addPropertyChangeListener("connectionChatClosed",pcl);
         this.support.addPropertyChangeListener("userDisconnected",pcl);
         this.support.addPropertyChangeListener("fileReceived",pcl);
-
     }
 
 

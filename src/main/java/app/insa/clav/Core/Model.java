@@ -469,6 +469,24 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         }
     }
 
+    public void deleteHistory(String remotePseudo) {
+        int remoteId = this.getUserFromPseudo(remotePseudo).getId();
+        for (TCPChatConnection tcpCo : this.listTCPConnection){
+            if (tcpCo.remoteUserId == remoteId){
+                this.listTCPConnection.remove(tcpCo);
+                tcpCo.sendCloseChat();
+                Socket link = tcpCo.getSocket();
+                try {
+                    link.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+        this.dbAccess.deleteHistory(remoteId,user.getId());
+    }
+
 
     /**
      * Classe interne au model pour au bout d'une seconde d'envoi de demande pseudo type 1,
