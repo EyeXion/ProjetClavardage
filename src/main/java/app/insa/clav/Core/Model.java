@@ -103,12 +103,12 @@ ID 1 -> Listening on 6000, sending on 5000, tcpServer on 7000
 ID 2 -> Listening on 6001, sending on 5001, tcpServer on 7001
 ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
 */
-    private Model(int inputPort, int outputPort, int tcpListenerPort, Application app){
+    private Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
         try {
-            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0, inputPort);
-            this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), outputPort);
-            this.UDPIn = new UDPInput(user.getInetAddress(),inputPort);
-            this.tcpListener = new TCPListener(this.user.getInetAddress(),tcpListenerPort,user.getId());
+            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0);
+            this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), portListening);
+            this.UDPIn = new UDPInput(user.getInetAddress(), portListening);
+            this.tcpListener = new TCPListener(this.user.getInetAddress(), user.getId());
             this.tim= new Timer();
             this.support = new PropertyChangeSupport(this);
         }
@@ -118,24 +118,30 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         }
         this.userList = new ArrayList<Utilisateurs>();
         this.listTCPConnection = new ArrayList<TCPChatConnection>();
-        this.dbAccess = DataBaseAccess.getInstance();
+        this.dbAccess = DataBaseAccess.getInstance(addrBdd, userBdd, mdpBdd);
         this.app = app;
     }
 
+
     /**
-     * Returns the instance of the Model (and creates it if null)
-     *          id of user
-     * @param inputPort
-     *                  input Port UDP
-     * @param outputPort
-     *                  outPutPort UDP
+     * @param addrBroadcast
+     *          adresse de broadcast du réseau
+     * @param portListening
+     *          port d'ecoute UDP
+     * @param app
+     *          L'application elle meme
+     * @param addrBdd
+     *          L'adresse de la base de donnee
+     * @param userBdd
+     *          L'utilisateur de la BDD
+     * @param mdpBdd
+     *          Le mot de passe qui lui est associé
      * @return
-     *         instance of Model
      */
-    public static Model getInstance(int inputPort, int outputPort, int tcpListenerPort, Application app){
+    public static Model getInstance(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
         synchronized(Model.class){
             if (instance == null) {
-                instance = new Model(inputPort, outputPort,tcpListenerPort, app);
+                instance = new Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd);
             }
         }
         return instance;
@@ -198,20 +204,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      * Envoi un messagePseudo de type 1 aux 3 machines de test
      */
     public void sendPseudoBroadcast(){
-        System.out.println("Send pseudo broadcast with" + this.user.getPseudo());
+        //System.out.println("Send pseudo broadcast with" + this.user.getPseudo());
         try {
-            if (user.getId() == 1 || user.getId() == 2) {
-                MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 2 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6000, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 1 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6001,this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
+            MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), InetAddress.getLocalHost(), 0, this.user.getPseudo(),this.user.getId());
+            UDPOut.sendMsg(msg);
         }
         catch (UnknownHostException e){
             System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
@@ -225,18 +221,8 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     public void sendPseudoValideBroadcast(){
         System.out.println("Send pseudo Valide broadcast with" + this.user.getPseudo());
         try {
-            if (user.getId() == 1 || user.getId() == 2) {
-                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 2 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6000, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 1 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6001,this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
+            MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), InetAddress.getLocalHost(), 0, this.user.getPseudo(),this.user.getId());
+            UDPOut.sendMsg(msg);
         }
         catch (UnknownHostException e){
             System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
@@ -283,15 +269,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         if (!isChatAlreadyCreated) {
             for (Utilisateurs u : userList) {
                 if (u.getPseudo().equals(remotePseudo)) {
-                    int destPort;
-                    if (u.getId() == 1) {
-                        destPort = 7000;
-                    } else if (u.getId() == 2) {
-                        destPort = 7001;
-                    } else {
-                        destPort = 7002;
-                    }
-                    MessageInit msgInit = new MessageInit(7, user.getInetAddress(), user.getPort(), u.getInetAddress(), destPort, user.getId());
+                    MessageInit msgInit = new MessageInit(7, user.getInetAddress(), u.getInetAddress(), u.getTcpListeningPort(), user.getId());
                     TCPChatConnection tcpCo = new TCPChatConnection(msgInit, u.getId());
                     listTCPConnection.add(tcpCo);
                 }

@@ -42,12 +42,12 @@ public class UDPInput extends Thread{
      * Constructeur
      * @param localAddress
      *                  Adresse IP locale
-     * @param localPort
+     * @param listeningPort
      *                  Numéro de port de la machine locale sur lequel on écoute (le même sur toutes les machines en théorie)
      */
-    public UDPInput(InetAddress localAddress, int localPort){
+    public UDPInput(InetAddress localAddress, int listeningPort){
         try {
-            this.socket = new DatagramSocket(localPort,localAddress);
+            this.socket = new DatagramSocket(listeningPort,localAddress);
             this.filter = new boolean[8];
             this.filter[1] = false;
             this.filter[2] = false;

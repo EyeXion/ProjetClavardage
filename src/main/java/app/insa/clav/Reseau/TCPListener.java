@@ -29,10 +29,10 @@ public class TCPListener extends Thread{
      */
     private ArrayList<TCPChatConnection> bufferTCPConnection;
 
-    public TCPListener(InetAddress inetAddress, int tcpListenerPort,int localId){
+    public TCPListener(InetAddress inetAddress,int localId){
         this.inetAddress = inetAddress;
         try {
-            this.servSocket = new ServerSocket(tcpListenerPort,1000,inetAddress); //0 alloue un port dispo
+            this.servSocket = new ServerSocket(0,1000,inetAddress); //0 alloue un port dispo
         } catch (IOException e) {
             e.printStackTrace();
         }

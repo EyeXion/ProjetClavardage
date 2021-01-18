@@ -14,9 +14,12 @@ public class Main extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception{
         String[] args = this.getParameters().getUnnamed().toArray(new String[0]);
-        int inputPort = Integer.parseInt(args[0]);
-        int outPutPort = Integer.parseInt(args[1]);
-        int tcpListenerPort = Integer.parseInt(args[2]);
+        String addrBroad = args[0];
+        String udpListeningPort = Integer.parseInt(args[1]);
+        String addrSrv = args[2];
+        String addrBdd = args[3];
+        String userBdd = args[4];
+        String mdpBdd = args[5];
 
         Model model = Model.getInstance(inputPort, outPutPort,tcpListenerPort, this);
 
@@ -33,9 +36,9 @@ public class Main extends Application{
         model.openTCPListener();
     }
 
-    public static void main(String[] arg){
+    public static void main(String[] args){
         //String ipAdress = arg[0];
-        launch(arg);
+        launch(args);
 
         /*while (true){
             Scanner myScan = new Scanner(System.in);

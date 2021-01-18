@@ -13,8 +13,8 @@ public class MessageChatFile extends MessageChatTxt{
         this.ext = ext;
     }
 
-    public MessageChatFile(int typeMessage, InetAddress srcIP, int srcResponsePort, InetAddress destIP, int destPort, String payload, String date, long fileSize, String ext) {
-        super(typeMessage, srcIP, srcResponsePort, destIP, destPort, payload, date);
+    public MessageChatFile(int typeMessage, InetAddress srcIP, InetAddress destIP, int destPort, String payload, String date, long fileSize, String ext) {
+        super(typeMessage, srcIP, destIP, destPort, payload, date);
         this.fileSize = fileSize;
         this.ext = ext;
     }

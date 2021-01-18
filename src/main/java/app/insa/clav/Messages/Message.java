@@ -32,7 +32,6 @@ public class Message implements Serializable {
      */
     public int typeMessage;
     public InetAddress srcIP;
-    public int srcResponsePort; //Seulement besoin car on teste en localHost
     public InetAddress destIP; //Seulement pour UDP ou ouverture CO TCP
     public int destPort; //Seulement pour UDP ou l'ouverture connexion TCP, sinon à 0.
 
@@ -43,7 +42,6 @@ public class Message implements Serializable {
     public Message(Message msg){
         this.typeMessage = msg.typeMessage;
         this.srcIP = msg.srcIP;
-        this.srcResponsePort = msg.srcResponsePort;
         this.destIP = msg.destIP;
         this.destPort = msg.destPort;
     }
@@ -56,17 +54,14 @@ public class Message implements Serializable {
      *
      * @param srcIP
      *              IP depuis laquelle le msg à été envoyé
-     * @param srcResponsePort
-     *              Port à utiliser pour répondre à ce message
      * @param destIP
      *              Ip de la machine destinataire
      * @param destPort
      *              Port de la machine destinataire
      */
-    public Message(int typeMessage,InetAddress srcIP, int srcResponsePort,InetAddress destIP,int destPort){
+    public Message(int typeMessage,InetAddress srcIP,InetAddress destIP,int destPort){
         this.typeMessage = typeMessage;
         this.srcIP = srcIP;
-        this.srcResponsePort = srcResponsePort;
         this.destIP = destIP;
         this.destPort = destPort;
     }

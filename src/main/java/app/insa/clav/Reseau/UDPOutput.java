@@ -19,17 +19,21 @@ public class UDPOutput{
      */
     private DatagramSocket socket;
 
+    private InetAddress addrBroadcast;
+    private int destPort;
+
     /**
      * Constructeur
      * @param localAddress
      *                  IP locale
-     * @param outputPort
-     *                  Port du socket output
+     * @param destPort
+     *                  Port de destination
      */
-    public UDPOutput(InetAddress localAddress, int outputPort){
+    public UDPOutput(InetAddress localAddress, int destPort){
         try {
-            this.socket = new DatagramSocket(outputPort, localAddress);
+            this.socket = new DatagramSocket(0, localAddress);
             this.socket.setBroadcast(true);
+            this.destPort = destPort;
         }
         catch (SocketException e){
             System.out.println("Exception creation SocketDatagrammeConfiguration");
@@ -56,7 +60,7 @@ public class UDPOutput{
                 System.out.println("Exception serialisation de l'objet envoi message");
             }
             //InetAddress broadcastAdress = InetAddress.getByAddress("255.255.255.255".getBytes());
-            DatagramPacket packet = new DatagramPacket(buffer,buffer.length,msg.destIP,msg.destPort);
+            DatagramPacket packet = new DatagramPacket(buffer,buffer.length,msg.destIP,this.destPort);
             this.socket.send(packet);
         }
         catch (UnknownHostException e){

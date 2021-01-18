@@ -24,14 +24,13 @@ public class MessagePseudo extends Message {
      * @see Message
      * @param typeMessage
      * @param srcIP
-     * @param srcPort
      * @param destIP
      * @param destPort
      * @param pseudo
      * @param id
      */
-    public MessagePseudo(int typeMessage, InetAddress srcIP, int srcPort, InetAddress destIP, int destPort, String pseudo, int id) {
-        super(typeMessage, srcIP, srcPort, destIP, destPort);
+    public MessagePseudo(int typeMessage, InetAddress srcIP, InetAddress destIP, int destPort, String pseudo, int id) {
+        super(typeMessage, srcIP, destIP, destPort);
         this.pseudo = pseudo;
         this.id = id;
     }
