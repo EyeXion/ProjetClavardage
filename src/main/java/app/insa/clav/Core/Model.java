@@ -1,7 +1,6 @@
 package app.insa.clav.Core;
 
 import app.insa.clav.Messages.Message;
-import app.insa.clav.Messages.MessageChatTxt;
 import app.insa.clav.Messages.MessageInit;
 import app.insa.clav.Messages.MessagePseudo;
 import app.insa.clav.Reseau.TCPChatConnection;
@@ -10,17 +9,13 @@ import app.insa.clav.Reseau.UDPInput;
 import app.insa.clav.Reseau.UDPOutput;
 import javafx.application.Application;
 import javafx.application.Platform;
-import jdk.jshell.execution.Util;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 import java.net.*;
-import java.util.Collections;
-import java.util.Timer;
-import java.util.TimerTask;
 //Toutes les interactions avec l'utilisateur (pour tester)
 
 /**
@@ -90,24 +85,42 @@ public class Model implements PropertyChangeListener{
 
 
     /**
-     * Constructeur
-
-     *           Id de l'utilisateur (unique dans toutes les machines)
-     * @param inputPort
-     *                  Port d'input UDP
-     * @param outputPort
-     *                  Port d'Output UDP
+     * @param addrBroadcast
+     * @param portListening
+     * @param app
+     * @param addrBdd
+     * @param userBdd
+     * @param mdpBdd
      */
-/*
-ID 1 -> Listening on 6000, sending on 5000, tcpServer on 7000
-ID 2 -> Listening on 6001, sending on 5001, tcpServer on 7001
-ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
-*/
     private Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
+        System.out.println("On essai de creer le modele");
         try {
-            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0);
-            this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), portListening);
-            this.UDPIn = new UDPInput(user.getInetAddress(), portListening);
+            boolean founded = false;
+            InetAddress addrBcst = InetAddress.getByName(addrBroadcast);
+            InetAddress addrLocal = null;
+
+            final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements() && !founded) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                if (!networkInterface.isLoopback() && networkInterface.isUp()) {
+                    List<InterfaceAddress> addressesInterface = networkInterface.getInterfaceAddresses();
+                    System.out.println(addressesInterface.toString());
+                    Iterator<InterfaceAddress> addressesInterfaceIterator = addressesInterface.iterator();
+                    while (addressesInterfaceIterator.hasNext()) {
+                        InterfaceAddress addresseInterface = addressesInterfaceIterator.next();
+                        if (addresseInterface.getBroadcast() != null && addresseInterface.getBroadcast().equals(addrBcst)) {
+                            founded = true;
+                            addrLocal = addresseInterface.getAddress();
+                        }
+                    }
+                }
+            }
+
+            System.out.println("Addresse de broadcast : " + addrBcst.toString() + "\nAddresse de l'utilisateur local : " + addrLocal.toString());
+
+            this.user = new Utilisateurs("NA", addrLocal, 0, 0);
+            this.UDPOut = new UDPOutput(addrBcst, this.user.getInetAddress(), portListening);
+            this.UDPIn = new UDPInput(this.user.getInetAddress(), portListening);
             this.tcpListener = new TCPListener(this.user.getInetAddress(), user.getId());
             this.tim= new Timer();
             this.support = new PropertyChangeSupport(this);
@@ -141,7 +154,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     public static Model getInstance(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
         synchronized(Model.class){
             if (instance == null) {
-                instance = new Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd);
+                instance = new Model(addrBroadcast, portListening, app, addrBdd, userBdd, mdpBdd);
             }
         }
         return instance;
@@ -309,7 +322,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 break;
             case 2 :
                 MessagePseudo msgP2 = (MessagePseudo) msg;
-                Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id,msgP2.srcResponsePort);
+                Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id, msgP2.destPort);
                 if (!this.userList.contains(newUser2)) {
                     this.userList.add(newUser2);
                     Collections.sort(this.userList);
@@ -319,7 +332,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
             case 3 :
                 System.out.println("Received message type 3");
                 MessagePseudo msgP3 = (MessagePseudo) msg;
-                Utilisateurs newUser3 = new Utilisateurs(msgP3.pseudo,msgP3.srcIP,msgP3.id,msgP3.srcResponsePort);
+                Utilisateurs newUser3 = new Utilisateurs(msgP3.pseudo,msgP3.srcIP,msgP3.id, msgP3.destPort);
                 if (!this.userList.contains(newUser3)) {
                     this.userList.add(newUser3);
                     Collections.sort(this.userList);
@@ -333,7 +346,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 break;
             case 4:
                 MessagePseudo msgP4 = (MessagePseudo) msg;
-                Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id,msgP4.srcResponsePort);
+                Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id, msgP4.destPort);
                 this.userList.remove(newUser4);
                 this.userList.add(newUser4);
                 Collections.sort(this.userList);
@@ -341,7 +354,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 break;
             case 7 :
                 MessagePseudo msgP7 = (MessagePseudo) msg;
-                Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id,msgP7.srcResponsePort);
+                Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id, msgP7.destPort);
                 this.userList.remove(User7);
                 this.support.firePropertyChange("newUserConnected",true,false);
             default :
@@ -357,10 +370,10 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
     private void handleType1Message(MessagePseudo msg){
         MessagePseudo msgResponse;
         if (this.user.getPseudo().equals(msg.pseudo)){
-            msgResponse = new MessagePseudo(3, this.user.getInetAddress(), this.user.getPort(),  msg.srcIP, msg.srcResponsePort,this.user.getPseudo(),this.user.getId());
+            msgResponse = new MessagePseudo(3, this.user.getInetAddress(), msg.srcIP, this.user.getTcpListeningPort(), this.user.getPseudo(),this.user.getId());
         }
         else{
-            msgResponse = new MessagePseudo(2, this.user.getInetAddress(), this.user.getPort(),  msg.srcIP, msg.srcResponsePort,this.user.getPseudo(),this.user.getId());
+            msgResponse = new MessagePseudo(2, this.user.getInetAddress(),  msg.srcIP, this.user.getTcpListeningPort(), this.user.getPseudo(),this.user.getId());
         }
         this.UDPOut.sendMsg(msgResponse);
     }
@@ -408,18 +421,8 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      */
     public void sendDeconnectionMessage() {
         try {
-            if (user.getId() == 1 || user.getId() == 2) {
-                MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPort(), InetAddress.getLocalHost(), 6002, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 2 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6000, this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
-            if (user.getId() == 1 || user.getId() == 3) {
-                MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPort(),  InetAddress.getLocalHost(), 6001,this.user.getPseudo(),this.user.getId());
-                UDPOut.sendMsg(msg);
-            }
+            MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), InetAddress.getLocalHost(), 0, this.user.getPseudo(),this.user.getId());
+            UDPOut.sendMsg(msg);
         }
         catch (UnknownHostException e){
             System.out.println(("exception Trouver host dans sendPseudoBroadcast"));

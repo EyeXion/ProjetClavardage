@@ -24,11 +24,14 @@ public class DataBaseAccess {
             e.printStackTrace();
         }
         try {
-            con = DriverManager.getConnection("jdbc:mysql://" + addr + ":3306/testDBChat?useSSL=false", user, mdp);
+            String urlBdd = "jdbc:mysql://" + addr + ":3306/testDBChat?useSSL=false";
+            System.out.println("Tentative de connection à : " + urlBdd);
+            con = DriverManager.getConnection(urlBdd, user, mdp);
             //con = DriverManager.getConnection("jdbc:mysql://srv-bdens.insa-toulouse.fr:3306/tp_servlet_013?useSSL=false", "tp_servlet_013", "eiN3ahng");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+        System.out.println(con.toString());
     }
 
     /** Used to get Instance/Create Instance of DBAccess if necessary
@@ -36,12 +39,15 @@ public class DataBaseAccess {
      */
     public static DataBaseAccess getInstance(String addr, String user, String mdp) {
         synchronized (DataBaseAccess.class) {
-            DataBaseAccess res = instance;
-            if (res == null) {
-                res = new DataBaseAccess(addr, user, mdp);
+            if (instance == null) {
+                instance = new DataBaseAccess(addr, user, mdp);
             }
-            return res;
+            return instance;
         }
+    }
+
+    public static DataBaseAccess getInstance() {
+            return instance;
     }
 
     /**

@@ -167,7 +167,7 @@ public class TCPChatConnection extends Thread{
     }
 
     public void sendMessageTxt(MessageDisplay msgDisp){
-        MessageChatTxt msg = new MessageChatTxt(6,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate());
+        MessageChatTxt msg = new MessageChatTxt(6,this.link.getLocalAddress(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate());
         try {
             this.objectOutStream.writeObject(msg);
         } catch (IOException e) {
@@ -178,7 +178,7 @@ public class TCPChatConnection extends Thread{
 
     public void sendMessageFile(MessageDisplayFile msgDisp){
         int bytes = 0;
-        MessageChatFile msgStartofFile = new MessageChatFile(9,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate(),msgDisp.getFile().length(),msgDisp.getExt());
+        MessageChatFile msgStartofFile = new MessageChatFile(9,this.link.getLocalAddress(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate(),msgDisp.getFile().length(),msgDisp.getExt());
         try {
             this.objectOutStream.writeObject(msgStartofFile);
         } catch (IOException e) {
@@ -202,7 +202,7 @@ public class TCPChatConnection extends Thread{
      * When receiving a type 8 message, closed the chat connection
      */
     public void sendCloseChat() {
-        Message msg = new Message(8,this.link.getLocalAddress(),this.link.getLocalPort(),this.link.getInetAddress(),this.link.getPort());
+        Message msg = new Message(8,this.link.getLocalAddress(),this.link.getInetAddress(),this.link.getPort());
         try {
             this.objectOutStream.writeObject(msg);
         } catch (IOException e) {

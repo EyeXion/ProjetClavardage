@@ -1,7 +1,5 @@
 package app.insa.clav.Core;
 
-import java.io.Serializable;
-import java.util.Date;
 import java.net.*;
 
 
@@ -12,16 +10,6 @@ public class Utilisateurs implements Comparable{
     private InetAddress inetAddress;
     private int id;
     private String login;
-
-    public Date getLatestUpdate() {
-        return latestUpdate;
-    }
-
-    public void setLatestUpdate(Date latestUpdate) {
-        this.latestUpdate = latestUpdate;
-    }
-
-    private Date latestUpdate;
 
     private int tcpListeningPort;
 
@@ -74,7 +62,7 @@ public class Utilisateurs implements Comparable{
 
     @Override
     public String toString(){
-        return Integer.toString(this.id) + "|" + this.pseudo + "|" + this.inetAddress.toString();
+        return this.id + "|" + this.pseudo + "|" + this.inetAddress.toString();
     }
 
 
