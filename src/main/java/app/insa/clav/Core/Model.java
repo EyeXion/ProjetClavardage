@@ -395,7 +395,8 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 MessagePseudo msgP7 = (MessagePseudo) msg;
                 Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id,msgP7.srcResponsePort,false);
                 this.userList.remove(User7);
-                this.support.firePropertyChange("newUserConnected",true,false);
+                this.support.firePropertyChange("newUserConnected",-1,-2);
+                break;
             default :
                 System.out.println("Message de type inconnu");
         }
