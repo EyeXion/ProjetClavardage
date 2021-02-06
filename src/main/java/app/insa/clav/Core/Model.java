@@ -4,10 +4,7 @@ import app.insa.clav.Messages.Message;
 import app.insa.clav.Messages.MessageChatTxt;
 import app.insa.clav.Messages.MessageInit;
 import app.insa.clav.Messages.MessagePseudo;
-import app.insa.clav.Reseau.TCPChatConnection;
-import app.insa.clav.Reseau.TCPListener;
-import app.insa.clav.Reseau.UDPInput;
-import app.insa.clav.Reseau.UDPOutput;
+import app.insa.clav.Reseau.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import jdk.jshell.execution.Util;
@@ -16,11 +13,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.net.*;
-import java.util.Collections;
-import java.util.Timer;
-import java.util.TimerTask;
 //Toutes les interactions avec l'utilisateur (pour tester)
 
 /**
@@ -32,6 +27,9 @@ public class Model implements PropertyChangeListener{
      * Liste des utilisateurs connectés.
      */
     private ArrayList<Utilisateurs> userList;
+
+    private ServletConnection servCon;
+
     /**
      * Timer qui permet de planifier des éxécutions dans le temps
      */
@@ -105,7 +103,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
 */
     private Model(int inputPort, int outputPort, int tcpListenerPort, Application app){
         try {
-            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0, inputPort);
+            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0, inputPort, false);
             this.UDPOut = new UDPOutput(InetAddress.getLocalHost(), outputPort);
             this.UDPIn = new UDPInput(user.getInetAddress(),inputPort);
             this.tcpListener = new TCPListener(this.user.getInetAddress(),tcpListenerPort,user.getId());
@@ -120,6 +118,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         this.listTCPConnection = new ArrayList<TCPChatConnection>();
         this.dbAccess = DataBaseAccess.getInstance();
         this.app = app;
+        this.servCon = ServletConnection.getInstance();
     }
 
     /**
@@ -248,16 +247,47 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
      * Méthode appelée par le controleur quand la vue envoie un signal d'appuis bouton changer Pseudo
      * @param pseudo
      *              Pseudo rentré par l'utilisateur
-     * @return
      */
-    public boolean choosePseudo(String pseudo, boolean isConfirmationNeeded){
+    public void choosePseudo(String pseudo, boolean isConfirmationNeeded){
         this.ancienPseudo = this.user.getPseudo();
         this.user.setPseudo(pseudo);
-        this.UDPIn.setFilterValue(2,true);
-        this.UDPIn.setFilterValue(3,true);
-        this.sendPseudoBroadcast();
-        this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded),1000);
-        return true;
+        this.UDPIn.setFilterValue(2, true);
+        this.UDPIn.setFilterValue(3, true);
+        if (!this.user.isOutdoor()) {
+            this.sendPseudoBroadcast();
+            this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded), 2000);
+            ArrayList<Utilisateurs> outdoorUsers = servCon.getRemoteActiveUsers();
+            for (Utilisateurs newUser : outdoorUsers) {
+                if (newUser.getPseudo().equals(this.user.getPseudo())) {
+                    this.isPseudoOk = false;
+                    this.user.setPseudo(this.ancienPseudo);
+                    this.ancienPseudo = "";
+                    this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
+                }
+                if (!this.userList.contains(newUser)) {
+                    this.userList.add(newUser);
+                    Collections.sort(this.userList);
+                    this.support.firePropertyChange("newUserConnected", -1, -2);
+                }
+            }
+        }
+        else{
+            this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded), 2000);
+            ArrayList<Utilisateurs> users = servCon.getAllActiveUsers();
+            for (Utilisateurs newUser : users) {
+                if (newUser.getPseudo().equals(this.user.getPseudo())) {
+                    this.isPseudoOk = false;
+                    this.user.setPseudo(this.ancienPseudo);
+                    this.ancienPseudo = "";
+                    this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
+                }
+                if (!this.userList.contains(newUser)) {
+                    this.userList.add(newUser);
+                    Collections.sort(this.userList);
+                    this.support.firePropertyChange("newUserConnected", -1, -2);
+                }
+            }
+        }
     }
 
     /** Sets the id
@@ -331,7 +361,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 break;
             case 2 :
                 MessagePseudo msgP2 = (MessagePseudo) msg;
-                Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id,msgP2.srcResponsePort);
+                Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id,msgP2.srcResponsePort,false);
                 if (!this.userList.contains(newUser2)) {
                     this.userList.add(newUser2);
                     Collections.sort(this.userList);
@@ -341,7 +371,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
             case 3 :
                 System.out.println("Received message type 3");
                 MessagePseudo msgP3 = (MessagePseudo) msg;
-                Utilisateurs newUser3 = new Utilisateurs(msgP3.pseudo,msgP3.srcIP,msgP3.id,msgP3.srcResponsePort);
+                Utilisateurs newUser3 = new Utilisateurs(msgP3.pseudo,msgP3.srcIP,msgP3.id,msgP3.srcResponsePort,false);
                 if (!this.userList.contains(newUser3)) {
                     this.userList.add(newUser3);
                     Collections.sort(this.userList);
@@ -355,7 +385,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 break;
             case 4:
                 MessagePseudo msgP4 = (MessagePseudo) msg;
-                Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id,msgP4.srcResponsePort);
+                Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id,msgP4.srcResponsePort,false);
                 this.userList.remove(newUser4);
                 this.userList.add(newUser4);
                 Collections.sort(this.userList);
@@ -363,7 +393,7 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 break;
             case 7 :
                 MessagePseudo msgP7 = (MessagePseudo) msg;
-                Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id,msgP7.srcResponsePort);
+                Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id,msgP7.srcResponsePort,false);
                 this.userList.remove(User7);
                 this.support.firePropertyChange("newUserConnected",true,false);
             default :
@@ -486,8 +516,6 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
         }
         this.dbAccess.deleteHistory(remoteId,user.getId());
     }
-
-
     /**
      * Classe interne au model pour au bout d'une seconde d'envoi de demande pseudo type 1,
      * on desactive les filtes et on met à jour la vue.
@@ -514,7 +542,13 @@ ID 2 -> Listening on 6002, sending on 5002, tcpServer on 7002
                 support.firePropertyChange("pseudoValide",ancienPseudo,user.getPseudo());
                 UDPIn.setFilterValue(1,true);
                 if (isConfirmationNeeded){
-                    sendPseudoValideBroadcast();
+                    if (!user.isOutdoor()) {
+                        sendPseudoValideBroadcast();
+                        servCon.submitConnectionIndoor(user);
+                    }
+                    else{
+                        servCon.submitConnectionOutdoor(user);
+                    }
                 }
             }
             else{

@@ -4,6 +4,7 @@ import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Core.Model;
 import app.insa.clav.Core.Utilisateurs;
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXToggleButton;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -117,6 +118,13 @@ public class ConnectionScreenController implements Initializable, PropertyChange
      */
     private boolean isSubmittingNewPseudoIn;
 
+
+    /**
+     * True if the user is outdoor
+     */
+    @FXML
+    private JFXToggleButton isOutdoorUserButton;
+
     private DataBaseAccess dbAccess;
 
     private String loginUp;
@@ -193,6 +201,11 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     }
 
 
+    @FXML
+    void outdoorUserAction(ActionEvent event) {
+        this.model.user.setOutdoor(this.isOutdoorUserButton.isSelected());
+    }
+
     /**
      * Handler of notifications sent by te model
      * @param evt
@@ -204,7 +217,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                 this.model.deletePropertyChangeListener(this,"pseudoValide");
                 this.model.deletePropertyChangeListener(this,"pseudoRefused");
                 System.out.println("Pseudo valide");
-                if (isSubmittingUp){
+                if (isSubmittingUp && !this.model.user.isOutdoor()){
                     this.pseudoValideUp();
                 }
                 if (this.isSubmittingNewPseudoIn){

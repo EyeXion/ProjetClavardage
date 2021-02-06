@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXToggleButton?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
@@ -50,5 +51,6 @@
             <Font name="Ubuntu" size="14.0" />
          </font>
       </Label>
+      <JFXToggleButton fx:id="isOutdoorUserButton" layoutX="-9.0" onAction="#outdoorUserAction" prefHeight="24.0" prefWidth="194.0" text="Outdoor User" />
    </children>
 </AnchorPane>

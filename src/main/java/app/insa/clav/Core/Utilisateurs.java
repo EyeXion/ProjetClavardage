@@ -13,6 +13,7 @@ public class Utilisateurs implements Comparable{
     private int id;
     private int port;
     private String login;
+    private boolean isOutdoor;
 
     public Date getLatestUpdate() {
         return latestUpdate;
@@ -24,11 +25,12 @@ public class Utilisateurs implements Comparable{
 
     private Date latestUpdate;
 
-    public Utilisateurs(String pseudo, InetAddress inetAddress, int id, int port) {
+    public Utilisateurs(String pseudo, InetAddress inetAddress, int id, int port, boolean isOutdoor) {
         this.pseudo = pseudo;
         this.inetAddress = inetAddress;
         this.id = id;
         this.port = port;
+        this.isOutdoor = isOutdoor;
     }
 
     public void setPseudo(String pseudo) {
@@ -62,6 +64,16 @@ public class Utilisateurs implements Comparable{
     public int getPort() {
         return port;
     }
+
+
+    public boolean isOutdoor() {
+        return isOutdoor;
+    }
+
+    public void setOutdoor(boolean outdoor) {
+        isOutdoor = outdoor;
+    }
+
 
     @Override
     public String toString(){
