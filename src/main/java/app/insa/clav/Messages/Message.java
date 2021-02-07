@@ -32,8 +32,6 @@ public class Message implements Serializable {
      */
     public int typeMessage;
     public InetAddress srcIP;
-    public InetAddress destIP; //Seulement pour UDP ou ouverture CO TCP
-    public int destPort; //Seulement pour UDP ou l'ouverture connexion TCP, sinon à 0.
 
     /**
      * Constructeur d'un message depuis un autre
@@ -42,8 +40,6 @@ public class Message implements Serializable {
     public Message(Message msg){
         this.typeMessage = msg.typeMessage;
         this.srcIP = msg.srcIP;
-        this.destIP = msg.destIP;
-        this.destPort = msg.destPort;
     }
 
     /**
@@ -54,15 +50,9 @@ public class Message implements Serializable {
      *
      * @param srcIP
      *              IP depuis laquelle le msg à été envoyé
-     * @param destIP
-     *              Ip de la machine destinataire
-     * @param destPort
-     *              Port de la machine destinataire
      */
-    public Message(int typeMessage,InetAddress srcIP,InetAddress destIP,int destPort){
+    public Message(int typeMessage,InetAddress srcIP){
         this.typeMessage = typeMessage;
         this.srcIP = srcIP;
-        this.destIP = destIP;
-        this.destPort = destPort;
     }
 }

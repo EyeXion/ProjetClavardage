@@ -144,7 +144,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     @FXML
     void submitConnection(ActionEvent event) {
         String login = this.loginInputIn.getText();
-        System.out.println(this.dbAccess == null);
+        //System.out.println(this.dbAccess == null);
         if (!login.equals("") && !this.isSubmittingIn && !this.isSubmittingUp) {
             this.isSubmittingIn = true;
             this.spinnerIn.setVisible(true);
@@ -166,13 +166,12 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     void submitSignUp(ActionEvent event) {
         this.loginUp = this.loginInputUp.getText();
         this.pseudoUp = this.pseudoInputUp.getText();
-        System.out.println("login = " + loginUp + " and pseudo = " + pseudoUp);
         if (!this.loginUp.equals("") && !this.pseudoUp.equals("") && !this.isSubmittingIn && !this.isSubmittingUp){
             this.isSubmittingUp = true;
             this.spinnerUp.setVisible(true);
-            boolean isLoginOk = this.dbAccess.isLoginUsed(this.loginUp);
-            if (isLoginOk){
-                this.model.choosePseudo(this.pseudoUp,false);
+            boolean loginExist = this.dbAccess.isLoginUsed(this.loginUp);
+            if (!loginExist){
+                this.model.choosePseudo(this.pseudoUp,true);
             }
             else{
                 this.labelErrorUpLogin.setVisible(true);
@@ -186,6 +185,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
      * Called when signing up and pseudo valid, used to update DB ad send pseudo Confirmation
      */
     private void pseudoValideUp(){
+        System.out.println("Log et pseudo " + this.loginUp + this.pseudoUp);
         this.model.setUserId(this.dbAccess.addUtilisateur(this.loginUp,this.pseudoUp));
         this.model.sendPseudoValideBroadcast();
     }

@@ -20,7 +20,7 @@ public class MessageChatTxt extends Message{
     }
 
     public MessageChatTxt(int typeMessage, InetAddress srcIP, InetAddress destIP, int destPort, String payload, String date) {
-        super(typeMessage, srcIP, destIP, destPort);
+        super(typeMessage, srcIP);
         this.payload = payload;
         this.date = date;
     }

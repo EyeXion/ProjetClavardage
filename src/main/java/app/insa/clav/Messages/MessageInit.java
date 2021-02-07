@@ -11,7 +11,7 @@ public class MessageInit extends Message{
 
 
     public MessageInit(int typeMessage, InetAddress srcIP, InetAddress destIP, int destPort, int localId) {
-        super(typeMessage, srcIP, destIP, destPort);
+        super(typeMessage, srcIP);
         this.id = localId;
     }
 }

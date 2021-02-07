@@ -39,17 +39,16 @@ public class UDPOutput{
             this.addrBroadcast = addrBroadcast;
         }
         catch (SocketException e){
-            System.out.println("Exception creation SocketDatagrammeConfiguration");
-            e.printStackTrace();
+            System.out.println("Exception creation Socket UDP output");
         }
     }
 
     /**
-     * Envoie le message en paramètre
+     * Envoie le message en paramètre en Broadcast
      * @param msg
      *          Message à envoyer
      */
-    public void sendMsg(Message msg){
+    public void sendBrdcst(Message msg){
         try {
             //Envoi du pseudo sur le reseau local à l'adresse IP dest sur le port dest
             byte[] buffer = "".getBytes();
@@ -62,19 +61,49 @@ public class UDPOutput{
             } catch (IOException e1) {
                 System.out.println("Exception serialisation de l'objet envoi message");
             }
-            //InetAddress broadcastAdress = InetAddress.getByAddress("255.255.255.255".getBytes());
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length,this.addrBroadcast,this.portListening);
-            System.out.println(packet.toString());
-            System.out.println(this.addrBroadcast.toString());
+            //System.out.println(packet.toString());
+            //System.out.println(this.addrBroadcast.toString());
             this.socket.send(packet);
         }
         catch (UnknownHostException e){
             System.out.println("Unknown host dans broadcast address");
-            e.printStackTrace();
         }
         catch (IOException e){
-            System.out.println("IOException send pseudo");
-            e.printStackTrace();
+            System.out.println("IOException sendbrcst");
+        }
+    }
+
+    /**
+     * Envoie le message en paramètre
+     * @param msg
+     *          Message à envoyer
+     * @param destIP
+     *          IP du destinataire
+     */
+    public void sendMsg(Message msg, InetAddress destIP){
+        try {
+            //Envoi du pseudo sur le reseau local à l'adresse IP dest sur le port dest
+            byte[] buffer = "".getBytes();
+            ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+            try {
+                ObjectOutputStream objectOutStream = new ObjectOutputStream(byteOutStream);
+                objectOutStream.writeObject(msg);
+                objectOutStream.close();
+                buffer = byteOutStream.toByteArray();
+            } catch (IOException e1) {
+                System.out.println("Exception serialisation de l'objet envoi message");
+            }
+            DatagramPacket packet = new DatagramPacket(buffer,buffer.length, destIP, this.portListening);
+            //System.out.println(packet.toString());
+            //System.out.println(this.addrBroadcast.toString());
+            this.socket.send(packet);
+        }
+        catch (UnknownHostException e){
+            System.out.println("Unknown host dans sendmsg");
+        }
+        catch (IOException e){
+            System.out.println("IOException sendmsg");
         }
     }
 }

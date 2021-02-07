@@ -93,7 +93,7 @@ public class Model implements PropertyChangeListener{
      * @param mdpBdd
      */
     private Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
-        System.out.println("On essai de creer le modele");
+        //System.out.println("On essai de creer le modele");
         try {
             boolean founded = false;
             InetAddress addrBcst = InetAddress.getByName(addrBroadcast);
@@ -104,7 +104,7 @@ public class Model implements PropertyChangeListener{
                 NetworkInterface networkInterface = interfaces.nextElement();
                 if (!networkInterface.isLoopback() && networkInterface.isUp()) {
                     List<InterfaceAddress> addressesInterface = networkInterface.getInterfaceAddresses();
-                    System.out.println(addressesInterface.toString());
+                    //System.out.println(addressesInterface.toString());
                     Iterator<InterfaceAddress> addressesInterfaceIterator = addressesInterface.iterator();
                     while (addressesInterfaceIterator.hasNext()) {
                         InterfaceAddress addresseInterface = addressesInterfaceIterator.next();
@@ -116,17 +116,18 @@ public class Model implements PropertyChangeListener{
                 }
             }
 
-            System.out.println("Addresse de broadcast : " + addrBcst.toString() + "\nAddresse de l'utilisateur local : " + addrLocal.toString());
+            //System.out.println("Addresse de broadcast : " + addrBcst.toString() + "\nAddresse de l'utilisateur local : " + addrLocal.toString());
 
             this.user = new Utilisateurs("NA", addrLocal, 0, 0);
             this.UDPOut = new UDPOutput(addrBcst, this.user.getInetAddress(), portListening);
             this.UDPIn = new UDPInput(this.user.getInetAddress(), portListening);
             this.tcpListener = new TCPListener(this.user.getInetAddress(), user.getId());
+            this.user.setTcpListeningPort(this.tcpListener.getPort());
             this.tim= new Timer();
             this.support = new PropertyChangeSupport(this);
         }
         catch (IOException e){
-            System.out.println("IOException dans la creation de l'utilisateur local");
+            System.out.println("IOException dans la creation du modele");
             e.printStackTrace();
         }
         this.userList = new ArrayList<Utilisateurs>();
@@ -165,6 +166,9 @@ public class Model implements PropertyChangeListener{
      * @return instance of Model
      */
     public static Model getInstance(){
+        if (instance == null) {
+            System.out.println("ATTENTION : getInstance null renvoyé");
+        }
         return instance;
     }
 
@@ -214,33 +218,24 @@ public class Model implements PropertyChangeListener{
     }
 
     /**
-     * Envoi un messagePseudo de type 1 aux 3 machines de test
+     * Envoi un messagePseudo de type 1
      */
     public void sendPseudoBroadcast(){
-        //System.out.println("Send pseudo broadcast with" + this.user.getPseudo());
-        try {
-            MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), InetAddress.getLocalHost(), 0, this.user.getPseudo(),this.user.getId());
-            UDPOut.sendMsg(msg);
-        }
-        catch (UnknownHostException e){
-            System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
-            e.printStackTrace();
-        }
+        //System.out.println("Demande de validaton du pseudo : " + this.user.getPseudo());
+        MessagePseudo msg = new MessagePseudo(1, this.user.getInetAddress(), this.user.getPseudo(), 0, this.user.getId());
+        //System.out.println("Message envoyé : " + msg.toString());
+        UDPOut.sendBrdcst(msg);
     }
 
     /**
      * Envoi message de type 4 (confirmation pseudo)
      */
     public void sendPseudoValideBroadcast(){
-        System.out.println("Send pseudo Valide broadcast with" + this.user.getPseudo());
-        try {
-            MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), InetAddress.getLocalHost(), 0, this.user.getPseudo(),this.user.getId());
-            UDPOut.sendMsg(msg);
-        }
-        catch (UnknownHostException e){
-            System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
-            e.printStackTrace();
-        }
+        //System.out.println("Confirmation du pseudo : " + this.user.getPseudo());
+        MessagePseudo msg = new MessagePseudo(4, this.user.getInetAddress(), this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
+        //System.out.println("Message envoyé : " + msg.toString());
+        UDPOut.sendBrdcst(msg);
+        //UDPIn.printFilter();
     }
 
     /**
@@ -283,7 +278,7 @@ public class Model implements PropertyChangeListener{
             for (Utilisateurs u : userList) {
                 if (u.getPseudo().equals(remotePseudo)) {
                     MessageInit msgInit = new MessageInit(7, user.getInetAddress(), u.getInetAddress(), u.getTcpListeningPort(), user.getId());
-                    TCPChatConnection tcpCo = new TCPChatConnection(msgInit, u.getId());
+                    TCPChatConnection tcpCo = new TCPChatConnection(msgInit,u.getInetAddress(), u.getTcpListeningPort(), u.getId());
                     listTCPConnection.add(tcpCo);
                 }
             }
@@ -322,7 +317,9 @@ public class Model implements PropertyChangeListener{
                 break;
             case 2 :
                 MessagePseudo msgP2 = (MessagePseudo) msg;
-                Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id, msgP2.destPort);
+                //System.out.println("Message de type 2 reçu : " + msgP2.toString());
+                Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id, msgP2.portEcouteTCP);
+                //System.out.println("Utilisateur créé : " + newUser2.toString());
                 if (!this.userList.contains(newUser2)) {
                     this.userList.add(newUser2);
                     Collections.sort(this.userList);
@@ -330,35 +327,33 @@ public class Model implements PropertyChangeListener{
                 }
                 break;
             case 3 :
-                System.out.println("Received message type 3");
                 MessagePseudo msgP3 = (MessagePseudo) msg;
-                Utilisateurs newUser3 = new Utilisateurs(msgP3.pseudo,msgP3.srcIP,msgP3.id, msgP3.destPort);
-                if (!this.userList.contains(newUser3)) {
-                    this.userList.add(newUser3);
-                    Collections.sort(this.userList);
-                    this.support.firePropertyChange("newUserConnected",-1,-2);
-                }
+                //System.out.println("Message de type 3 reçu : " + msgP3.toString());
                 this.isPseudoOk = false;
                 this.user.setPseudo(this.ancienPseudo);
                 this.ancienPseudo = "";
                 this.support.firePropertyChange("pseudoRefused",this.user.getPseudo(),this.ancienPseudo);
-                System.out.println("After pseudo refused");
+                //System.out.println("After pseudo refused");
                 break;
             case 4:
                 MessagePseudo msgP4 = (MessagePseudo) msg;
-                Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id, msgP4.destPort);
-                this.userList.remove(newUser4);
-                this.userList.add(newUser4);
-                Collections.sort(this.userList);
-                this.support.firePropertyChange("newUserConnected",-1,newUser4.getId());
+                //System.out.println("Message de type 4 reçu : " + msgP4.toString());
+                if (msgP4.id != this.user.getId()) {
+                    Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id, msgP4.portEcouteTCP);
+                    //System.out.println("Utilisateur créé : " + newUser4.toString());
+                    this.userList.remove(newUser4);
+                    this.userList.add(newUser4);
+                    Collections.sort(this.userList);
+                    this.support.firePropertyChange("newUserConnected",-1,newUser4.getId());
+                }
                 break;
             case 7 :
                 MessagePseudo msgP7 = (MessagePseudo) msg;
-                Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id, msgP7.destPort);
+                Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id, msgP7.portEcouteTCP);
                 this.userList.remove(User7);
                 this.support.firePropertyChange("newUserConnected",true,false);
             default :
-                System.out.println("Message de type inconnu");
+                //System.out.println("Message de type inconnu");
         }
     }
 
@@ -369,13 +364,19 @@ public class Model implements PropertyChangeListener{
      */
     private void handleType1Message(MessagePseudo msg){
         MessagePseudo msgResponse;
-        if (this.user.getPseudo().equals(msg.pseudo)){
-            msgResponse = new MessagePseudo(3, this.user.getInetAddress(), msg.srcIP, this.user.getTcpListeningPort(), this.user.getPseudo(),this.user.getId());
+        //System.out.println("Message de type 1 reçu : " + msg.toString());
+        if (msg.id != this.user.getId()) {
+            if (this.user.getPseudo().equals(msg.pseudo)){
+                msgResponse = new MessagePseudo(3, null, msg.pseudo, 0, 0);
+                //System.out.println("Pseudo pas OK, on envoi : " + msgResponse.toString());
+            } else{
+                msgResponse = new MessagePseudo(2, this.user.getInetAddress(),this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
+                //System.out.println("Pseudo OK, on envoi : " + msgResponse.toString());
+            }
+            this.UDPOut.sendMsg(msgResponse, msg.srcIP);
+        } else {
+            //System.out.println("Moi-même -> IGNORED");
         }
-        else{
-            msgResponse = new MessagePseudo(2, this.user.getInetAddress(),  msg.srcIP, this.user.getTcpListeningPort(), this.user.getPseudo(),this.user.getId());
-        }
-        this.UDPOut.sendMsg(msgResponse);
     }
 
     /**
@@ -420,20 +421,14 @@ public class Model implements PropertyChangeListener{
      * Sends a deconnection Messages (type 7) in broadcast
      */
     public void sendDeconnectionMessage() {
-        try {
-            MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), InetAddress.getLocalHost(), 0, this.user.getPseudo(),this.user.getId());
-            UDPOut.sendMsg(msg);
-        }
-        catch (UnknownHostException e){
-            System.out.println(("exception Trouver host dans sendPseudoBroadcast"));
-            e.printStackTrace();
-        }
+        MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
+        UDPOut.sendBrdcst(msg);
         try {
             this.app.stop();
             Platform.exit();
             System.exit(0);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Erreur lors de l'envoi du message de deconnexion'");
         }
     }
 
@@ -446,7 +441,7 @@ public class Model implements PropertyChangeListener{
         try {
             link.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Erreur lors de la fermeture du Chat");
         }
     }
 

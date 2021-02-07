@@ -61,10 +61,15 @@ public class Utilisateurs implements Comparable{
     }
 
     @Override
-    public String toString(){
-        return this.id + "|" + this.pseudo + "|" + this.inetAddress.toString();
+    public String toString() {
+        return "Utilisateurs{" +
+                "pseudo='" + pseudo + '\'' +
+                ", inetAddress=" + inetAddress +
+                ", id=" + id +
+                ", login='" + login + '\'' +
+                ", tcpListeningPort=" + tcpListeningPort +
+                '}';
     }
-
 
     @Override
     public boolean equals(Object obj) {

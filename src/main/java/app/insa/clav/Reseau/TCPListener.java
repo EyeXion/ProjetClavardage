@@ -53,6 +53,9 @@ public class TCPListener extends Thread{
         this.support.addPropertyChangeListener("chatCreated",pcl);
     }
 
+    public int getPort() {
+        return port;
+    }
 
     public TCPChatConnection getTCPChatConnection(){return this.bufferTCPConnection.remove(0);}
 

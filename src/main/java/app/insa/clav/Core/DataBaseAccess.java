@@ -21,17 +21,17 @@ public class DataBaseAccess {
         try {
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("Erreur lors de la récupération de la classe dans DataBaseAccess");
         }
         try {
             String urlBdd = "jdbc:mysql://" + addr + ":3306/testDBChat?useSSL=false";
-            System.out.println("Tentative de connection à : " + urlBdd);
+            //System.out.println("Tentative de connection à : " + urlBdd);
             con = DriverManager.getConnection(urlBdd, user, mdp);
             //con = DriverManager.getConnection("jdbc:mysql://srv-bdens.insa-toulouse.fr:3306/tp_servlet_013?useSSL=false", "tp_servlet_013", "eiN3ahng");
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de la connexion à la BDD");
         }
-        System.out.println(con.toString());
+        //System.out.println(con.toString());
     }
 
     /** Used to get Instance/Create Instance of DBAccess if necessary
@@ -47,7 +47,10 @@ public class DataBaseAccess {
     }
 
     public static DataBaseAccess getInstance() {
-            return instance;
+        if (instance == null) {
+            System.out.println("ATTENTION : DataBaseAccess null renvoyé");
+        }
+        return instance;
     }
 
     /**
@@ -68,7 +71,7 @@ public class DataBaseAccess {
             }
 
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de la requette pseudo from login avec " + login);
         }
         return pseudo;
     }
@@ -79,21 +82,19 @@ public class DataBaseAccess {
      * @return true if already exists, else false
      */
     public boolean isLoginUsed(String login) {
-        String loginAux = null;
+        boolean retour = false;
         String preparedQuery = "SELECT * FROM Utilisateurs WHERE login=?";
         PreparedStatement prSt = null;
         try {
             prSt = con.prepareStatement(preparedQuery);
             prSt.setString(1, login);
             ResultSet rs = prSt.executeQuery();
-            if (rs.first()) {
-                loginAux = rs.getString("login");
-            }
+            retour = rs.first();
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de la requette login used avec " + login);
         }
-        System.out.println("login Aux = " + loginAux);
-        return !(loginAux == null);
+        //System.out.println("login Aux = " + loginAux);
+        return retour;
     }
 
     /** Gets id of user identified by the login
@@ -110,7 +111,7 @@ public class DataBaseAccess {
                 id = rs.getInt(1);
             }
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de la récupération de l'ID avec " + login);
         }
         return id;
     }
@@ -130,6 +131,7 @@ public class DataBaseAccess {
             prSt.setString(2, pseudo);
             prSt.executeUpdate();
         } catch (SQLException throwables) {
+            System.out.println("Erreur lors de l'insertion de l'utilisateur " + login);
             throwables.printStackTrace();
         }
         preparedQuery = "SELECT * FROM Utilisateurs WHERE login=?";
@@ -142,7 +144,7 @@ public class DataBaseAccess {
                 id = rs.getInt("id");
             }
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de la récupération de l'ID de l'utilisateur créé avec " + login);
         }
         return id;
     }
@@ -171,7 +173,6 @@ public class DataBaseAccess {
             ResultSet rs = prSt.executeQuery();
         } catch (SQLException throwables) {
             res = false;
-            throwables.printStackTrace();
         }
         System.out.println(res);
         return res;
@@ -208,7 +209,7 @@ public class DataBaseAccess {
                 history.add(msg);
             }
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de la récupération de l'historique des messages entre " + id1 + " et " + id2);
         }
         return history;
     }
@@ -238,7 +239,7 @@ public class DataBaseAccess {
             prSt.setString(3,message.getPayload());
             prSt.executeUpdate();
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de l'ajout du message " + message.getPayload());
         }
     }
 
@@ -257,7 +258,7 @@ public class DataBaseAccess {
             idPetit = id1;
         }
         String nomTable = "Chat" + idPetit + "_" + idGrand;
-        String preparedQuery = "CREATE TABLE `" +  nomTable +"` (\n" + "`id` int NOT NULL,\n" + "  `sourceId` int NOT NULL,\n" +  "  `date` varchar(30) NOT NULL,\n" +  "  `payload` mediumtext NOT NULL\n" +  ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;";
+        String preparedQuery = "CREATE TABLE `" +  nomTable +"` (\n" + "`id` int NOT NULL,\n" + "  `sourceId` int NOT NULL,\n" +  "  `date` varchar(30) NOT NULL,\n" +  "  `payload` mediumtext NOT NULL\n" +  ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         PreparedStatement prSt = null;
         System.out.println(preparedQuery);
         try {
@@ -270,7 +271,7 @@ public class DataBaseAccess {
             prSt = con.prepareStatement(preparedQuery);
             prSt.executeUpdate();
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de la creation de la table " + nomTable);
         }
     }
 
@@ -287,7 +288,7 @@ public class DataBaseAccess {
             prSt.setInt(2,id);
             prSt.executeUpdate();
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println("Erreur lors de la mise a jour du pseudo " + pseudo);
         }
     }
 }

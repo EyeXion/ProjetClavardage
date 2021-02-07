@@ -18,35 +18,37 @@ public class MessagePseudo extends Message {
      * id de l'utilidateur source du message
      */
     public int id;
+    /**
+     * nport d'ecoute TCP
+     */
+    public int portEcouteTCP;
+
 
     /**
      * Créé un message à partir des info.
      * @see Message
      * @param typeMessage
      * @param srcIP
-     * @param destIP
-     * @param destPort
      * @param pseudo
+     * @param portEcouteTCP
      * @param id
      */
-    public MessagePseudo(int typeMessage, InetAddress srcIP, InetAddress destIP, int destPort, String pseudo, int id) {
-        super(typeMessage, srcIP, destIP, destPort);
+    public MessagePseudo(int typeMessage, InetAddress srcIP, String pseudo, int portEcouteTCP, int id) {
+        super(typeMessage, srcIP);
         this.pseudo = pseudo;
+        this.portEcouteTCP = portEcouteTCP;
         this.id = id;
     }
 
-    /**
-     * Crée un message à partir d'un message de base
-     * @see Message
-     * @param msg
-     * @param id
-     * @param pseudo
-     */
-    //Create Messages.MessagePseudo from Messages.Message
-    public MessagePseudo(Message msg, int id, String pseudo){
-        super(msg);
-        this.pseudo = pseudo;
-        this.id = id;
+    @Override
+    public String toString() {
+        return "MessagePseudo{" +
+                "typeMessage=" + typeMessage +
+                ", srcIP=" + srcIP +
+                ", pseudo='" + pseudo + '\'' +
+                ", id=" + id +
+                ", portEcouteTCP=" + portEcouteTCP +
+                "} " + super.toString();
     }
 
     /**
