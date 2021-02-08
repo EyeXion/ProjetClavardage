@@ -1,7 +1,5 @@
 package app.insa.clav.Core;
 
-import java.io.Serializable;
-import java.util.Date;
 import java.net.*;
 
 
@@ -11,26 +9,17 @@ public class Utilisateurs implements Comparable{
     private String pseudo;
     private InetAddress inetAddress;
     private int id;
-    private int port;
     private String login;
     private boolean isOutdoor;
 
-    public Date getLatestUpdate() {
-        return latestUpdate;
-    }
+    private int tcpListeningPort;
 
-    public void setLatestUpdate(Date latestUpdate) {
-        this.latestUpdate = latestUpdate;
-    }
 
-    private Date latestUpdate;
-
-    public Utilisateurs(String pseudo, InetAddress inetAddress, int id, int port, boolean isOutdoor) {
+    public Utilisateurs(String pseudo, InetAddress inetAddress, int id, int tcpListeningPort) {
         this.pseudo = pseudo;
         this.inetAddress = inetAddress;
         this.id = id;
-        this.port = port;
-        this.isOutdoor = isOutdoor;
+        this.tcpListeningPort = tcpListeningPort;
     }
 
     public void setPseudo(String pseudo) {
@@ -45,8 +34,8 @@ public class Utilisateurs implements Comparable{
         this.id = id;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setTcpListeningPort(int tcpListeningPort) {
+        this.tcpListeningPort = tcpListeningPort;
     }
 
     public String getPseudo() {
@@ -61,10 +50,9 @@ public class Utilisateurs implements Comparable{
         return id;
     }
 
-    public int getPort() {
-        return port;
+    public String getLogin() {
+        return login;
     }
-
 
     public boolean isOutdoor() {
         return isOutdoor;
@@ -74,12 +62,24 @@ public class Utilisateurs implements Comparable{
         isOutdoor = outdoor;
     }
 
-
-    @Override
-    public String toString(){
-        return Integer.toString(this.id) + "|" + this.pseudo + "|" + this.inetAddress.toString() + "|" + Integer.toString(this.port);
+    public void setLogin(String login) {
+        this.login = login;
     }
 
+    public int getTcpListeningPort() {
+        return tcpListeningPort;
+    }
+
+    @Override
+    public String toString() {
+        return "Utilisateurs{" +
+                "pseudo='" + pseudo + '\'' +
+                ", inetAddress=" + inetAddress +
+                ", id=" + id +
+                ", login='" + login + '\'' +
+                ", tcpListeningPort=" + tcpListeningPort +
+                '}';
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -91,13 +91,5 @@ public class Utilisateurs implements Comparable{
     public int compareTo(Object o) {
         Utilisateurs u = (Utilisateurs)  o;
         return this.pseudo.compareTo(u.pseudo);
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
     }
 }

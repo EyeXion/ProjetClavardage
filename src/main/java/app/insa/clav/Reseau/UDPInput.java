@@ -42,14 +42,15 @@ public class UDPInput extends Thread{
      * Constructeur
      * @param localAddress
      *                  Adresse IP locale
-     * @param localPort
+     * @param listeningPort
      *                  Numéro de port de la machine locale sur lequel on écoute (le même sur toutes les machines en théorie)
      */
-    public UDPInput(InetAddress localAddress, int localPort){
+    public UDPInput(InetAddress localAddress, int listeningPort){
         try {
-            this.socket = new DatagramSocket(localPort,localAddress);
+            this.socket = new DatagramSocket(listeningPort,localAddress);
+            //System.out.println("\n\nADRESSE DU SOCKET : " + localAddress.toString());
             this.filter = new boolean[8];
-            this.filter[1] = false;
+            this.filter[1] = true;
             this.filter[2] = false;
             this.filter[3] = false;
             this.filter[4] = true;
@@ -59,8 +60,7 @@ public class UDPInput extends Thread{
             this.support = new PropertyChangeSupport(this);
         }
         catch (SocketException e){
-            System.out.println("Exception creation SocketDatagrammeConfiguration");
-            e.printStackTrace();
+            System.out.println("Exception creation Socket UDP input");
         }
     }
 
@@ -94,6 +94,13 @@ public class UDPInput extends Thread{
         this.filter[index] = value;
     }
 
+    public void printFilter() {
+        int i;
+        for (i=0;i<8;i++) {
+            System.out.println("Filtre de type " + i + " : " + this.filter[i]);
+        }
+    }
+
     /**
      * Ecoute en permanance le socket UDP et si un message reçu passe le filtre, on notifie les observateurs
      */
@@ -104,11 +111,13 @@ public class UDPInput extends Thread{
             DatagramPacket inputPacket = new DatagramPacket(buffer,buffer.length);
             try
             {
+                //System.out.println("En attente de reception d'un message");
                 this.socket.receive(inputPacket);
+                //System.out.println("Message reçu");
             }
             catch (IOException e){
                 System.out.println("IOException reception paquet UDP");
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             ByteArrayInputStream byteInStream = new ByteArrayInputStream(inputPacket.getData());
             try {
@@ -117,15 +126,17 @@ public class UDPInput extends Thread{
                 if (this.filter[msg.typeMessage]){
                     this.msgReceivedBuffer.add(msg);
                     this.support.firePropertyChange("UDPInput",this.msgReceivedBuffer.size() -1, this.msgReceivedBuffer.size());
+                } else {
+                    System.out.println("Message filtré : " + msg.toString());
                 }
             }
             catch (IOException e){
                 System.out.println("IOException déserialization paquet UDP");
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             catch (ClassNotFoundException e){
                 System.out.println("IOException déserialization paquet UDP");
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

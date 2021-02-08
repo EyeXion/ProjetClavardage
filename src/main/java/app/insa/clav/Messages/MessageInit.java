@@ -10,8 +10,8 @@ public class MessageInit extends Message{
     public int id;
 
 
-    public MessageInit(int typeMessage, InetAddress srcIP, int srcResponsePort, InetAddress destIP, int destPort, int localId) {
-        super(typeMessage, srcIP, srcResponsePort, destIP, destPort);
+    public MessageInit(int typeMessage, InetAddress srcIP, InetAddress destIP, int destPort, int localId) {
+        super(typeMessage, srcIP);
         this.id = localId;
     }
 }

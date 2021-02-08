@@ -2,11 +2,9 @@ package app.insa.clav.UIControllers;
 
 import app.insa.clav.Core.DataBaseAccess;
 import app.insa.clav.Core.Model;
-import app.insa.clav.Core.Utilisateurs;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXToggleButton;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,14 +15,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class ConnectionScreenController implements Initializable, PropertyChangeListener {
 
@@ -137,6 +133,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     public ConnectionScreenController(){
         this.model = Model.getInstance();
         this.dbAccess = DataBaseAccess.getInstance();
+        System.out.println(this.dbAccess.toString());
         this.model.addPropertyChangeListener(this,"pseudoRefused");
         this.model.addPropertyChangeListener(this,"pseudoValide");
         isSubmittingIn = false;
@@ -155,6 +152,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     @FXML
     void submitConnection(ActionEvent event) {
         String login = this.loginInputIn.getText();
+        //System.out.println(this.dbAccess == null);
         if (!login.equals("") && !this.isSubmittingIn && !this.isSubmittingUp) {
             this.isSubmittingIn = true;
             this.spinnerIn.setVisible(true);
@@ -176,13 +174,12 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     void submitSignUp(ActionEvent event) {
         this.loginUp = this.loginInputUp.getText();
         this.pseudoUp = this.pseudoInputUp.getText();
-        System.out.println("login = " + loginUp + " and pseudo = " + pseudoUp);
         if (!this.loginUp.equals("") && !this.pseudoUp.equals("") && !this.isSubmittingIn && !this.isSubmittingUp){
             this.isSubmittingUp = true;
             this.spinnerUp.setVisible(true);
-            boolean isLoginOk = this.dbAccess.isLoginUsed(this.loginUp);
-            if (isLoginOk){
-                this.model.choosePseudo(this.pseudoUp,false);
+            boolean loginExist = this.dbAccess.isLoginUsed(this.loginUp);
+            if (!loginExist){
+                this.model.choosePseudo(this.pseudoUp,true);
             }
             else{
                 this.labelErrorUpLogin.setVisible(true);
@@ -196,6 +193,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
      * Called when signing up and pseudo valid, used to update DB ad send pseudo Confirmation
      */
     private void pseudoValideUp(){
+        System.out.println("Log et pseudo " + this.loginUp + this.pseudoUp);
         this.model.setUserId(this.dbAccess.addUtilisateur(this.loginUp,this.pseudoUp));
         this.model.sendPseudoValideBroadcast();
     }

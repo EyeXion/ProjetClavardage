@@ -19,8 +19,8 @@ public class MessageChatTxt extends Message{
         this.date = date;
     }
 
-    public MessageChatTxt(int typeMessage, InetAddress srcIP, int srcResponsePort, InetAddress destIP, int destPort, String payload, String date) {
-        super(typeMessage, srcIP, srcResponsePort, destIP, destPort);
+    public MessageChatTxt(int typeMessage, InetAddress srcIP, InetAddress destIP, int destPort, String payload, String date) {
+        super(typeMessage, srcIP);
         this.payload = payload;
         this.date = date;
     }
