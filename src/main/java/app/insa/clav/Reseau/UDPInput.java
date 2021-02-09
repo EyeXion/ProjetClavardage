@@ -47,7 +47,7 @@ public class UDPInput extends Thread{
      */
     public UDPInput(InetAddress localAddress, int listeningPort){
         try {
-            this.socket = new DatagramSocket(listeningPort,localAddress);
+            this.socket = new DatagramSocket(listeningPort);
             //System.out.println("\n\nADRESSE DU SOCKET : " + localAddress.toString());
             this.filter = new boolean[8];
             this.filter[1] = true;

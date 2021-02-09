@@ -19,8 +19,9 @@ public class Main extends Application{
         String addrBdd = args[3];
         String userBdd = args[4];
         String mdpBdd = args[5];
+        String nomBDD = args[6];
 
-        Model model = Model.getInstance(addrBroad, udpListeningPort, this, addrBdd, userBdd, mdpBdd);
+        Model model = Model.getInstance(addrBroad, udpListeningPort, this, addrBdd, userBdd, mdpBdd, nomBDD);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/splashScreen.fxml"));
         Parent root =fxmlLoader.load();

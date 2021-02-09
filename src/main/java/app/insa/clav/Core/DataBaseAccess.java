@@ -17,14 +17,14 @@ public class DataBaseAccess {
      */
     public Connection con;
 
-    private DataBaseAccess(String addr, String user, String mdp) {
+    private DataBaseAccess(String addr, String user, String mdp, String nomDB) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             System.out.println("Erreur lors de la récupération de la classe dans DataBaseAccess");
         }
         try {
-            String urlBdd = "jdbc:mysql://" + addr + ":3306/testDBChat?useSSL=false";
+            String urlBdd = "jdbc:mysql://" + addr + ":3306/" + nomDB + "?useSSL=false";
             //System.out.println("Tentative de connection à : " + urlBdd);
             con = DriverManager.getConnection(urlBdd, user, mdp);
             //con = DriverManager.getConnection("jdbc:mysql://srv-bdens.insa-toulouse.fr:3306/tp_servlet_013?useSSL=false", "tp_servlet_013", "eiN3ahng");
@@ -37,10 +37,10 @@ public class DataBaseAccess {
     /** Used to get Instance/Create Instance of DBAccess if necessary
      * @return Singleton Instance of DB
      */
-    public static DataBaseAccess getInstance(String addr, String user, String mdp) {
+    public static DataBaseAccess getInstance(String addr, String user, String mdp, String nomDB) {
         synchronized (DataBaseAccess.class) {
             if (instance == null) {
-                instance = new DataBaseAccess(addr, user, mdp);
+                instance = new DataBaseAccess(addr, user, mdp, nomDB);
             }
             return instance;
         }

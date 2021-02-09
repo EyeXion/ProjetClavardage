@@ -92,7 +92,7 @@ public class Model implements PropertyChangeListener{
      * @param userBdd
      * @param mdpBdd
      */
-    private Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
+    private Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd, String nomBDD){
         //System.out.println("On essai de creer le modele");
         try {
             boolean founded = false;
@@ -132,7 +132,7 @@ public class Model implements PropertyChangeListener{
         }
         this.userList = new ArrayList<Utilisateurs>();
         this.listTCPConnection = new ArrayList<TCPChatConnection>();
-        this.dbAccess = DataBaseAccess.getInstance(addrBdd, userBdd, mdpBdd);
+        this.dbAccess = DataBaseAccess.getInstance(addrBdd, userBdd, mdpBdd, nomBDD);
         this.app = app;
     }
 
@@ -152,10 +152,10 @@ public class Model implements PropertyChangeListener{
      *          Le mot de passe qui lui est associé
      * @return
      */
-    public static Model getInstance(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
+    public static Model getInstance(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd, String nomBDD){
         synchronized(Model.class){
             if (instance == null) {
-                instance = new Model(addrBroadcast, portListening, app, addrBdd, userBdd, mdpBdd);
+                instance = new Model(addrBroadcast, portListening, app, addrBdd, userBdd, mdpBdd, nomBDD);
             }
         }
         return instance;
