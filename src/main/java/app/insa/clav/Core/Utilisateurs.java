@@ -20,6 +20,7 @@ public class Utilisateurs implements Comparable{
         this.inetAddress = inetAddress;
         this.id = id;
         this.tcpListeningPort = tcpListeningPort;
+        this.isOutdoor = true;
     }
 
     public void setPseudo(String pseudo) {

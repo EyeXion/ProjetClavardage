@@ -55,10 +55,6 @@ public class SplashScreenController implements Initializable {
      * loader pour la scene principale
      */
     private FXMLLoader fxmlLoader;
-
-    /**
-     *feneter principale
-     */
     private Stage mainStage;
 
 
@@ -93,13 +89,6 @@ public class SplashScreenController implements Initializable {
 
         fadeIn.setOnFinished((e) -> {
             fadeOut.play();
-            this.mainStage = (Stage) rootSplash.getScene().getWindow();
-            mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                @Override
-                public void handle(WindowEvent t) {
-                    Model.getInstance().sendDeconnectionMessage();
-                }
-            });
             this.fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/connectionScreen.fxml"));
             try {
                 this.rootMainScreen = fxmlLoader.load();
@@ -110,6 +99,7 @@ public class SplashScreenController implements Initializable {
         });
 
         fadeOut.setOnFinished((e) -> {
+            this.mainStage = (Stage) rootSplash.getScene().getWindow();
             mainStage.setScene(scene);
             mainStage.show();
         });

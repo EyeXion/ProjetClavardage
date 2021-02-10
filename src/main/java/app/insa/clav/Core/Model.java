@@ -79,25 +79,37 @@ public class Model implements PropertyChangeListener{
 
     private DataBaseAccess dbAccess;
 
-    /**
-     * Instance of the Main JavaFx Application
-     */
+    private String addrBroadcast;
+    private int portListening;
     private Application app;
 
 
-    /**
-     * @param addrBroadcast
-     * @param portListening
-     * @param app
-     * @param addrBdd
-     * @param userBdd
-     * @param mdpBdd
-     */
-    private Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
-        //System.out.println("On essai de creer le modele");
+    public Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd, String nomBdd, String urlServeur) {
+        this.addrBroadcast = addrBroadcast;
+        this.portListening = portListening;
+
+        try {
+            this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0, 0);
+            this.tcpListener = new TCPListener(user.getId());
+            this.user.setTcpListeningPort(this.tcpListener.getPort());
+            this.tim= new Timer();
+            this.support = new PropertyChangeSupport(this);
+        }
+        catch (IOException e){
+            System.out.println("IOException dans la creation du modele");
+            e.printStackTrace();
+        }
+        this.userList = new ArrayList<Utilisateurs>();
+        this.listTCPConnection = new ArrayList<TCPChatConnection>();
+        this.dbAccess = DataBaseAccess.getInstance(addrBdd, userBdd, mdpBdd, nomBdd);
+        this.app = app;
+        this.servCon = ServletConnection.getInstance(urlServeur);
+    }
+
+    public void configModelIndoor(){
         try {
             boolean founded = false;
-            InetAddress addrBcst = InetAddress.getByName(addrBroadcast);
+            InetAddress addrBcst = InetAddress.getByName(this.addrBroadcast);
             InetAddress addrLocal = null;
 
             final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -119,23 +131,20 @@ public class Model implements PropertyChangeListener{
 
             //System.out.println("Addresse de broadcast : " + addrBcst.toString() + "\nAddresse de l'utilisateur local : " + addrLocal.toString());
 
-            this.user = new Utilisateurs("NA", addrLocal, 0, 0);
-            this.UDPOut = new UDPOutput(addrBcst, this.user.getInetAddress(), portListening);
-            this.UDPIn = new UDPInput(this.user.getInetAddress(), portListening);
+            this.user.setOutdoor(false);
+            this.user.setInetAddress(addrLocal);
             this.tcpListener = new TCPListener(this.user.getInetAddress(), user.getId());
             this.user.setTcpListeningPort(this.tcpListener.getPort());
-            this.tim= new Timer();
-            this.support = new PropertyChangeSupport(this);
+            this.UDPOut = new UDPOutput(addrBcst, this.user.getInetAddress(), this.portListening);
+            this.UDPIn = new UDPInput(this.portListening);
         }
         catch (IOException e){
             System.out.println("IOException dans la creation du modele");
             e.printStackTrace();
         }
-        this.userList = new ArrayList<Utilisateurs>();
-        this.listTCPConnection = new ArrayList<TCPChatConnection>();
-        this.dbAccess = DataBaseAccess.getInstance(addrBdd, userBdd, mdpBdd);
-        this.app = app;
-        this.servCon = ServletConnection.getInstance();
+
+        this.openInputUDP();
+        this.openTCPListener();
     }
 
 
@@ -154,10 +163,10 @@ public class Model implements PropertyChangeListener{
      *          Le mot de passe qui lui est associé
      * @return
      */
-    public static Model getInstance(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd){
+    public static Model getInstance(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd, String nomBdd, String urlServeur){
         synchronized(Model.class){
             if (instance == null) {
-                instance = new Model(addrBroadcast, portListening, app, addrBdd, userBdd, mdpBdd);
+                instance = new Model(addrBroadcast, portListening, app, addrBdd, userBdd, mdpBdd, nomBdd, urlServeur);
             }
         }
         return instance;
@@ -241,7 +250,7 @@ public class Model implements PropertyChangeListener{
     }
 
     /**
-     * Méthode appelée par le controleur quand la vue envoie un signal d'appuis bouton changer Pseudo
+     * Méthode appelée par le controleur quand la vue envoie un signal d'appuis bouton changer Pseudo (indoor)
      * @param pseudo
      *              Pseudo rentré par l'utilisateur
      */
@@ -250,39 +259,45 @@ public class Model implements PropertyChangeListener{
         this.user.setPseudo(pseudo);
         this.UDPIn.setFilterValue(2, true);
         this.UDPIn.setFilterValue(3, true);
-        if (!this.user.isOutdoor()) {
-            this.sendPseudoBroadcast();
-            this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded), 2000);
-            ArrayList<Utilisateurs> outdoorUsers = servCon.getRemoteActiveUsers();
-            for (Utilisateurs newUser : outdoorUsers) {
-                if (newUser.getPseudo().equals(this.user.getPseudo())) {
-                    this.isPseudoOk = false;
-                    this.user.setPseudo(this.ancienPseudo);
-                    this.ancienPseudo = "";
-                    this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
-                }
-                if (!this.userList.contains(newUser)) {
-                    this.userList.add(newUser);
-                    Collections.sort(this.userList);
-                    this.support.firePropertyChange("newUserConnected", -1, -2);
-                }
+        this.sendPseudoBroadcast();
+        this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded), 2000);
+        ArrayList<Utilisateurs> outdoorUsers = servCon.getRemoteActiveUsers();
+        for (Utilisateurs newUser : outdoorUsers) {
+            if (newUser.getPseudo().equals(this.user.getPseudo())) {
+                this.isPseudoOk = false;
+                this.user.setPseudo(this.ancienPseudo);
+                this.ancienPseudo = "";
+                this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
+            }
+            if (!this.userList.contains(newUser)) {
+                this.userList.add(newUser);
+                Collections.sort(this.userList);
+                this.support.firePropertyChange("newUserConnected", -1, -2);
             }
         }
-        else{
-            this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded), 2000);
-            ArrayList<Utilisateurs> users = servCon.getAllActiveUsers();
-            for (Utilisateurs newUser : users) {
-                if (newUser.getPseudo().equals(this.user.getPseudo())) {
-                    this.isPseudoOk = false;
-                    this.user.setPseudo(this.ancienPseudo);
-                    this.ancienPseudo = "";
-                    this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
-                }
-                if (!this.userList.contains(newUser)) {
-                    this.userList.add(newUser);
-                    Collections.sort(this.userList);
-                    this.support.firePropertyChange("newUserConnected", -1, -2);
-                }
+    }
+
+    /**
+     * Méthode appelée par le controleur quand la vue envoie un signal d'appuis bouton changer Pseudo
+     * @param pseudo
+     *              Pseudo rentré par l'utilisateur
+     */
+    public void choosePseudoOutdoor(String pseudo, boolean isConfirmationNeeded){
+        this.ancienPseudo = this.user.getPseudo();
+        this.user.setPseudo(pseudo);
+        this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded), 2000);
+        ArrayList<Utilisateurs> users = servCon.getAllActiveUsers();
+        for (Utilisateurs newUser : users) {
+            if (newUser.getPseudo().equals(this.user.getPseudo())) {
+                this.isPseudoOk = false;
+                this.user.setPseudo(this.ancienPseudo);
+                this.ancienPseudo = "";
+                this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
+            }
+            if (!this.userList.contains(newUser)) {
+                this.userList.add(newUser);
+                Collections.sort(this.userList);
+                this.support.firePropertyChange("newUserConnected", -1, -2);
             }
         }
     }
@@ -455,8 +470,14 @@ public class Model implements PropertyChangeListener{
      * Sends a deconnection Messages (type 7) in broadcast
      */
     public void sendDeconnectionMessage() {
-        MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
-        UDPOut.sendBrdcst(msg);
+        if (!this.user.isOutdoor()) {
+            MessagePseudo msg = new MessagePseudo(7, this.user.getInetAddress(), this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
+            UDPOut.sendBrdcst(msg);
+            servCon.submitDeconnectionIndoor(this.user);
+        }
+        else{
+            servCon.submitDeconnectionOutdoor(this.user);
+        }
         try {
             this.app.stop();
             Platform.exit();
@@ -464,6 +485,7 @@ public class Model implements PropertyChangeListener{
         } catch (Exception e) {
             System.out.println("Erreur lors de l'envoi du message de deconnexion'");
         }
+
     }
 
     /** Closes the Chat Connection when asked
@@ -515,12 +537,16 @@ public class Model implements PropertyChangeListener{
          * Quand la seconde s'est écoulée, on met les filtres à faux pour ne plus prendre en compte les messages de type 2 et 3
          */
         public void run() {
-            UDPIn.setFilterValue(2, false);
-            UDPIn.setFilterValue(3, false);
+            if (!user.isOutdoor()) {
+                UDPIn.setFilterValue(2, false);
+                UDPIn.setFilterValue(3, false);
+            }
             if (isPseudoOk){
                 //envoi message de type 4 pour confirmer.
                 support.firePropertyChange("pseudoValide",ancienPseudo,user.getPseudo());
-                UDPIn.setFilterValue(1,true);
+                if (!user.isOutdoor()) {
+                    UDPIn.setFilterValue(1,true);
+                }
                 if (isConfirmationNeeded){
                     if (!user.isOutdoor()) {
                         sendPseudoValideBroadcast();

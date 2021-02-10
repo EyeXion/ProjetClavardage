@@ -17,7 +17,6 @@ import java.util.ArrayList;
 public class TCPListener extends Thread{
 
 
-    private InetAddress localAddress;
     private int port;
     private  ServerSocket servSocket;
     private int localId;
@@ -30,9 +29,20 @@ public class TCPListener extends Thread{
     private ArrayList<TCPChatConnection> bufferTCPConnection;
 
     public TCPListener(InetAddress localAddress,int localId){
-        this.localAddress = localAddress;
         try {
             this.servSocket = new ServerSocket(0,1000,localAddress); //0 alloue un port dispo
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.port = servSocket.getLocalPort();
+        this.localId = localId;
+        this.bufferTCPConnection = new ArrayList<TCPChatConnection>();
+        this.support = new PropertyChangeSupport(this);
+    }
+
+    public TCPListener(int localId) {
+        try {
+            this.servSocket = new ServerSocket(0,1000); //0 alloue un port dispo
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXToggleButton;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -15,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -127,18 +129,18 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     private String pseudoUp;
     private String pseudoIn;
 
+    private boolean isOutdoor;
+
 
 
 
     public ConnectionScreenController(){
-        this.model = Model.getInstance();
         this.dbAccess = DataBaseAccess.getInstance();
         System.out.println(this.dbAccess.toString());
-        this.model.addPropertyChangeListener(this,"pseudoRefused");
-        this.model.addPropertyChangeListener(this,"pseudoValide");
         isSubmittingIn = false;
         isSubmittingUp = false;
         isSubmittingNewPseudoIn = false;
+        this.isOutdoor = false;
     }
 
 
@@ -157,10 +159,18 @@ public class ConnectionScreenController implements Initializable, PropertyChange
             this.isSubmittingIn = true;
             this.spinnerIn.setVisible(true);
             if (this.dbAccess.isLoginUsed(login)) {
+                this.model = Model.getInstance();
+                this.model.addPropertyChangeListener(this,"pseudoRefused");
+                this.model.addPropertyChangeListener(this,"pseudoValide");
                 String pseudo = this.dbAccess.getPseudoFromLogin(login);
                 int id = this.dbAccess.getIdFromLogin(login);
                 this.model.setUserId(id);
-                this.model.choosePseudo(pseudo,true);
+                if (this.isOutdoor) {
+                    this.model.choosePseudoOutdoor(pseudo,true);
+                } else {
+                    model.configModelIndoor();
+                    this.model.choosePseudo(pseudo,true);
+                }
             } else {
                 this.labelErrorInLogin.setVisible(true);
             }
@@ -179,7 +189,15 @@ public class ConnectionScreenController implements Initializable, PropertyChange
             this.spinnerUp.setVisible(true);
             boolean loginExist = this.dbAccess.isLoginUsed(this.loginUp);
             if (!loginExist){
-                this.model.choosePseudo(this.pseudoUp,true);
+                this.model = Model.getInstance();
+                this.model.addPropertyChangeListener(this,"pseudoRefused");
+                this.model.addPropertyChangeListener(this,"pseudoValide");
+                if (this.isOutdoor) {
+                    this.model.choosePseudoOutdoor(pseudoUp,true);
+                } else {
+                    model.configModelIndoor();
+                    this.model.choosePseudo(pseudoUp,true);
+                }
             }
             else{
                 this.labelErrorUpLogin.setVisible(true);
@@ -201,7 +219,8 @@ public class ConnectionScreenController implements Initializable, PropertyChange
 
     @FXML
     void outdoorUserAction(ActionEvent event) {
-        this.model.user.setOutdoor(this.isOutdoorUserButton.isSelected());
+        //this.model.user.setOutdoor(this.isOutdoorUserButton.isSelected());
+        this.isOutdoor = this.isOutdoorUserButton.isSelected();
     }
 
     /**
@@ -212,6 +231,13 @@ public class ConnectionScreenController implements Initializable, PropertyChange
     public void propertyChange(PropertyChangeEvent evt) {
         switch (evt.getPropertyName()){
             case "pseudoValide" :
+                Stage mainStage = (Stage) loginInputIn.getScene().getWindow();
+                mainStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                    @Override
+                    public void handle(WindowEvent t) {
+                        Model.getInstance().sendDeconnectionMessage();
+                    }
+                });
                 this.model.deletePropertyChangeListener(this,"pseudoValide");
                 this.model.deletePropertyChangeListener(this,"pseudoRefused");
                 System.out.println("Pseudo valide");

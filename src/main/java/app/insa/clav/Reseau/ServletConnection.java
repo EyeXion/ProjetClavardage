@@ -27,18 +27,25 @@ public class ServletConnection {
     public final Gson gson;
     public String baseURL;
 
-    public ServletConnection(){
+    private ServletConnection(String urlServeur){
         builder = new GsonBuilder();
         gson = builder.create();;
         //baseURL = "https://srv-gei-tomcat.insa-toulouse.fr/ServletJiggly/";
-        baseURL = "http://localhost:8080/Gradle___com_example___ServeurClavardage_1_0_SNAPSHOT_war/";
+        baseURL = urlServeur;
+    }
+
+    public static ServletConnection getInstance(String urlServeur){
+        synchronized(ServletConnection.class){
+            if (instance == null) {
+                instance = new ServletConnection(urlServeur);
+            }
+        }
+        return instance;
     }
 
     public static ServletConnection getInstance(){
-        synchronized(ServletConnection.class){
-            if (instance == null) {
-                instance = new ServletConnection();
-            }
+        if (instance == null) {
+            System.out.println("ATTENTION : Pointeur servlet null");
         }
         return instance;
     }
@@ -50,7 +57,8 @@ public class ServletConnection {
         try {
             url = new URL(baseURL + "getOutdoorUsers");
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            System.out.println("Erreur recup user externes actif : création URL avec " + url.toString());
+            //e.printStackTrace();
         }
         try {
             con = (HttpURLConnection) url.openConnection();
@@ -70,6 +78,7 @@ public class ServletConnection {
             resList = gson.fromJson(content.toString(),listType);
             //resList = new Utilisateurs[Integer.parseInt(con.getHeaderField("sizeArray"))];
         } catch (IOException e) {
+            System.out.println("Erreur recup user externes actif : Utilisation URL avec " + url.toString());
             e.printStackTrace();
         }
         return resList;

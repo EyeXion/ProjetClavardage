@@ -68,7 +68,18 @@ public class TCPChatConnection extends Thread{
      */
     public TCPChatConnection(MessageInit msgInit, InetAddress destIP, int portEcouteTCP, int remoteUserId){
         try {
-            this.link = new Socket(destIP, portEcouteTCP);
+            if (destIP == null) {
+                System.out.println("NULLLLLL");
+            }
+            try {
+                this.link = new Socket(destIP, portEcouteTCP);
+            }
+            catch (IOException e) {
+                System.out.println("C'est bien la" + destIP + " " + portEcouteTCP);
+            }
+            if (this.link == null) {
+                System.out.println("LINK NULL");
+            }
             OutputStream os = this.link.getOutputStream();
             InputStream is = this.link.getInputStream();
             this.objectOutStream = new ObjectOutputStream(os);
@@ -178,6 +189,9 @@ public class TCPChatConnection extends Thread{
     }
 
     public void sendMessageTxt(MessageDisplay msgDisp){
+        if (this.link == null) {
+            System.out.println("LINK NULL");
+        }
         MessageChatTxt msg = new MessageChatTxt(6,this.link.getLocalAddress(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate());
         try {
             this.objectOutStream.writeObject(msg);

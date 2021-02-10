@@ -15,12 +15,13 @@ public class Main extends Application{
         String[] args = this.getParameters().getUnnamed().toArray(new String[0]);
         String addrBroad = args[0];
         int udpListeningPort = Integer.parseInt(args[1]);
-        String addrSrv = args[2];
+        String urlServeur = args[2];
         String addrBdd = args[3];
         String userBdd = args[4];
         String mdpBdd = args[5];
+        String nomBdd = args[6];
 
-        Model model = Model.getInstance(addrBroad, udpListeningPort, this, addrBdd, userBdd, mdpBdd);
+        Model model = Model.getInstance(addrBroad, udpListeningPort, this, addrBdd, userBdd, mdpBdd, nomBdd, urlServeur);
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/splashScreen.fxml"));
         Parent root =fxmlLoader.load();
@@ -31,8 +32,6 @@ public class Main extends Application{
         primaryStage.setMaxHeight(450);
         primaryStage.setMaxWidth(650);
         primaryStage.show();
-        model.openInputUDP();
-        model.openTCPListener();
     }
 
     public static void main(String[] args){
