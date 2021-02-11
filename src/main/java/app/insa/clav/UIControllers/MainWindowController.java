@@ -176,9 +176,11 @@ public class MainWindowController implements PropertyChangeListener, Initializab
     @FXML
     void openChat(ActionEvent event) {
         String remotePseudo = userListView.getFocusModel().getFocusedItem();
-        int remoteId = model.getUserFromPseudo(remotePseudo).getId();
+        System.out.println("Pseudo " + remotePseudo);
+        Utilisateurs remoteUser = model.getUserFromPseudo(remotePseudo);
+        int remoteId = remoteUser.getId();
         DataBaseAccess dbAccess = DataBaseAccess.getInstance();
-        if (!dbAccess.isTableCreated(model.user.getId(),remoteId)){
+        if (!dbAccess.isTableCreated(model.user.getId(), remoteId)) {
             dbAccess.createChatTable(remoteId, model.user.getId());
         }
         model.createChatFromLocalRequest(remoteId, remotePseudo);

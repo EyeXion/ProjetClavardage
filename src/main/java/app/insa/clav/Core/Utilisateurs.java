@@ -1,6 +1,7 @@
 package app.insa.clav.Core;
 
 import java.net.*;
+import java.util.Date;
 
 
 //Classe qui permet d'identifier un utilisateur
@@ -11,7 +12,7 @@ public class Utilisateurs implements Comparable{
     private int id;
     private String login;
     private boolean isOutdoor;
-
+    private Date lastUpdate;
     private int tcpListeningPort;
 
 
@@ -21,6 +22,8 @@ public class Utilisateurs implements Comparable{
         this.id = id;
         this.tcpListeningPort = tcpListeningPort;
         this.isOutdoor = true;
+        this.lastUpdate = new Date();
+        System.out.println("Date du jour " + this.lastUpdate.toString());
     }
 
     public void setPseudo(String pseudo) {
@@ -71,6 +74,18 @@ public class Utilisateurs implements Comparable{
         return tcpListeningPort;
     }
 
+    public void update() {
+        this.lastUpdate = new Date();
+    }
+
+    public boolean userToOld(Date date) {
+        System.out.println("Local Date : " + this.lastUpdate.toString());
+        System.out.println("Local time : " + this.lastUpdate.getTime());
+        System.out.println("Remote Date : " + date.toString());
+        System.out.println("Remote Time : " + date.getTime());
+        return (date.getTime() - this.lastUpdate.getTime() > 4000);
+    }
+
     @Override
     public String toString() {
         return "Utilisateurs{" +
@@ -78,6 +93,8 @@ public class Utilisateurs implements Comparable{
                 ", inetAddress=" + inetAddress +
                 ", id=" + id +
                 ", login='" + login + '\'' +
+                ", isOutdoor=" + isOutdoor +
+                ", lastUpdate=" + lastUpdate +
                 ", tcpListeningPort=" + tcpListeningPort +
                 '}';
     }

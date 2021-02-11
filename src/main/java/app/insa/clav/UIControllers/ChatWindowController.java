@@ -279,6 +279,9 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
      */
     private void getHistory(){
         this.dbAccess = DataBaseAccess.getInstance();
+        if (remoteUser == null) {
+            System.out.println("\n\n\nATTTENNNNTIIONNN\n \n\n");
+        }
         ArrayList<MessageDisplay> history = this.dbAccess.getMessageHistory(this.localUserId,remoteUser.getId());
         this.listMessages = FXCollections.observableList(history);
         this.messageList.setItems(this.listMessages);

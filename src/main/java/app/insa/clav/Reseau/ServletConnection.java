@@ -85,6 +85,7 @@ public class ServletConnection {
     }
 
     public void submitConnectionIndoor(Utilisateurs user){
+        System.out.println("On envoi l'user au serveur avec " + user.toString());
         URL url = null;
         HttpURLConnection con = null;
         try {

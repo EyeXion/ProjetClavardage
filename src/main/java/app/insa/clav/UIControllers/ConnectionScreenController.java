@@ -250,6 +250,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                 }
                 this.isSubmittingUp = false;
                 this.isSubmittingIn = false;
+                this.model.startTim2s();
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {

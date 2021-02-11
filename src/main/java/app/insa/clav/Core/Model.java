@@ -24,7 +24,7 @@ public class Model implements PropertyChangeListener{
     /**
      * Liste des utilisateurs connectés.
      */
-    private ArrayList<Utilisateurs> userList;
+    private List<Utilisateurs> userList;
 
     private ServletConnection servCon;
 
@@ -32,6 +32,7 @@ public class Model implements PropertyChangeListener{
      * Timer qui permet de planifier des éxécutions dans le temps
      */
     private Timer tim;
+    private Timer tim2s;
 
     /**
      * Notre interface UDP pour envoyer des messages
@@ -93,13 +94,14 @@ public class Model implements PropertyChangeListener{
             this.tcpListener = new TCPListener(user.getId());
             this.user.setTcpListeningPort(this.tcpListener.getPort());
             this.tim= new Timer();
+            this.tim2s= new Timer();
             this.support = new PropertyChangeSupport(this);
         }
         catch (IOException e){
             System.out.println("IOException dans la creation du modele");
             e.printStackTrace();
         }
-        this.userList = new ArrayList<Utilisateurs>();
+        this.userList = Collections.synchronizedList(new ArrayList<>());
         this.listTCPConnection = new ArrayList<TCPChatConnection>();
         this.dbAccess = DataBaseAccess.getInstance(addrBdd, userBdd, mdpBdd, nomBdd);
         this.app = app;
@@ -269,10 +271,12 @@ public class Model implements PropertyChangeListener{
                 this.ancienPseudo = "";
                 this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
             }
-            if (!this.userList.contains(newUser)) {
-                this.userList.add(newUser);
-                Collections.sort(this.userList);
-                this.support.firePropertyChange("newUserConnected", -1, -2);
+            synchronized (userList) {
+                if (!this.userList.contains(newUser)) {
+                    this.userList.add(newUser);
+                    Collections.sort(this.userList);
+                    this.support.firePropertyChange("newUserConnected", -1, -2);
+                }
             }
         }
     }
@@ -294,10 +298,12 @@ public class Model implements PropertyChangeListener{
                 this.ancienPseudo = "";
                 this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
             }
-            if (!this.userList.contains(newUser)) {
-                this.userList.add(newUser);
-                Collections.sort(this.userList);
-                this.support.firePropertyChange("newUserConnected", -1, -2);
+            synchronized (userList) {
+                if (!this.userList.contains(newUser)) {
+                    this.userList.add(newUser);
+                    Collections.sort(this.userList);
+                    this.support.firePropertyChange("newUserConnected", -1, -2);
+                }
             }
         }
     }
@@ -323,11 +329,13 @@ public class Model implements PropertyChangeListener{
             }
         }
         if (!isChatAlreadyCreated) {
-            for (Utilisateurs u : userList) {
-                if (u.getPseudo().equals(remotePseudo)) {
-                    MessageInit msgInit = new MessageInit(7, user.getInetAddress(), u.getInetAddress(), u.getTcpListeningPort(), user.getId());
-                    TCPChatConnection tcpCo = new TCPChatConnection(msgInit,u.getInetAddress(), u.getTcpListeningPort(), u.getId());
-                    listTCPConnection.add(tcpCo);
+            synchronized (userList) {
+                for (Utilisateurs u : userList) {
+                    if (u.getPseudo().equals(remotePseudo)) {
+                        MessageInit msgInit = new MessageInit(7, user.getInetAddress(), u.getInetAddress(), u.getTcpListeningPort(), user.getId());
+                        TCPChatConnection tcpCo = new TCPChatConnection(msgInit, u.getInetAddress(), u.getTcpListeningPort(), u.getId());
+                        listTCPConnection.add(tcpCo);
+                    }
                 }
             }
         }
@@ -368,10 +376,12 @@ public class Model implements PropertyChangeListener{
                 //System.out.println("Message de type 2 reçu : " + msgP2.toString());
                 Utilisateurs newUser2 = new Utilisateurs(msgP2.pseudo,msgP2.srcIP,msgP2.id, msgP2.portEcouteTCP);
                 //System.out.println("Utilisateur créé : " + newUser2.toString());
-                if (!this.userList.contains(newUser2)) {
-                    this.userList.add(newUser2);
-                    Collections.sort(this.userList);
-                    this.support.firePropertyChange("newUserConnected",-1,-2);
+                synchronized (userList) {
+                    if (!this.userList.contains(newUser2)) {
+                        this.userList.add(newUser2);
+                        Collections.sort(this.userList);
+                        this.support.firePropertyChange("newUserConnected", -1, -2);
+                    }
                 }
                 break;
             case 3 :
@@ -388,17 +398,22 @@ public class Model implements PropertyChangeListener{
                 //System.out.println("Message de type 4 reçu : " + msgP4.toString());
                 if (msgP4.id != this.user.getId()) {
                     Utilisateurs newUser4 = new Utilisateurs(msgP4.pseudo,msgP4.srcIP,msgP4.id, msgP4.portEcouteTCP);
+                    newUser4.setOutdoor(false);
                     //System.out.println("Utilisateur créé : " + newUser4.toString());
-                    this.userList.remove(newUser4);
-                    this.userList.add(newUser4);
-                    Collections.sort(this.userList);
+                    synchronized (userList) {
+                        this.userList.remove(newUser4);
+                        this.userList.add(newUser4);
+                        Collections.sort(this.userList);
+                    }
                     this.support.firePropertyChange("newUserConnected",-1,newUser4.getId());
                 }
                 break;
             case 7 :
                 MessagePseudo msgP7 = (MessagePseudo) msg;
                 Utilisateurs User7 = new Utilisateurs(msgP7.pseudo,msgP7.srcIP,msgP7.id, msgP7.portEcouteTCP);
-                this.userList.remove(User7);
+                synchronized (userList) {
+                    this.userList.remove(User7);
+                }
                 this.support.firePropertyChange("newUserConnected",-1,-2);
                 break;
             default :
@@ -431,8 +446,10 @@ public class Model implements PropertyChangeListener{
     /**
      * @return the list of users
      */
-    public ArrayList<Utilisateurs> getUserList(){
-        return userList;
+    public List<Utilisateurs> getUserList(){
+        synchronized (userList) {
+            return userList;
+        }
     }
 
     /** returns connected the user identified by the id
@@ -441,10 +458,12 @@ public class Model implements PropertyChangeListener{
      */
     public Utilisateurs getUserFromId(int id){
         Utilisateurs res = null;
-        for (Utilisateurs u : userList){
-            if (u.getId() == id){
-                res = u;
-                break;
+        synchronized (userList) {
+            for (Utilisateurs u : userList) {
+                if (u.getId() == id) {
+                    res = u;
+                    break;
+                }
             }
         }
         return res;
@@ -457,10 +476,12 @@ public class Model implements PropertyChangeListener{
      */
     public Utilisateurs getUserFromPseudo(String pseudo){
         Utilisateurs res = null;
-        for (Utilisateurs u : userList){
-            if (u.getPseudo().equals(pseudo)){
-                res = u;
-                break;
+        synchronized (userList) {
+            for (Utilisateurs u : userList) {
+                if (u.getPseudo().equals(pseudo)) {
+                    res = u;
+                    break;
+                }
             }
         }
         return res;
@@ -476,6 +497,7 @@ public class Model implements PropertyChangeListener{
             servCon.submitDeconnectionIndoor(this.user);
         }
         else{
+            //System.out.println("Send deco Outdoor sent");
             servCon.submitDeconnectionOutdoor(this.user);
         }
         try {
@@ -518,6 +540,13 @@ public class Model implements PropertyChangeListener{
         }
         this.dbAccess.deleteHistory(remoteId,user.getId());
     }
+
+    public void startTim2s() {
+        tim2s.scheduleAtFixedRate(new TimerTaskCheckUsers(), 2000, 2000);
+    }
+
+
+
     /**
      * Classe interne au model pour au bout d'une seconde d'envoi de demande pseudo type 1,
      * on desactive les filtes et on met à jour la vue.
@@ -562,4 +591,129 @@ public class Model implements PropertyChangeListener{
             }
         }
     }
+
+    /**
+     * Classe interne au model check si tout les utilisateurs sont toujours présents
+     */
+    class TimerTaskCheckUsers extends TimerTask {
+        public void run() {
+            //System.out.println(user);
+            synchronized (userList) {
+                Date currentDate = new Date();
+                if (user.isOutdoor()) {
+                    System.out.println("Timer task 2s Outdoor");
+                    servCon.submitConnectionOutdoor(user);
+                    ArrayList<Utilisateurs> servUserList = servCon.getAllActiveUsers();
+                    ArrayList<Utilisateurs> userListToRemove = new ArrayList<>();
+                    ArrayList<Utilisateurs> userListToAdd = new ArrayList<>();
+                    ArrayList<Utilisateurs> userListWatched = new ArrayList<>();
+                    for (Iterator<Utilisateurs> iter = userList.iterator(); iter.hasNext(); ) {
+                        Utilisateurs userloop = iter.next();
+                        Utilisateurs userfound = null;
+                        for (Utilisateurs userExtloop : servUserList) {
+                            if (userExtloop.getId() == userloop.getId()) {
+                                userfound = userExtloop;
+                                break;
+                            }
+                        }
+                        if (userfound == null) {
+                            userListToRemove.add(userloop);
+                        } else {
+                            userListWatched.add(userfound);
+                            if (userfound.userToOld(currentDate)) {
+                                userListToRemove.add(userloop);
+                                if (userfound.isOutdoor()) {
+                                    servCon.submitDeconnectionOutdoor(userfound);
+                                } else {
+                                    servCon.submitDeconnectionIndoor(userfound);
+                                }
+                            } else {
+                                userListToRemove.add(userloop);
+                                userListToAdd.add(userfound);
+                            }
+                        }
+                    }
+                    userList.removeAll(userListToRemove);
+                    servUserList.removeAll(userListWatched);
+                    servUserList.remove(user);
+                    userListToAdd.addAll(servUserList);
+                    userList.addAll(userListToAdd);
+                } else {
+                    // On previent qu'on existe
+                    System.out.println("Timer task 2s Indoor");
+                    System.out.println("UserList " + userList.toString());
+                    sendPseudoValideBroadcast();
+                    servCon.submitConnectionIndoor(user);
+
+                    ArrayList<Utilisateurs> utilisateursExternes = servCon.getRemoteActiveUsers();
+                    ArrayList<Utilisateurs> userListToRemove = new ArrayList<>();
+                    ArrayList<Utilisateurs> userListToAdd = new ArrayList<>();
+                    ArrayList<Utilisateurs> userListExternWatched = new ArrayList<>();
+                    for (Iterator<Utilisateurs> iter = userList.iterator(); iter.hasNext(); ) {
+                        Utilisateurs userloop = iter.next();
+                        if (userloop.isOutdoor()) {
+                            Utilisateurs userfound = null;
+                            for (Utilisateurs userExtloop : utilisateursExternes) {
+                                if (userExtloop.getId() == userloop.getId()) {
+                                    userfound = userExtloop;
+                                    break;
+                                }
+                            }
+                            if (userfound == null) {
+                                userListToRemove.add(userloop);
+                            } else {
+                                userListExternWatched.add(userfound);
+                                if (userfound.userToOld(currentDate)) {
+                                    userListToRemove.add(userloop);
+                                    servCon.submitDeconnectionOutdoor(userfound);
+                                } else {
+                                    userListToRemove.add(userloop);
+                                    userListToAdd.add(userfound);
+                                }
+                            }
+                        } else {
+                            if (userloop.userToOld(currentDate)) {
+                                userListToRemove.add(userloop);
+                                servCon.submitDeconnectionIndoor(userloop);
+                            }
+                        }
+                    }
+                    userList.removeAll(userListToRemove);
+                    utilisateursExternes.removeAll(userListExternWatched);
+                    userListToAdd.addAll(utilisateursExternes);
+                    userList.addAll(userListToAdd);
+                }
+            }
+
+            Collections.sort(userList);
+            support.firePropertyChange("newUserConnected",-1,-2);
+        }
+    }
+
+    /** if (user.isOutdoor()) {
+     userList = servCon.getAllActiveUsers();
+     } else {
+     ArrayList<Utilisateurs> userListToRemove = new ArrayList<>();
+     for (Iterator<Utilisateurs> iter = userList.iterator(); iter.hasNext(); ) {
+     Utilisateurs userloop = iter.next();
+     if (userloop.isOutdoor()) {
+     //System.out.println("OUAIP CA DECNNE");
+     userListToRemove.add(userloop);
+     }
+     }
+     //System.out.println(userListToRemove);
+     userList.removeAll(userListToRemove);
+     userList.addAll(servCon.getRemoteActiveUsers());
+     }
+     support.firePropertyChange("newUserConnected",-1,-2);
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+     *
+*/
 }
+
