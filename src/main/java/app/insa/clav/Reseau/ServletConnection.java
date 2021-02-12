@@ -1,5 +1,7 @@
 package app.insa.clav.Reseau;
 import app.insa.clav.Core.Utilisateurs;
+import app.insa.clav.Messages.Message;
+import app.insa.clav.Messages.MessageInit;
 import app.insa.clav.Messages.MessagePseudo;
 
 import java.io.BufferedReader;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import app.insa.clav.Messages.MessageSrvTCP;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -214,5 +217,135 @@ public class ServletConnection {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void SubmitMessageChat(int userId, int remoteId, Message msg){
+        URL url = null;
+        HttpURLConnection con = null;
+        try {
+            url = new URL(baseURL + "SubmitMessageChat");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setDoOutput(true);
+            try(OutputStream os = con.getOutputStream()) {
+                byte[] input = gson.toJson(new MessageSrvTCP(userId, remoteId, msg)).getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            int status = con.getResponseCode();
+            System.out.println("Error code HTTP request submit msg chat = " + status);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void SubmitConnectionChat(int userId, MessageInit msg){
+        URL url = null;
+        HttpURLConnection con = null;
+        try {
+            url = new URL(baseURL + "SubmitConnectionChat");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setDoOutput(true);
+            try(OutputStream os = con.getOutputStream()) {
+                byte[] input = gson.toJson(new MessageSrvTCP(userId, 0, msg)).getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            int status = con.getResponseCode();
+            System.out.println("Error code HTTP request submit connection  avec = " + status);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Message GetMessageChat(int userId, int remoteId){
+        //System.out.println("Demande");
+        URL url = null;
+        HttpURLConnection con = null;
+        Message resList = null;
+        try {
+            url = new URL(baseURL + "GetMessageChat");
+        } catch (MalformedURLException e) {
+            System.out.println("Erreur recup message avec " + url.toString());
+            //e.printStackTrace();
+        }
+        try {
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            try(OutputStream os = con.getOutputStream()) {
+                byte[] input = gson.toJson(new MessageSrvTCP(userId, remoteId, null)).getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            int status = con.getResponseCode();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer content = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+            System.out.println("Response : " + content);
+            resList = gson.fromJson(content.toString(),Message.class);
+            //resList = new Utilisateurs[Integer.parseInt(con.getHeaderField("sizeArray"))];
+        } catch (IOException e) {
+            System.out.println("Erreur recup msg chat 2 avec " + url.toString());
+            e.printStackTrace();
+        }
+        return resList;
+    }
+
+    public ArrayList<MessageInit> GetConnectionChat(int userId){
+        URL url = null;
+        HttpURLConnection con = null;
+        ArrayList<MessageInit> resList = null;
+        try {
+            url = new URL(baseURL + "GetConnectionChat");
+        } catch (MalformedURLException e) {
+            System.out.println("Erreur recup connecion" + url.toString());
+            //e.printStackTrace();
+        }
+        try {
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setDoOutput(true);
+            con.setDoInput(true);
+            try(OutputStream os = con.getOutputStream()) {
+                byte[] input = gson.toJson(new MessageSrvTCP(userId, 0, null)).getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            int status = con.getResponseCode();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer content = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+            System.out.println("Response : " + content);
+            Type listType = new TypeToken<ArrayList<MessageInit>>(){}.getType();
+            resList = gson.fromJson(content.toString(),listType);
+            //resList = new Utilisateurs[Integer.parseInt(con.getHeaderField("sizeArray"))];
+        } catch (IOException e) {
+            System.out.println("Erreur recup connecion 2 " + url.toString());
+            e.printStackTrace();
+        }
+        return resList;
     }
 }

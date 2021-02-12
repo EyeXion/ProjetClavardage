@@ -1,8 +1,6 @@
 package app.insa.clav.Core;
 
-import app.insa.clav.Messages.Message;
-import app.insa.clav.Messages.MessageInit;
-import app.insa.clav.Messages.MessagePseudo;
+import app.insa.clav.Messages.*;
 import app.insa.clav.Reseau.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -11,6 +9,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.*;
@@ -329,12 +330,25 @@ public class Model implements PropertyChangeListener{
             }
         }
         if (!isChatAlreadyCreated) {
-            synchronized (userList) {
-                for (Utilisateurs u : userList) {
-                    if (u.getPseudo().equals(remotePseudo)) {
-                        MessageInit msgInit = new MessageInit(7, user.getInetAddress(), u.getInetAddress(), u.getTcpListeningPort(), user.getId());
-                        TCPChatConnection tcpCo = new TCPChatConnection(msgInit, u.getInetAddress(), u.getTcpListeningPort(), u.getId());
-                        listTCPConnection.add(tcpCo);
+            Utilisateurs remoteUser = this.getUserFromId(remoteId);
+            if (remoteUser.isOutdoor() || this.user.isOutdoor()) {
+                System.out.println("Creation d'un chat avec un outdoor");
+                MessageInit msgInit = new MessageInit(7, user.getInetAddress(), remoteUser.getInetAddress(), remoteUser.getTcpListeningPort(), user.getId());
+                this.servCon.SubmitConnectionChat(remoteUser.getId(), msgInit);
+                TCPChatConnection tcpCo = new TCPChatConnection(null, remoteId, this.user.getId(), null, null, null, null);
+                tcpCo.setOutdoor();
+                tcpCo.startTCPCo();
+                listTCPConnection.add(tcpCo);
+            } else {
+                System.out.println("Creattion d'un chat avec un indoor");
+                synchronized (userList) {
+                    for (Utilisateurs u : userList) {
+                        if (u.getPseudo().equals(remotePseudo)) {
+                            MessageInit msgInit = new MessageInit(7, user.getInetAddress(), u.getInetAddress(), u.getTcpListeningPort(), user.getId());
+                            TCPChatConnection tcpCo = new TCPChatConnection(msgInit, u.getInetAddress(), u.getTcpListeningPort(), u.getId());
+                            tcpCo.startTCPCo();
+                            listTCPConnection.add(tcpCo);
+                        }
                     }
                 }
             }
@@ -428,18 +442,16 @@ public class Model implements PropertyChangeListener{
      */
     private void handleType1Message(MessagePseudo msg){
         MessagePseudo msgResponse;
-        //System.out.println("Message de type 1 reçu : " + msg.toString());
-        if (msg.id != this.user.getId()) {
-            if (this.user.getPseudo().equals(msg.pseudo)){
+        System.out.println("Message de type 1 reçu : " + msg.toString() + " local addr IP " + this.user.getInetAddress());
+        if (!this.user.getInetAddress().equals(msg.srcIP)) {
+            if (this.user.getPseudo().equals(msg.pseudo)) {
                 msgResponse = new MessagePseudo(3, null, msg.pseudo, 0, 0);
                 //System.out.println("Pseudo pas OK, on envoi : " + msgResponse.toString());
-            } else{
-                msgResponse = new MessagePseudo(2, this.user.getInetAddress(),this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
+            } else {
+                msgResponse = new MessagePseudo(2, this.user.getInetAddress(), this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
                 //System.out.println("Pseudo OK, on envoi : " + msgResponse.toString());
             }
             this.UDPOut.sendMsg(msgResponse, msg.srcIP);
-        } else {
-            //System.out.println("Moi-même -> IGNORED");
         }
     }
 
@@ -545,6 +557,19 @@ public class Model implements PropertyChangeListener{
         tim2s.scheduleAtFixedRate(new TimerTaskCheckUsers(), 2000, 2000);
     }
 
+
+    public void recupAndHandleConnexion() {
+        ArrayList<MessageInit> messages = this.servCon.GetConnectionChat(this.user.getId());
+        if (messages != null) {
+            for (Iterator<MessageInit> iter = messages.iterator(); iter.hasNext(); ) {
+                MessageInit msg = iter.next();
+                TCPChatConnection newCo = new TCPChatConnection(null, msg.id, this.user.getId(), null, null, null, null);
+                newCo.setOutdoor();
+                newCo.startTCPCo();
+                this.listTCPConnection.add(newCo);
+            }
+        }
+    }
 
 
     /**
@@ -687,6 +712,8 @@ public class Model implements PropertyChangeListener{
 
             Collections.sort(userList);
             support.firePropertyChange("newUserConnected",-1,-2);
+
+            recupAndHandleConnexion();
         }
     }
 

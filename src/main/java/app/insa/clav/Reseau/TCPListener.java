@@ -80,7 +80,9 @@ public class TCPListener extends Thread{
                 ObjectInputStream objectInStream = new ObjectInputStream(is);
                 MessageInit msgInit = (MessageInit) objectInStream.readObject();
                 int remoteUserId = msgInit.id;
-                this.bufferTCPConnection.add(new TCPChatConnection(link,remoteUserId,localId,is,os,objectOutStream,objectInStream));
+                TCPChatConnection tcpCo = new TCPChatConnection(link,remoteUserId,localId,is,os,objectOutStream,objectInStream);
+                tcpCo.startTCPCo();
+                this.bufferTCPConnection.add(tcpCo);
                 this.support.firePropertyChange("chatCreated",true,false);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();

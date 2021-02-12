@@ -357,40 +357,40 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
      * @param actionEvent
      */
     public void buttonSendMessageClicked(ActionEvent actionEvent) {
-        this.sendButton.setDisable(true);
-        String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
-        String payload = this.messageInput.getText();
-        if (!payload.equals("")) {
-            MessageDisplay msg = new MessageDisplay(model.user.getId(),timeStamp,payload,1);
-            this.listMessages.add(msg);
-            this.messageInput.clear();
-            this.tcpCo.sendMessageTxt(msg);
-            this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),msg);
-        }
-
-        //We send the File if the filed is not null
-        if (this.filePicked != null){
-            String ext = FilenameUtils.getExtension(this.filePicked.getPath());
-            int type = 2;
-            switch (ext) {
-                case "png":
-                case "gif":
-                case "jpeg":
-                case "svg":
-                case "jpg":
-                    type = 3;
-                    break;
+            this.sendButton.setDisable(true);
+            String timeStamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
+            String payload = this.messageInput.getText();
+            if (!payload.equals("")) {
+                MessageDisplay msg = new MessageDisplay(model.user.getId(), timeStamp, payload, 1);
+                this.listMessages.add(msg);
+                this.messageInput.clear();
+                this.tcpCo.sendMessageTxt(msg);
+                this.dbAccess.addMessage(this.localUserId, this.remoteUser.getId(), msg);
             }
-            MessageDisplayFile msgFile = new MessageDisplayFile(model.user.getId(),timeStamp,this.filePicked.getName(),type,this.filePicked, ext, -1);
-            this.listMessages.add(msgFile);
-            this.tcpCo.sendMessageFile(msgFile);
-            this.dbAccess.addMessage(this.localUserId,this.remoteUser.getId(),msgFile);
-            this.filePicked = null;
-            this.labelFile.setVisible(false);
-        }
-        this.sendButton.setDisable(false);
-        int size = messageList.getItems().size();
-        messageList.scrollTo(size - 1);
+
+            //We send the File if the filed is not null
+            if (this.filePicked != null) {
+                String ext = FilenameUtils.getExtension(this.filePicked.getPath());
+                int type = 2;
+                switch (ext) {
+                    case "png":
+                    case "gif":
+                    case "jpeg":
+                    case "svg":
+                    case "jpg":
+                        type = 3;
+                        break;
+                }
+                MessageDisplayFile msgFile = new MessageDisplayFile(model.user.getId(), timeStamp, this.filePicked.getName(), type, this.filePicked, ext, -1);
+                this.listMessages.add(msgFile);
+                this.tcpCo.sendMessageFile(msgFile);
+                this.dbAccess.addMessage(this.localUserId, this.remoteUser.getId(), msgFile);
+                this.filePicked = null;
+                this.labelFile.setVisible(false);
+            }
+            this.sendButton.setDisable(false);
+            int size = messageList.getItems().size();
+            messageList.scrollTo(size - 1);
     }
 
     /**

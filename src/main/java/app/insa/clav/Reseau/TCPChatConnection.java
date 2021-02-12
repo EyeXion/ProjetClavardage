@@ -1,4 +1,5 @@
 package app.insa.clav.Reseau;
+import app.insa.clav.Core.Utilisateurs;
 import app.insa.clav.Messages.*;
 import app.insa.clav.UISubStages.ChatStage;
 import javafx.application.Platform;
@@ -35,11 +36,14 @@ public class TCPChatConnection extends Thread{
     private ObjectInputStream objectInStream;
     private DataInputStream dis;
     private DataOutputStream dos;
+    private boolean isOutdoor;
+    private ServletConnection serCon;
 
     PropertyChangeSupport support;
 
     public int remoteUserId;
     public int localUserId;
+
 
     /**
      * Constructeur utilisé quand l'utilisateur distant inititie la connexion
@@ -47,6 +51,7 @@ public class TCPChatConnection extends Thread{
      */
     public TCPChatConnection(Socket link, int remoteUserId, int localUserId,InputStream is, OutputStream os, ObjectOutputStream objectOutputStream, ObjectInputStream objectInputStream){
         this.link = link;
+        this.isOutdoor = false;
         this.objectOutStream = objectOutputStream;
         this.objectInStream = objectInputStream;
         this.dos = new DataOutputStream(os);
@@ -55,9 +60,9 @@ public class TCPChatConnection extends Thread{
         this.msgReceivedBufferFiles = new ArrayList<MessageDisplayFile>();
         this.remoteUserId = remoteUserId;
         this.localUserId = localUserId;
+        this.serCon = ServletConnection.getInstance();
         this.support = new PropertyChangeSupport(this);
         Platform.runLater(() -> new ChatStage(this));
-        this.start();
     }
 
     /**
@@ -90,13 +95,26 @@ public class TCPChatConnection extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.isOutdoor = false;
+        this.serCon = ServletConnection.getInstance();
         this.msgReceivedBuffer = new ArrayList<Message>();
         this.msgReceivedBufferFiles = new ArrayList<MessageDisplayFile>();
         this.remoteUserId = remoteUserId;
         this.localUserId = msgInit.id;
         this.support = new PropertyChangeSupport(this);
         Platform.runLater(() -> new ChatStage(this));
+    }
+
+    public void startTCPCo() {
         this.start();
+    }
+
+    public void setOutdoor() {
+        this.isOutdoor = true;
+    }
+
+    public boolean isOutdoor() {
+        return this.isOutdoor;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pcl){
@@ -127,99 +145,164 @@ public class TCPChatConnection extends Thread{
 
     @Override
     public void run() {
-        while (true){
-            Message msgReceived = null;
-            try {
-                msgReceived = (Message) this.objectInStream.readObject();
-                System.out.println("Message reçu");
-            } catch (IOException e) {
-                this.support.firePropertyChange("userDisconnected",true,false);
-                break;
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            if (msgReceived.typeMessage == 8){
-                this.support.firePropertyChange("connectionChatClosed",true,false);
-                break;
-            }
-            else if (msgReceived.typeMessage == 9){
-                int bytes = 0;
-                MessageChatFile msgFile = (MessageChatFile) msgReceived;
+        if (!this.isOutdoor) {
+            while (true) {
+                Message msgReceived = null;
                 try {
-                    String path;
-                    if (localUserId > remoteUserId){
-                        path = "./file_" + remoteUserId + "_" + localUserId + "_" + msgFile.date + "." + msgFile.ext;
-                    }
-                    else{
-                        path = "./file_" + localUserId + "_" + remoteUserId + "_" + msgFile.date + "." + msgFile.ext;
-                    }
-                    File file = new File(path);
-                    FileOutputStream fileOutputStream = new FileOutputStream(file);
-                    long size = msgFile.fileSize;
-                    byte[] buffer = new byte[4*1024];
-                    while (size > 0){
-                        bytes = dis.read(buffer, 0, (int)Math.min(buffer.length, size));
-                        fileOutputStream.write(buffer,0,bytes);
-                        size -= bytes;
-                    }
-                    System.out.println("Reception fichier terminée");
-                    int type = 2;
-                    switch (msgFile.ext) {
-                        case "png":
-                        case "gif":
-                        case "jpeg":
-                        case "svg":
-                        case "jpg":
-                            type = 3;
-                            break;
-                    }
-                    this.msgReceivedBufferFiles.add(new MessageDisplayFile(this.remoteUserId,msgFile.date,msgFile.payload,type,file,msgFile.ext, -1));
-                    this.support.firePropertyChange("fileReceived",true,false);
-                    fileOutputStream.close();
-                    file.deleteOnExit();
+                    msgReceived = (Message) this.objectInStream.readObject();
+                    System.out.println("Message reçu");
                 } catch (IOException e) {
+                    this.support.firePropertyChange("userDisconnected", true, false);
+                    break;
+                } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
+                if (msgReceived.typeMessage == 8) {
+                    this.support.firePropertyChange("connectionChatClosed", true, false);
+                    break;
+                } else if (msgReceived.typeMessage == 9) {
+                    int bytes = 0;
+                    MessageChatFile msgFile = (MessageChatFile) msgReceived;
+                    try {
+                        String path;
+                        if (localUserId > remoteUserId) {
+                            path = "./file_" + remoteUserId + "_" + localUserId + "_" + msgFile.date + "." + msgFile.ext;
+                        } else {
+                            path = "./file_" + localUserId + "_" + remoteUserId + "_" + msgFile.date + "." + msgFile.ext;
+                        }
+                        File file = new File(path);
+                        FileOutputStream fileOutputStream = new FileOutputStream(file);
+                        long size = msgFile.fileSize;
+                        byte[] buffer = new byte[4 * 1024];
+                        while (size > 0) {
+                            bytes = dis.read(buffer, 0, (int) Math.min(buffer.length, size));
+                            fileOutputStream.write(buffer, 0, bytes);
+                            size -= bytes;
+                        }
+                        System.out.println("Reception fichier terminée");
+                        int type = 2;
+                        switch (msgFile.ext) {
+                            case "png":
+                            case "gif":
+                            case "jpeg":
+                            case "svg":
+                            case "jpg":
+                                type = 3;
+                                break;
+                        }
+                        this.msgReceivedBufferFiles.add(new MessageDisplayFile(this.remoteUserId, msgFile.date, msgFile.payload, type, file, msgFile.ext, -1));
+                        this.support.firePropertyChange("fileReceived", true, false);
+                        fileOutputStream.close();
+                        file.deleteOnExit();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    this.msgReceivedBuffer.add(msgReceived);
+                    this.support.firePropertyChange("messageTextReceivedTCP", true, false);
+                }
             }
-            else {
-                this.msgReceivedBuffer.add(msgReceived);
-                this.support.firePropertyChange("messageTextReceivedTCP", true, false);
+        } else {
+            while (true) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Message msgReceived = this.serCon.GetMessageChat(this.localUserId, this.remoteUserId);
+                if (msgReceived != null) {//this.support.firePropertyChange("userDisconnected", true, false);
+
+                    if (msgReceived.typeMessage == 8) {
+                        this.support.firePropertyChange("connectionChatClosed", true, false);
+                        break;
+                    } else if (msgReceived.typeMessage == 9) {
+                        int bytes = 0;
+                        MessageChatFile msgFile = (MessageChatFile) msgReceived;
+                        try {
+                            String path;
+                            if (localUserId > remoteUserId) {
+                                path = "./file_" + remoteUserId + "_" + localUserId + "_" + msgFile.date + "." + msgFile.ext;
+                            } else {
+                                path = "./file_" + localUserId + "_" + remoteUserId + "_" + msgFile.date + "." + msgFile.ext;
+                            }
+                            File file = new File(path);
+                            FileOutputStream fileOutputStream = new FileOutputStream(file);
+                            long size = msgFile.fileSize;
+                            byte[] buffer = new byte[4 * 1024];
+                            while (size > 0) {
+                                bytes = dis.read(buffer, 0, (int) Math.min(buffer.length, size));
+                                fileOutputStream.write(buffer, 0, bytes);
+                                size -= bytes;
+                            }
+                            System.out.println("Reception fichier terminée");
+                            int type = 2;
+                            switch (msgFile.ext) {
+                                case "png":
+                                case "gif":
+                                case "jpeg":
+                                case "svg":
+                                case "jpg":
+                                    type = 3;
+                                    break;
+                            }
+                            this.msgReceivedBufferFiles.add(new MessageDisplayFile(this.remoteUserId, msgFile.date, msgFile.payload, type, file, msgFile.ext, -1));
+                            this.support.firePropertyChange("fileReceived", true, false);
+                            fileOutputStream.close();
+                            file.deleteOnExit();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        this.msgReceivedBuffer.add(msgReceived);
+                        this.support.firePropertyChange("messageTextReceivedTCP", true, false);
+                    }
+                }
             }
         }
     }
 
     public void sendMessageTxt(MessageDisplay msgDisp){
-        if (this.link == null) {
-            System.out.println("LINK NULL");
-        }
-        MessageChatTxt msg = new MessageChatTxt(6,this.link.getLocalAddress(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate());
-        try {
-            this.objectOutStream.writeObject(msg);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!isOutdoor) {
+            if (this.link == null) {
+                System.out.println("LINK NULL");
+            }
+            MessageChatTxt msg = new MessageChatTxt(6, this.link.getLocalAddress(), this.link.getInetAddress(), this.link.getPort(), msgDisp.getPayload(), msgDisp.getDate());
+            try {
+                this.objectOutStream.writeObject(msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Message msg = new MessageChatTxt(6, null, null, 0, msgDisp.getPayload(), msgDisp.getDate());
+            this.serCon.SubmitMessageChat(this.remoteUserId, this.localUserId, msg);
         }
     }
 
 
     public void sendMessageFile(MessageDisplayFile msgDisp){
-        int bytes = 0;
-        MessageChatFile msgStartofFile = new MessageChatFile(9,this.link.getLocalAddress(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate(),msgDisp.getFile().length(),msgDisp.getExt());
-        try {
-            this.objectOutStream.writeObject(msgStartofFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            FileInputStream fis = new FileInputStream(msgDisp.getFile());
-            byte[] buffer = new byte[4*1024];
-            while ((bytes=fis.read(buffer))!=-1){
-                dos.write(buffer,0,bytes);
-                dos.flush();
+        if (!isOutdoor) {
+            int bytes = 0;
+            MessageChatFile msgStartofFile = new MessageChatFile(9,this.link.getLocalAddress(),this.link.getInetAddress(),this.link.getPort(),msgDisp.getPayload(),msgDisp.getDate(),msgDisp.getFile().length(),msgDisp.getExt());
+            try {
+                this.objectOutStream.writeObject(msgStartofFile);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            try {
+                FileInputStream fis = new FileInputStream(msgDisp.getFile());
+                byte[] buffer = new byte[4*1024];
+                while ((bytes=fis.read(buffer))!=-1){
+                    dos.write(buffer,0,bytes);
+                    dos.flush();
+                }
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Message msg = new MessageChatFile(9,null, null, 0,msgDisp.getPayload(),msgDisp.getDate(),msgDisp.getFile().length(),msgDisp.getExt());
+            this.serCon.SubmitMessageChat(this.remoteUserId, this.localUserId, msg);
         }
     }
 
@@ -227,11 +310,16 @@ public class TCPChatConnection extends Thread{
      * When receiving a type 8 message, closed the chat connection
      */
     public void sendCloseChat() {
-        Message msg = new Message(8, this.link.getLocalAddress());
-        try {
-            this.objectOutStream.writeObject(msg);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!isOutdoor) {
+            Message msg = new Message(8, this.link.getLocalAddress());
+            try {
+                this.objectOutStream.writeObject(msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Message msg = new Message(8, null);
+            this.serCon.SubmitMessageChat(this.remoteUserId, this.localUserId, msg);
         }
     }
 
