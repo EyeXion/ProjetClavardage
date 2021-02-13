@@ -83,7 +83,7 @@ public class Utilisateurs implements Comparable{
         System.out.println("Local time : " + this.lastUpdate.getTime());
         System.out.println("Remote Date : " + date.toString());
         System.out.println("Remote Time : " + date.getTime());
-        return (date.getTime() - this.lastUpdate.getTime() > 4000);
+        return (date.getTime() - this.lastUpdate.getTime() > 5000);
     }
 
     @Override

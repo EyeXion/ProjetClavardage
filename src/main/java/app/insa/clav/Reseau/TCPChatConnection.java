@@ -257,6 +257,12 @@ public class TCPChatConnection extends Thread{
                 }
             }
         }
+        System.out.println("\n\n\n\n\nFIN DU THREAD\n\n\n\n");
+        try {
+            this.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void sendMessageTxt(MessageDisplay msgDisp){

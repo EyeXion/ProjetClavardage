@@ -334,11 +334,12 @@ public class Model implements PropertyChangeListener{
             if (remoteUser.isOutdoor() || this.user.isOutdoor()) {
                 System.out.println("Creation d'un chat avec un outdoor");
                 MessageInit msgInit = new MessageInit(7, user.getInetAddress(), remoteUser.getInetAddress(), remoteUser.getTcpListeningPort(), user.getId());
-                this.servCon.SubmitConnectionChat(remoteUser.getId(), user.getId(), msgInit);
-                TCPChatConnection tcpCo = new TCPChatConnection(null, remoteId, this.user.getId(), null, null, null, null);
-                tcpCo.setOutdoor();
-                tcpCo.startTCPCo();
-                listTCPConnection.add(tcpCo);
+                if (this.servCon.SubmitConnectionChat(remoteUser.getId(), user.getId(), msgInit)) {
+                    TCPChatConnection tcpCo = new TCPChatConnection(null, remoteId, this.user.getId(), null, null, null, null);
+                    tcpCo.setOutdoor();
+                    tcpCo.startTCPCo();
+                    listTCPConnection.add(tcpCo);
+                }
             } else {
                 System.out.println("Creattion d'un chat avec un indoor");
                 synchronized (userList) {

@@ -291,9 +291,10 @@ public class ServletConnection {
         }
     }
 
-    public void SubmitConnectionChat(int userId, int remoteId, MessageInit msg){
+    public boolean SubmitConnectionChat(int userId, int remoteId, MessageInit msg){
         URL url = null;
         HttpURLConnection con = null;
+        boolean ret = false;
         try {
             url = new URL(baseURL + "SubmitConnectionChat");
         } catch (MalformedURLException e) {
@@ -310,10 +311,12 @@ public class ServletConnection {
                 os.write(input, 0, input.length);
             }
             int status = con.getResponseCode();
+            ret = (status != 201);
             System.out.println("Error code HTTP request submit connection  avec = " + status);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return ret;
     }
 
     public MessageRetourSrvTCP GetMessageChat(int userId, int remoteId){

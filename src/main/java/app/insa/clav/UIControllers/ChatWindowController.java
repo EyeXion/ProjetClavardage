@@ -304,6 +304,10 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
      */
     public void setTCPCo(TCPChatConnection tcpCo){
         this.tcpCo = tcpCo;
+        if (this.tcpCo.isOutdoor()) {
+            this.pickFileButton.setVisible(false);
+            this.pickFileButton.setDisable(true);
+        }
         tcpCo.addPropertyChangeListener(this);
         int remoteUserId = tcpCo.remoteUserId;
         this.remoteUser = model.getUserFromId(remoteUserId);
