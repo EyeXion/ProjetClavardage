@@ -7,21 +7,62 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 public class Main extends Application{
 
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        String[] args = this.getParameters().getUnnamed().toArray(new String[0]);
-        String addrBroad = args[0];
-        int udpListeningPort = Integer.parseInt(args[1]);
-        String urlServeur = args[2];
-        String addrBdd = args[3];
-        String userBdd = args[4];
-        String mdpBdd = args[5];
-        String nomBdd = args[6];
+        String addrBroad;
+        int udpListeningPort;
+        String urlServeur;
+        String addrBdd;
+        String userBdd;
+        String mdpBdd;
+        String nomBdd;
 
-        Model model = Model.getInstance(addrBroad, udpListeningPort, this, addrBdd, userBdd, mdpBdd, nomBdd, urlServeur);
+        try {
+            //to load application's properties, we use this class
+            Properties mainProperties = new Properties();
+
+            FileInputStream file;
+
+            //the base folder is ./, the root of the main.properties file
+            String path = "./config.properties";
+
+            //load the file handle for main.properties
+            file = new FileInputStream(path);
+
+            //load all the properties from this file
+            mainProperties.load(file);
+
+            //we have loaded the properties, so close the file handle
+            file.close();
+
+
+            System.out.println(mainProperties.getProperty("app.localNetIPAddress"));
+            System.out.println(mainProperties.getProperty("app.udpPortNumber"));
+            System.out.println(mainProperties.getProperty("app.servletURL"));
+            System.out.println(mainProperties.getProperty("app.dataBaseAddress"));
+            System.out.println(mainProperties.getProperty("app.dataBaseUser"));
+            System.out.println(mainProperties.getProperty("app.dataBasePasswd"));
+            System.out.println(mainProperties.getProperty("app.dataBaseName"));
+
+            addrBroad = mainProperties.getProperty("app.localNetIPAddress");
+            udpListeningPort = Integer.parseInt(mainProperties.getProperty("app.udpPortNumber"));
+            urlServeur = mainProperties.getProperty("app.servletURL");
+            addrBdd = mainProperties.getProperty("app.dataBaseAddress");
+            userBdd = mainProperties.getProperty("app.dataBaseUser");
+            mdpBdd = mainProperties.getProperty("app.dataBasePasswd");
+            nomBdd = mainProperties.getProperty("app.dataBaseName");
+            Model model = Model.getInstance(addrBroad, udpListeningPort, this, addrBdd, userBdd, mdpBdd, nomBdd, urlServeur);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/splashScreen.fxml"));
         Parent root =fxmlLoader.load();
