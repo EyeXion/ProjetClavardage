@@ -4,12 +4,14 @@ package app.insa.clav.Messages;
 public class MessageSrvTCP {
     private int userId;
     private int id;
-    private Message message;
+    private MessageRetourSrvTCP messageRetourSrvTCP;
+    private MessageInit messageInit;
 
-    public MessageSrvTCP(int userId, int id, Message message) {
+    public MessageSrvTCP(int userId, int id, MessageRetourSrvTCP messageRetourSrvTCP, MessageInit messageInit) {
         this.userId = userId;
         this.id = id;
-        this.message = message;
+        this.messageRetourSrvTCP = messageRetourSrvTCP;
+        this.messageInit = messageInit;
     }
 
     public int getUserId() {
@@ -20,7 +22,21 @@ public class MessageSrvTCP {
         return id;
     }
 
-    public Message getMessage() {
-        return message;
+    public MessageRetourSrvTCP getMessageRetourSrvTCP() {
+        return messageRetourSrvTCP;
+    }
+
+    public MessageInit getMessageInit() {
+        return messageInit;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageSrvTCP{" +
+                "userId=" + userId +
+                ", id=" + id +
+                ", messageRetourSrvTCP=" + messageRetourSrvTCP +
+                ", messageInit=" + messageInit +
+                '}';
     }
 }

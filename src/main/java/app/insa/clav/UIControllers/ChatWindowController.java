@@ -282,6 +282,9 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
         if (remoteUser == null) {
             System.out.println("\n\n\nATTTENNNNTIIONNN\n \n\n");
         }
+        if (!this.dbAccess.isTableCreated(remoteUser.getId(), localUserId)) {
+            System.out.println("ATTENTION TU N'AS PAS CREE LA TABLE");
+        }
         ArrayList<MessageDisplay> history = this.dbAccess.getMessageHistory(this.localUserId,remoteUser.getId());
         this.listMessages = FXCollections.observableList(history);
         this.messageList.setItems(this.listMessages);

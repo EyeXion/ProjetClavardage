@@ -334,7 +334,7 @@ public class Model implements PropertyChangeListener{
             if (remoteUser.isOutdoor() || this.user.isOutdoor()) {
                 System.out.println("Creation d'un chat avec un outdoor");
                 MessageInit msgInit = new MessageInit(7, user.getInetAddress(), remoteUser.getInetAddress(), remoteUser.getTcpListeningPort(), user.getId());
-                this.servCon.SubmitConnectionChat(remoteUser.getId(), msgInit);
+                this.servCon.SubmitConnectionChat(remoteUser.getId(), user.getId(), msgInit);
                 TCPChatConnection tcpCo = new TCPChatConnection(null, remoteId, this.user.getId(), null, null, null, null);
                 tcpCo.setOutdoor();
                 tcpCo.startTCPCo();
@@ -527,11 +527,13 @@ public class Model implements PropertyChangeListener{
      */
     public void notifyCloseChat(TCPChatConnection tcpCo) {
         this.listTCPConnection.remove(tcpCo);
-        Socket link = tcpCo.getSocket();
-        try {
-            link.close();
-        } catch (IOException e) {
-            System.out.println("Erreur lors de la fermeture du Chat");
+        if (!tcpCo.isOutdoor()) {
+            Socket link = tcpCo.getSocket();
+            try {
+                link.close();
+            } catch (IOException e) {
+                System.out.println("Erreur lors de la fermeture du Chat");
+            }
         }
     }
 
@@ -623,6 +625,7 @@ public class Model implements PropertyChangeListener{
     class TimerTaskCheckUsers extends TimerTask {
         public void run() {
             //System.out.println(user);
+            user.update();
             synchronized (userList) {
                 Date currentDate = new Date();
                 if (user.isOutdoor()) {
