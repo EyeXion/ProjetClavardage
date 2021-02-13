@@ -300,7 +300,7 @@ public class Model implements PropertyChangeListener{
                 this.support.firePropertyChange("pseudoRefused", this.user.getPseudo(), this.ancienPseudo);
             }
             synchronized (userList) {
-                if (!this.userList.contains(newUser)) {
+                if ((!this.userList.contains(newUser)) && (!newUser.equals(this.user))) {
                     this.userList.add(newUser);
                     Collections.sort(this.userList);
                     this.support.firePropertyChange("newUserConnected", -1, -2);
@@ -664,7 +664,9 @@ public class Model implements PropertyChangeListener{
                     }
                     userList.removeAll(userListToRemove);
                     servUserList.removeAll(userListWatched);
-                    servUserList.remove(user);
+                    if (servUserList.remove(user)) {
+                        System.out.println(("\n\nUSER SUPP\n\n"));
+                    }
                     userListToAdd.addAll(servUserList);
                     userList.addAll(userListToAdd);
                 } else {

@@ -100,9 +100,9 @@ public class Utilisateurs implements Comparable{
     }
 
     @Override
-    public boolean equals(Object obj) {
-        Utilisateurs aux = (Utilisateurs) obj;
-        return this.id == aux.id;
+    public boolean equals(Object o) {
+        Utilisateurs u = (Utilisateurs) o;
+        return this.id == u.id;
     }
 
     @Override
