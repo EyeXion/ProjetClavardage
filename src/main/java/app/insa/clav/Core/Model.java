@@ -67,6 +67,7 @@ public class Model implements PropertyChangeListener{
      * Vrai si pseudo ok, faux sinon
      */
     private boolean isPseudoOk = true;
+    private boolean configure;
 
 
     /**
@@ -89,6 +90,7 @@ public class Model implements PropertyChangeListener{
     public Model(String addrBroadcast, int portListening, Application app, String addrBdd, String userBdd, String mdpBdd, String nomBdd, String urlServeur) {
         this.addrBroadcast = addrBroadcast;
         this.portListening = portListening;
+        this.configure = false;
 
         try {
             this.user = new Utilisateurs("NA", InetAddress.getLocalHost(), 0, 0);
@@ -148,6 +150,11 @@ public class Model implements PropertyChangeListener{
 
         this.openInputUDP();
         this.openTCPListener();
+        this.configure = true;
+    }
+
+    public boolean isConfigured() {
+        return this.configure;
     }
 
 
