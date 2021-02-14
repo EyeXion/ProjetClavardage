@@ -47,12 +47,13 @@ public class UDPInput extends Thread{
         try {
             this.socket = new DatagramSocket(listeningPort);
             //System.out.println("\n\nADRESSE DU SOCKET : " + localAddress.toString());
-            this.filter = new boolean[8];
+            this.filter = new boolean[11];
             this.filter[1] = true;
             this.filter[2] = false;
             this.filter[3] = false;
             this.filter[4] = true;
             this.filter[7] = true;
+            this.filter[10] = false;
             this.socket.setBroadcast(true);
             this.msgReceivedBuffer = new ArrayList<Message>();
             this.support = new PropertyChangeSupport(this);

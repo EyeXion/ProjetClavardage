@@ -309,7 +309,6 @@ public class ChatWindowController implements Initializable, PropertyChangeListen
             this.removeFileButton.setVisible(false);
             this.pickFileButton.setDisable(true);
             this.removeFileButton.setDisable(true);
-
         }
         tcpCo.addPropertyChangeListener(this);
         int remoteUserId = tcpCo.remoteUserId;

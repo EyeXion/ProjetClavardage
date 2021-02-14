@@ -153,6 +153,8 @@ public class ConnectionScreenController implements Initializable, PropertyChange
      */
     @FXML
     void submitConnection(ActionEvent event) {
+        this.signInButton.setDisable(true);
+        this.signUpButton.setDisable(true);
         String login = this.loginInputIn.getText();
         //System.out.println(this.dbAccess == null);
         if (!login.equals("") && !this.isSubmittingIn && !this.isSubmittingUp) {
@@ -162,16 +164,22 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                 this.model = Model.getInstance();
                 this.model.addPropertyChangeListener(this,"pseudoRefused");
                 this.model.addPropertyChangeListener(this,"pseudoValide");
+                this.model.addPropertyChangeListener(this,"loginRefused");
                 String pseudo = this.dbAccess.getPseudoFromLogin(login);
                 int id = this.dbAccess.getIdFromLogin(login);
                 this.model.setUserId(id);
                 if (this.isOutdoor) {
-                    this.model.choosePseudoOutdoor(pseudo,true);
+                    this.model.choosePseudoOutdoor(pseudo,true,true);
                 } else {
                     model.configModelIndoor();
-                    this.model.choosePseudo(pseudo,true);
+                    this.model.choosePseudo(pseudo,true,true);
                 }
             } else {
+                this.isSubmittingIn = false;
+                this.labelErrorInLogin.setText("This login does not exist");
+                this.spinnerIn.setVisible(false);
+                this.signInButton.setDisable(false);
+                this.signUpButton.setDisable(false);
                 this.labelErrorInLogin.setVisible(true);
             }
         }
@@ -182,6 +190,8 @@ public class ConnectionScreenController implements Initializable, PropertyChange
      */
     @FXML
     void submitSignUp(ActionEvent event) {
+        this.signInButton.setDisable(true);
+        this.signUpButton.setDisable(true);
         this.loginUp = this.loginInputUp.getText();
         this.pseudoUp = this.pseudoInputUp.getText();
         if (!this.loginUp.equals("") && !this.pseudoUp.equals("") && !this.isSubmittingIn && !this.isSubmittingUp){
@@ -192,11 +202,12 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                 this.model = Model.getInstance();
                 this.model.addPropertyChangeListener(this,"pseudoRefused");
                 this.model.addPropertyChangeListener(this,"pseudoValide");
+                this.model.addPropertyChangeListener(this,"loginRefused");
                 if (this.isOutdoor) {
-                    this.model.choosePseudoOutdoor(pseudoUp,true);
+                    this.model.choosePseudoOutdoor(pseudoUp,true,true);
                 } else {
                     model.configModelIndoor();
-                    this.model.choosePseudo(pseudoUp,true);
+                    this.model.choosePseudo(pseudoUp,true,true);
                 }
             }
             else{
@@ -240,6 +251,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                 });
                 this.model.deletePropertyChangeListener(this,"pseudoValide");
                 this.model.deletePropertyChangeListener(this,"pseudoRefused");
+                this.model.deletePropertyChangeListener(this,"loginRefused");
                 System.out.println("Pseudo valide");
                 if (isSubmittingUp && !this.model.user.isOutdoor()){
                     this.pseudoValideUp();
@@ -266,6 +278,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                         }
                     }
                 });
+                break;
             case "pseudoRefused" :
                 if (this.isSubmittingIn) {
                     this.isSubmittingIn = false;
@@ -276,6 +289,8 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                             public void run() {
                                 errorLabelIn.setVisible(true);
                                 spinnerIn.setVisible(false);
+                                signInButton.setDisable(false);
+                                signUpButton.setDisable(false);
                             }
                         });
                     }
@@ -283,7 +298,7 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                         this.pseudoIn = this.pseudoInputIn.getText();
                         this.isSubmittingNewPseudoIn = true;
                         System.out.println("Pseudo refused, trying new " + this.pseudoIn);
-                        this.model.choosePseudo(this.pseudoIn,true);
+                        this.model.choosePseudo(this.pseudoIn,true,true);
                     }
                 }else if (this.isSubmittingUp){
                     this.isSubmittingUp = false;
@@ -291,6 +306,30 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                         @Override
                         public void run() {
                             errorLabelUp.setVisible(true);
+                            spinnerUp.setVisible(false);
+                        }
+                    });
+                }
+                break;
+            case "loginRefused":
+                if (this.isSubmittingIn) {
+                    this.isSubmittingIn = false;
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            labelErrorInLogin.setText("Already connected");
+                            labelErrorInLogin.setVisible(true);
+                            spinnerIn.setVisible(false);
+                            signInButton.setDisable(false);
+                            signUpButton.setDisable(false);
+                        }
+                    });
+                }else if (this.isSubmittingUp){
+                    this.isSubmittingUp = false;
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            labelErrorUpLogin.setVisible(true);
                             spinnerUp.setVisible(false);
                         }
                     });

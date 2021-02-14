@@ -97,9 +97,9 @@ public class PseudoWindowController implements PropertyChangeListener, Initializ
         String newPseudo = this.pseudoInput.getText();
         if (!newPseudo.equals(this.model.user.getPseudo())){
             if (!this.model.user.isOutdoor()) {
-                this.model.choosePseudo(newPseudo, true);
+                this.model.choosePseudo(newPseudo, true,false);
             } else {
-                this.model.choosePseudoOutdoor(newPseudo, true);
+                this.model.choosePseudoOutdoor(newPseudo, true,false);
             }
             this.spinnerPseudo.setVisible(true);
         }

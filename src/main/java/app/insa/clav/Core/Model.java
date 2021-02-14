@@ -257,16 +257,23 @@ public class Model implements PropertyChangeListener{
      * @param pseudo
      *              Pseudo rentré par l'utilisateur
      */
-    public void choosePseudo(String pseudo, boolean isConfirmationNeeded){
+    public void choosePseudo(String pseudo, boolean isConfirmationNeeded, boolean isForConnection){
         this.ancienPseudo = this.user.getPseudo();
         this.user.setPseudo(pseudo);
         this.UDPIn.setFilterValue(2, true);
         this.UDPIn.setFilterValue(3, true);
+        this.UDPIn.setFilterValue(10, true);
         this.sendPseudoBroadcast();
         this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded), 2000);
         ArrayList<Utilisateurs> outdoorUsers = servCon.getRemoteActiveUsers();
         for (Utilisateurs newUser : outdoorUsers) {
-            if (newUser.getPseudo().equals(this.user.getPseudo())) {
+            if (newUser.getId() == this.user.getId() && isForConnection){
+                this.isPseudoOk = false;
+                this.user.setPseudo(this.ancienPseudo);
+                this.ancienPseudo = "";
+                this.support.firePropertyChange("loginRefused", this.user.getPseudo(), this.ancienPseudo);
+            }
+            else if (newUser.getPseudo().equals(this.user.getPseudo())) {
                 this.isPseudoOk = false;
                 this.user.setPseudo(this.ancienPseudo);
                 this.ancienPseudo = "";
@@ -287,13 +294,19 @@ public class Model implements PropertyChangeListener{
      * @param pseudo
      *              Pseudo rentré par l'utilisateur
      */
-    public void choosePseudoOutdoor(String pseudo, boolean isConfirmationNeeded){
+    public void choosePseudoOutdoor(String pseudo, boolean isConfirmationNeeded, boolean isForConnection){
         this.ancienPseudo = this.user.getPseudo();
         this.user.setPseudo(pseudo);
         this.tim.schedule(new TimerTaskResponseWait(isConfirmationNeeded), 2000);
         ArrayList<Utilisateurs> users = servCon.getAllActiveUsers();
         for (Utilisateurs newUser : users) {
-            if (newUser.getPseudo().equals(this.user.getPseudo())) {
+            if (newUser.getId() == this.user.getId() && isForConnection){
+                this.isPseudoOk = false;
+                this.user.setPseudo(this.ancienPseudo);
+                this.ancienPseudo = "";
+                this.support.firePropertyChange("loginRefused", this.user.getPseudo(), this.ancienPseudo);
+            }
+            else if (newUser.getPseudo().equals(this.user.getPseudo())) {
                 this.isPseudoOk = false;
                 this.user.setPseudo(this.ancienPseudo);
                 this.ancienPseudo = "";
@@ -431,6 +444,15 @@ public class Model implements PropertyChangeListener{
                 }
                 this.support.firePropertyChange("newUserConnected",-1,-2);
                 break;
+            case 10:
+                MessagePseudo msgP10 = (MessagePseudo) msg;
+                //System.out.println("Message de type 10 reçu : " + msgP3.toString());
+                this.isPseudoOk = false;
+                this.user.setPseudo(this.ancienPseudo);
+                this.ancienPseudo = "";
+                this.support.firePropertyChange("loginRefused",this.user.getPseudo(),this.ancienPseudo);
+                //System.out.println("After pseudo refused");
+                break;
             default :
                 //System.out.println("Message de type inconnu");
         }
@@ -445,12 +467,18 @@ public class Model implements PropertyChangeListener{
         MessagePseudo msgResponse;
         System.out.println("Message de type 1 reçu : " + msg.toString() + " local addr IP " + this.user.getInetAddress());
         if (!this.user.getInetAddress().equals(msg.srcIP)) {
-            if (this.user.getPseudo().equals(msg.pseudo)) {
-                msgResponse = new MessagePseudo(3, null, msg.pseudo, 0, 0);
-                //System.out.println("Pseudo pas OK, on envoi : " + msgResponse.toString());
+            if ((this.user.getId() == msg.id)) {
+                msgResponse = new MessagePseudo(10, this.user.getInetAddress(), this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
             } else {
-                msgResponse = new MessagePseudo(2, this.user.getInetAddress(), this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
-                //System.out.println("Pseudo OK, on envoi : " + msgResponse.toString());
+                if (!this.user.getPseudo().equals(msg.pseudo)) {
+                    msgResponse = new MessagePseudo(2, this.user.getInetAddress(), this.user.getPseudo(), this.user.getTcpListeningPort(), this.user.getId());
+                    //System.out.println("Pseudo OK, on envoi : " + msgResponse.toString());
+                }
+                else{
+                    msgResponse = new MessagePseudo(3, null, msg.pseudo, 0, 0);
+                    //System.out.println("Pseudo pas OK, on envoi : " + msgResponse.toString());
+
+                }
             }
             this.UDPOut.sendMsg(msgResponse, msg.srcIP);
         }
@@ -597,6 +625,7 @@ public class Model implements PropertyChangeListener{
             if (!user.isOutdoor()) {
                 UDPIn.setFilterValue(2, false);
                 UDPIn.setFilterValue(3, false);
+                UDPIn.setFilterValue(10, false);
             }
             if (isPseudoOk){
                 //envoi message de type 4 pour confirmer.

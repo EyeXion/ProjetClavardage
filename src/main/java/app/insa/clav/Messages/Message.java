@@ -15,6 +15,7 @@ import java.net.InetAddress;
     7 ---> Message.MessagePseudo de deconnexion
     8 ---> Message fermeture fenetre chat
     9 ---> MessageChatFile to say a file is going to be sent
+    10 ---> Message.MessagePseudo réponse à type 1 login déjà connecté
  */
 
 /**
