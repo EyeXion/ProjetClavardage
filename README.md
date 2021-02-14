@@ -1,6 +1,7 @@
 #Projet Clavardage TALI Elies et FAURE Paul
 
 ##Conception 
+dd
 
 Faite sur Modelio, il suffit d'importer le fichier zip contenu dans Conception/ dans Modelio.
 Notre conception est pour le moment pas très bonne car nous avions mal compris le CDC. Nous allons donc la changer au fur et à mesure des TP
