@@ -6,15 +6,35 @@ Pour plus d'informations concernant l'utilisation et la configuration de JigglyP
 
 
 <p style="text-align:center">
-<img src="https://i.pinimg.com/originals/89/75/c3/8975c3e90d96605cba7e9ec80c4a6c3f.gif" alt="alt text" width="250" height="200">
+<img src="https://i.pinimg.com/originals/89/75/c3/8975c3e90d96605cba7e9ec80c4a6c3f.gif" alt="alt text" width="300" height="250">
+<img src="https://www.etud.insa-toulouse.fr/~tali/imgs/chat.jpg" alt="alt text" width="300" height="250">
 </p>
 
 #Cloner JigglyPuff Messenger
 
-Dans cette partie, nous vous expliquerons comment cloner 
+Dans cette partie, nous vous expliquerons comment cloner le repo et builder le projet chez vous ! Tout d'abord, lancez les commandes suivantes : 
 
+```bash
+git clone https://git.etud.insa-toulouse.fr/tali/ProjetClavardage.git
+cd ProjetClavardage
+```
 
-###Technos
+Ensuite, vous allez devoir compiler le projet avec gradle. Pour ce faire, lancez la commande 
+
+```bash
+./gradlew build
+```
+Cela va créer dans le répertoire ProjetClavardage/build/libs le fichier Clavardage-1.0-all.jar. Vous pouvez alors suivre lle manuel pour configurer l'application (notamment remplir le fichier config.properties situé à côté du jar) et puis lancer l'application ! 
+
+#Conception
+
+Vous trouverez dans ce repo un dossier Conception où se trouve les diagrammes UML du projet. Ces mêmes diagrammes ainsi que es explications sont dans le manuel.
+
+#Servlet
+
+Vous trouverez le repo contenant le servlet à cette adresse : https://git.etud.insa-toulouse.fr/pfaure/ServeurClavardage.
+
+#Technos
 
 - Java 11.0.9
 - JavaFX 11.0.2
