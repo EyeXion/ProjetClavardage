@@ -171,7 +171,9 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                 if (this.isOutdoor) {
                     this.model.choosePseudoOutdoor(pseudo,true,true);
                 } else {
-                    model.configModelIndoor();
+                    if (!model.isConfigured()) {
+                        model.configModelIndoor();
+                    }
                     this.model.choosePseudo(pseudo,true,true);
                 }
             } else {
@@ -206,7 +208,9 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                 if (this.isOutdoor) {
                     this.model.choosePseudoOutdoor(pseudoUp,true,true);
                 } else {
-                    model.configModelIndoor();
+                    if (!model.isConfigured()) {
+                        model.configModelIndoor();
+                    }
                     this.model.choosePseudo(pseudoUp,true,true);
                 }
             }
@@ -216,6 +220,8 @@ public class ConnectionScreenController implements Initializable, PropertyChange
                 this.isSubmittingUp = false;
             }
         }
+        this.signInButton.setDisable(false);
+        this.signUpButton.setDisable(false);
     }
 
     /**
