@@ -33,11 +33,11 @@ java -jar <nomdujar>
 
 #Conception
 
-Vous trouverez dans ce repo un dossier Conception où se trouve les diagrammes UML du projet. Ces mêmes diagrammes ainsi que es explications sont dans le manuel.
+Pour la conception de notre projet, c'est par ici : https://www.etud.insa-toulouse.fr/~tali/DownloadPageJigglyMessenger/ . Vous trouverez en bas de la page une archive zip à télécharger pour obtenir nos diagrammes UML en format image.
 
 #Servlet
 
-Vous trouverez le repo contenant le servlet à cette adresse : https://git.etud.insa-toulouse.fr/pfaure/ServeurClavardage.
+Vous trouverez le repo contenant le servlet à cette adresse : https://git.etud.insa-toulouse.fr/pfaure/ServeurClavardage .
 
 #Technos
 
