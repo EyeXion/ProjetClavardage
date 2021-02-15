@@ -24,7 +24,12 @@ Ensuite, vous allez devoir compiler le projet avec gradle. Pour ce faire, lancez
 ```bash
 ./gradlew build
 ```
-Cela va créer dans le répertoire ProjetClavardage/build/libs le fichier Clavardage-1.0-all.jar. Vous pouvez alors suivre lle manuel pour configurer l'application (notamment remplir le fichier config.properties situé à côté du jar) et puis lancer l'application ! 
+Cela va créer dans le répertoire ProjetClavardage/build/libs le fichier Clavardage-1.0-all.jar. Vous pouvez alors suivre le manuel pour configurer l'application (notamment remplir le fichier config.properties situé à côté du jar) et puis lancer l'application ! Si jamais, pour aller dans le répertoire où se trouvent les builds et lancer l'application, c'est 
+
+```bash
+cd ./build/libs
+java -jar <nomdujar>
+```
 
 #Conception
 
