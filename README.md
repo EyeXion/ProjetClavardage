@@ -1,4 +1,4 @@
-#Projet Clavardage TALI Elies et FAURE Paul
+# Projet Clavardage TALI Elies et FAURE Paul
 
 Bienvenue ! Ceci est le repo de l'application JigglyPuff Messenger. Vous trouverez dans ce README les explications vous permettant de cloner et de builder vous même notre application.
 
@@ -10,7 +10,7 @@ Pour plus d'informations concernant l'utilisation et la configuration de JigglyP
 <img src="https://www.etud.insa-toulouse.fr/~tali/imgs/chat.jpg" alt="alt text" width="300" height="250">
 </p>
 
-#Cloner JigglyPuff Messenger
+# Cloner JigglyPuff Messenger
 
 Dans cette partie, nous vous expliquerons comment cloner le repo et builder le projet chez vous ! Tout d'abord, lancez les commandes suivantes : 
 
@@ -31,11 +31,11 @@ cd ./build/libs
 java -jar <nomdujar>
 ```
 
-#Conception
+# Conception
 
 Pour la conception de notre projet, c'est par ici : https://www.etud.insa-toulouse.fr/~tali/DownloadPageJigglyMessenger/ . Vous trouverez en bas de la page une archive zip à télécharger pour obtenir nos diagrammes UML en format image.
 
-#Servlet
+# Servlet
 
 Vous trouverez le repo contenant le servlet à cette adresse : https://git.etud.insa-toulouse.fr/pfaure/ServeurClavardage .
 
